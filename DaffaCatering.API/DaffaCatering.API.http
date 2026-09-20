@@ -1,5 +1,8 @@
 @DaffaCatering.API_HostAddress = http://localhost:5247
 
+### POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
+DELETE {{DaffaCatering.API_HostAddress}}/api/{namaTabel}/{idKolom}
+
 ### ============ HeaderBahanBaku ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
@@ -21,21 +24,6 @@ Content-Type: application/json
   "status": true
 }
 
-### Update
-PUT {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
-Content-Type: application/json
-
-{
-  "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "Test Bahan Baku Updated",
-  "jenis": true,
-  "status": false
-}
-
-### Delete
-DELETE {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
-
-
 ### ============ Pemasok ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Pemasok
@@ -56,18 +44,22 @@ Content-Type: application/json
   "tglBergabung": "2026-01-01"
 }
 
-### Update
-PUT {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000013
+### ============ Pelanggan ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan/PL0000001
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/Pelanggan
 Content-Type: application/json
 
 {
-  "idPemasok": "PMS0000013",
-  "namaPemasok": "Test Pemasok Update",
-  "alamat": "Jl. Lingkup No. 15",
-  "noKontak": "081233568870",
+  "idPelanggan": "PLG0000013",
+  "namaPelanggan": "Test Pelanggan",
+  "alamat": "Jl. Sudirman No. 5",
+  "noKontak": "081298765432",
   "status": true,
   "tglBergabung": "2026-01-01"
 }
-
-### Delete
-DELETE {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000013
