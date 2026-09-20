@@ -1,32 +1,22 @@
 @DaffaCatering.API_HostAddress = http://localhost:5247
 
-### Get All (tanpa filter)
+### ============ HeaderBahanBaku ============
+### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 
-### Get All dengan filter status=true
+### Get All (filter status=true)
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku?status=true
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 
-### Create (Test validasi gagal - nama kosong)
+### Create
 POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 Content-Type: application/json
 
 {
   "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "",
-  "jenis": true,
-  "status": true
-}
-
-### Create (Test duplicate ID)
-POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
-Content-Type: application/json
-
-{
-  "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "Duplikat Test",
+  "namaBahanBaku": "Test Bahan Baku",
   "jenis": true,
   "status": true
 }
@@ -45,18 +35,39 @@ Content-Type: application/json
 ### Delete
 DELETE {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 
-### Pemasok - Get All
-GET {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000012
 
-### Pemasok - Create
-PUT {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000012
+### ============ Pemasok ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/Pemasok
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000013
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/Pemasok
 Content-Type: application/json
 
 {
-  "idPemasok": "PMS0000012",
-  "namaPemasok": "Toko Sembako Jaya",
+  "idPemasok": "PMS0000013",
+  "namaPemasok": "Test Pemasok",
   "alamat": "Jl. Merdeka No. 10",
   "noKontak": "081234567890",
   "status": true,
   "tglBergabung": "2026-01-01"
 }
+
+### Update
+PUT {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000013
+Content-Type: application/json
+
+{
+  "idPemasok": "PMS0000013",
+  "namaPemasok": "Test Pemasok Update",
+  "alamat": "Jl. Lingkup No. 15",
+  "noKontak": "081233568870",
+  "status": true,
+  "tglBergabung": "2026-01-01"
+}
+
+### Delete
+DELETE {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000013
