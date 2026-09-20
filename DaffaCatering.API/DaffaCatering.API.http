@@ -1,20 +1,37 @@
 @DaffaCatering.API_HostAddress = http://localhost:5247
 
-### GET by ID
+### Get All (tanpa filter)
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+
+### Get All dengan filter status=true
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku?status=true
+
+### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 
-### POST
+### Create (Test validasi gagal - nama kosong)
 POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 Content-Type: application/json
 
 {
   "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "Test Bahan Baku",
+  "namaBahanBaku": "",
   "jenis": true,
   "status": true
 }
 
-### UPDATE
+### Create (Test duplicate ID)
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+Content-Type: application/json
+
+{
+  "idBahanBaku": "BB0000016",
+  "namaBahanBaku": "Duplikat Test",
+  "jenis": true,
+  "status": true
+}
+
+### Update
 PUT {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 Content-Type: application/json
 
@@ -25,5 +42,5 @@ Content-Type: application/json
   "status": false
 }
 
-### DELETE
+### Delete
 DELETE {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
