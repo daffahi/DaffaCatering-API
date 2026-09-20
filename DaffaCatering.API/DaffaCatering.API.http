@@ -8,9 +8,9 @@ POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 Content-Type: application/json
 
 {
-  "idBahanBaku": "BB001",
+  "idBahanBaku": "BB0000016",
   "namaBahanBaku": "Test Bahan Baku",
-  "jenis": 1,
+  "jenis": true,
   "status": true
 }
 
