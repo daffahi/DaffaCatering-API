@@ -1,5 +1,6 @@
 ﻿using DaffaCatering.API.Data;
 using DaffaCatering.API.Models;
+using DaffaCatering.API.DTOs;              // ⬅ BARU
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,11 +25,19 @@ namespace DaffaCatering.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] HeaderBahanBaku input)
+        public async Task<IActionResult> Create([FromBody] HeaderBahanBakuDto input)  
         {
-            _context.HeaderBahanBakus.Add(input);
+            var entity = new HeaderBahanBaku                                            
+            {
+                IdBahanBaku = input.IdBahanBaku,
+                NamaBahanBaku = input.NamaBahanBaku,
+                Jenis = input.Jenis,
+                Status = input.Status
+            };
+
+            _context.HeaderBahanBakus.Add(entity);                                     
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetAll), new { id = input.IdBahanBaku }, input);
+            return CreatedAtAction(nameof(GetAll), new { id = entity.IdBahanBaku }, entity); 
         }
 
         [HttpGet("{id}")]
@@ -41,7 +50,7 @@ namespace DaffaCatering.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] HeaderBahanBaku input)
+        public async Task<IActionResult> Update(string id, [FromBody] HeaderBahanBakuDto input)  
         {
             if (id != input.IdBahanBaku)
                 return BadRequest("ID tidak sesuai");
