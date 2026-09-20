@@ -3,6 +3,17 @@
 ### GET by ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 
+### POST
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+Content-Type: application/json
+
+{
+  "idBahanBaku": "BB001",
+  "namaBahanBaku": "Test Bahan Baku",
+  "jenis": 1,
+  "status": true
+}
+
 ### UPDATE
 PUT {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 Content-Type: application/json
