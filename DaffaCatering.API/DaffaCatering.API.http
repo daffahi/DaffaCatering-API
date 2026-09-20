@@ -4,3 +4,12 @@ GET {{DaffaCatering.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+Content-Type: application/json
+
+{
+  "idBahanBaku": "BB0000016",
+  "namaBahanBaku": "Test Bahan Baku",
+  "jenis": true,
+  "status": true
+}

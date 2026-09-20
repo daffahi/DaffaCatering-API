@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DaffaCatering.API.Data;
+using DaffaCatering.API.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DaffaCatering.API.Data;
+using DaffaCatering.API.Models;
 
 namespace DaffaCatering.API.Controllers
 {
@@ -20,6 +22,14 @@ namespace DaffaCatering.API.Controllers
         {
             var data = await _context.HeaderBahanBakus.ToListAsync();
             return Ok(data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] HeaderBahanBaku input)
+        {
+            _context.HeaderBahanBakus.Add(input);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetAll), new { id = input.IdBahanBaku }, input);
         }
     }
 }
