@@ -44,3 +44,19 @@ Content-Type: application/json
 
 ### Delete
 DELETE {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
+
+### Pemasok - Get All
+GET {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000012
+
+### Pemasok - Create
+PUT {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000012
+Content-Type: application/json
+
+{
+  "idPemasok": "PMS0000012",
+  "namaPemasok": "Toko Sembako Jaya",
+  "alamat": "Jl. Merdeka No. 10",
+  "noKontak": "081234567890",
+  "status": true,
+  "tglBergabung": "2026-01-01"
+}
