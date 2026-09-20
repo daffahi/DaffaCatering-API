@@ -57,7 +57,7 @@ Content-Type: application/json
 
 {
   "idPelanggan": "PLG0000013",
-  "namaPelanggan": "Test Pelanggan",
+  "namaPelanggan": "Test Pelanggan 13",
   "alamat": "Jl. Sudirman No. 5",
   "noKontak": "081298765432",
   "status": true,
