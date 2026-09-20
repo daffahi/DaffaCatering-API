@@ -1,12 +1,18 @@
 @DaffaCatering.API_HostAddress = http://localhost:5247
 
-###
-POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+### GET by ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
+
+### UPDATE
+PUT {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 Content-Type: application/json
 
 {
   "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "Test Bahan Baku",
+  "namaBahanBaku": "Test Bahan Baku Updated",
   "jenis": true,
-  "status": true
+  "status": false
 }
+
+### DELETE
+DELETE {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
