@@ -61,9 +61,9 @@ namespace DaffaCatering.API.Controllers
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(GetById), new { id = entity.IdMenu }, entity);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
-                return Conflict("ID Menu Makanan sudah ada, gunakan ID yang berbeda");
+                return Conflict($"Gagal menyimpan data — ID sudah ada atau ID referensi (Satuan) tidak valid. Detail: {ex.InnerException?.Message}");
             }
             catch (Exception ex)
             {
