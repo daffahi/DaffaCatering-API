@@ -115,3 +115,22 @@ Content-Type: application/json
   "harga": 25000,
   "status": true
 }
+
+### ============ User ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/User
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/User/U005 // Yang sudah ada di database
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/User
+Content-Type: application/json
+
+{
+  "idUser": "U005",
+  "idRole": "R005",
+  "namaUser": "Test User 5",
+  "password": "TestPassword123",
+  "status": true
+}
