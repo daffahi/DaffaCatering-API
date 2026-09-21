@@ -6,10 +6,10 @@ namespace DaffaCatering.API.DTOs
     {
         [Required(ErrorMessage = "ID Satuan Bahan Baku wajib diisi")]
         [StringLength(10, ErrorMessage = "ID Satuan Bahan Baku maksimal 10 karakter")]
-        public string IdSatuanBahanBaku { get; set; } = null!;
+        public string IdSatuan { get; set; } = null!;
 
         [Required(ErrorMessage = "Nama Satuan Bahan Baku wajib diisi")]
         [StringLength(50, ErrorMessage = "Nama Satuan Bahan Baku maksimal 50 karakter")]
-        public string NamaSatuanBahanBaku { get; set; } = null!;
+        public string NamaSatuan { get; set; } = null!;
     }
 }

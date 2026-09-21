@@ -44,8 +44,8 @@ namespace DaffaCatering.API.Controllers
             {
                 var entity = new SatuanBahanBaku
                 {
-                    IdSatuan = input.IdSatuanBahanBaku,
-                    NamaSatuan = input.NamaSatuanBahanBaku
+                    IdSatuan = input.IdSatuan,
+                    NamaSatuan = input.NamaSatuan
                 };
 
                 _context.SatuanBahanBakus.Add(entity);
@@ -66,14 +66,14 @@ namespace DaffaCatering.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] SatuanBahanBakuDto input)
         {
-            if (id != input.IdSatuanBahanBaku)
+            if (id != input.IdSatuan)
                 return BadRequest("ID tidak sesuai");
 
             var existing = await _context.SatuanBahanBakus.FindAsync(id);
             if (existing == null)
                 return NotFound();
 
-            existing.NamaSatuan = input.NamaSatuanBahanBaku;
+            existing.NamaSatuan = input.NamaSatuan;
 
             await _context.SaveChangesAsync();
             return NoContent();
