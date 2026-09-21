@@ -1,7 +1,7 @@
 @DaffaCatering.API_HostAddress = http://localhost:5247
 
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
-### DELETE {{DaffaCatering.API_HostAddress}}/api/{namaTabel}/{idKolom}
+### DELETE {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000011
 
 ### ============ ROLE PENGGUNA ============
 ### Get All
@@ -16,7 +16,7 @@ Content-Type: application/json
 
 {
   "idRole": "R005",
-  "namaRole": "Test Role 5"
+  "namaRole": "Test Role"
 }
 
 ### ============ MASTER PENGGUNA ============
@@ -33,7 +33,7 @@ Content-Type: application/json
 {
   "idUser": "U006",
   "idRole": "R005",
-  "namaUser": "Test User 5",
+  "namaUser": "Test User",
   "password": "TestPassword123",
   "status": true
 }
@@ -50,8 +50,8 @@ POST {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
 Content-Type: application/json
 
 {
-  "idSatuan": "SBB0000011",
-  "namaSatuan": "Test Satuan Bahan Baku 11"
+  "idSatuan": "SBB0000012",
+  "namaSatuan": "Test Satuan Kecil"
 }
 
 ### ============ KONVERSI SATUAN ============
@@ -62,14 +62,14 @@ GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
 GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan/KNV0000003
 
 ### Create
-POST {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
+POST {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan/KNV0000004
 Content-Type: application/json
 
 {
   "idKonversi": "KNV0000004",
-  "idSatuanBesar": "SBB0000010",
-  "idSatuanKecil": "SBB0000007",
-  "nilaiKonversi": 15.00
+  "idSatuanBesar": "SBB0000011",
+  "idSatuanKecil": "SBB0000012",
+  "nilaiKonversi": 10.00
 }
 
 ### ============ MASTER PEMASOK ============
@@ -105,7 +105,7 @@ Content-Type: application/json
 
 {
   "idPelanggan": "PLG0000013",
-  "namaPelanggan": "Test Pelanggan 13",
+  "namaPelanggan": "Test Pelanggan",
   "alamat": "Jl. Sudirman No. 5",
   "noKontak": "081298765432",
   "status": true,
@@ -117,16 +117,16 @@ Content-Type: application/json
 GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan/MN0000014
+GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan/MN0000015
 
 ### Create
-POST {{DaffaCatering.API_HostAddress}}/api/MenuMakanan
+PUT {{DaffaCatering.API_HostAddress}}/api/MenuMakanan/MN0000015
 Content-Type: application/json
 
 {
   "idMenu": "MN0000015",
   "idSatuan": "SBB0000011",
-  "namaMenu": "Test Menu 15",
+  "namaMenu": "Test Menu",
   "jumlah": 10,
   "harga": 25000,
   "status": true
@@ -147,12 +147,34 @@ POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 Content-Type: application/json
 
 {
-  "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "Test Bahan Baku dengan Detail",
+  "idBahanBaku": "BB0000017",
+  "namaBahanBaku": "Test Bahan Baku 2 dengan Detail",
   "jenis": true,
   "status": true,
   "details": [
-    { "tglKadaluwarsa": "2026-12-01", "idSatuan": "SBB0000010", "stokAwal": 100, "sisaStok": 100 },
-    { "tglKadaluwarsa": "2026-11-15", "idSatuan": "SBB0000010", "stokAwal": 50, "sisaStok": 50 }
+    { "tglKadaluwarsa": "2026-12-01", "idSatuan": "SBB0000011", "stokAwal": 100, "sisaStok": 10 },
+    { "tglKadaluwarsa": "2026-11-15", "idSatuan": "SBB0000011", "stokAwal": 50, "sisaStok": 10 }
+  ]
+}
+
+### ============ HEADER PEMBELIAN + DETAIL PEMBELIAN ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPembelian
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPembelian/PB0000010
+
+### Create - dengan Pemasok valid & 2 item detail
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderPembelian
+Content-Type: application/json
+
+{
+  "idPembelian": "PB0000010",
+  "idPemasok": "PMS0000013",
+  "tglPembelian": "2026-09-21",
+  "status": "Open",
+  "details": [
+    { "idBahanBaku": "BB0000016", "idSatuan": "SBB0000011", "jumlah": 10, "harga": 5000 },
+    { "idBahanBaku": "BB0000017", "idSatuan": "SBB0000011", "jumlah": 2, "harga": 5000 }
   ]
 }
