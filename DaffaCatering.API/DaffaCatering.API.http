@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### ============ User ============
-### Get All
+### Get Allf
 GET {{DaffaCatering.API_HostAddress}}/api/User
 
 ### Get By ID
@@ -31,7 +31,7 @@ POST {{DaffaCatering.API_HostAddress}}/api/User
 Content-Type: application/json
 
 {
-  "idUser": "U005",
+  "idUser": "U006",
   "idRole": "R005",
   "namaUser": "Test User 5",
   "password": "TestPassword123",
@@ -43,7 +43,7 @@ Content-Type: application/json
 GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000011
+GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000010
 
 ### Create
 POST {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
@@ -77,7 +77,7 @@ Content-Type: application/json
 GET {{DaffaCatering.API_HostAddress}}/api/Pemasok
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000013
+GET {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000012
 
 ### Create
 POST {{DaffaCatering.API_HostAddress}}/api/Pemasok
@@ -97,7 +97,7 @@ Content-Type: application/json
 GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan/PL00000012
+GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan/PLG0000012
 
 ### Create
 POST {{DaffaCatering.API_HostAddress}}/api/Pelanggan
@@ -140,7 +140,7 @@ GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku?status=true
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000015
 
 ### Create
 POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
