@@ -3,25 +3,73 @@
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
 ### DELETE {{DaffaCatering.API_HostAddress}}/api/{namaTabel}/{idKolom}
 
-### ============ HeaderBahanBaku ============
+### ============ User ============
 ### Get All
-GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
-
-### Get All (filter status=true)
-GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku?status=true
+GET {{DaffaCatering.API_HostAddress}}/api/User
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
+GET {{DaffaCatering.API_HostAddress}}/api/User/U004
 
 ### Create
-POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+POST {{DaffaCatering.API_HostAddress}}/api/User
 Content-Type: application/json
 
 {
-  "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "Test Bahan Baku",
-  "jenis": true,
+  "idUser": "U005",
+  "idRole": "R005",
+  "namaUser": "Test User 5",
+  "password": "TestPassword123",
   "status": true
+}
+
+### ============ Role ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/Role
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/Role/R004
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/Role
+Content-Type: application/json
+
+{
+  "idRole": "R005",
+  "namaRole": "Test Role 5"
+}
+
+### ============ Satuan Bahan Baku ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000011
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
+Content-Type: application/json
+
+{
+  "idSatuan": "SBB0000011",
+  "namaSatuan": "Test Satuan Bahan Baku 11"
+}
+
+### ============ Konversi Satuan ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan/KNV0000003
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
+Content-Type: application/json
+
+{
+  "idKonversi": "KNV0000004",
+  "idSatuanBesar": "SBB0000010",
+  "idSatuanKecil": "SBB0000007",
+  "nilaiKonversi": 15.00
 }
 
 ### ============ Pemasok ============
@@ -64,38 +112,6 @@ Content-Type: application/json
   "tglBergabung": "2026-01-01"
 }
 
-### ============ Satuan Bahan Baku ============
-### Get All
-GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
-
-### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000011
-
-### Create
-POST {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
-Content-Type: application/json
-
-{
-  "idSatuan": "SBB0000011",
-  "namaSatuan": "Test Satuan Bahan Baku 11"
-}
-
-### ============ User Role ============
-### Get All
-GET {{DaffaCatering.API_HostAddress}}/api/Role
-
-### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/Role/R004
-
-### Create
-POST {{DaffaCatering.API_HostAddress}}/api/Role
-Content-Type: application/json
-
-{
-  "idRole": "R005",
-  "namaRole": "Test Role 5"
-}
-
 ### ============ Menu Makanan ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Menu
@@ -116,39 +132,23 @@ Content-Type: application/json
   "status": true
 }
 
-### ============ User ============
+### ============ HeaderBahanBaku ============
 ### Get All
-GET {{DaffaCatering.API_HostAddress}}/api/User
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+
+### Get All (filter status=true)
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku?status=true
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/User/U004
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 
 ### Create
-POST {{DaffaCatering.API_HostAddress}}/api/User
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 Content-Type: application/json
 
 {
-  "idUser": "U005",
-  "idRole": "R005",
-  "namaUser": "Test User 5",
-  "password": "TestPassword123",
+  "idBahanBaku": "BB0000016",
+  "namaBahanBaku": "Test Bahan Baku",
+  "jenis": true,
   "status": true
-}
-
-### ============ Konversi Satuan ============
-### Get All
-GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
-
-### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan/KNV0000003
-
-### Create
-POST {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
-Content-Type: application/json
-
-{
-  "idKonversi": "KNV0000004",
-  "idSatuanBesar": "SBB0000010",
-  "idSatuanKecil": "SBB0000007",
-  "nilaiKonversi": 15.00
 }
