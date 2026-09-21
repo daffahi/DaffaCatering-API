@@ -9,20 +9,20 @@ namespace DaffaCatering.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
 
-    public class PemasokController : ControllerBase
+    public class MenuController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
 
-        public PemasokController(DaffaCateringContext context)
+        public MenuController(DaffaCateringContext context)
         {
             _context = context;
         }
 
-        // GET semua pemasok, dengan opsi filter ?status=true/false
+        // GET all data, dengan opsi filter ?status=true/false
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool? status)
         {
-            var query = _context.Pemasoks.AsQueryable();
+            var query = _context.Menus.AsQueryable();
 
             if (status.HasValue)
                 query = query.Where(x => x.Status == status.Value);
@@ -35,36 +35,35 @@ namespace DaffaCatering.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var data = await _context.Pemasoks.FindAsync(id);
+            var data = await _context.Menus.FindAsync(id);
             if (data == null)
                 return NotFound();
             return Ok(data);
         }
 
-        // POST - Create data baru, dengan validasi otomatis dari DTO
-        // dan error handling untuk duplicate ID
+        // CREATE & error handling untuk duplicate ID
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PemasokDto input)
+        public async Task<IActionResult> Create([FromBody] MenuDto input)
         {
             try
             {
-                var entity = new Pemasok
+                var entity = new Menu
                 {
-                    IdPemasok = input.IdPemasok,
-                    NamaPemasok = input.NamaPemasok,
-                    NoKontak = input.NoKontak,
-                    Alamat = input.Alamat,
-                    TglBergabung = input.TglBergabung,
+                    IdMenu = input.IdMenu,
+                    IdSatuan = input.IdSatuan,
+                    NamaMenu = input.NamaMenu,
+                    Jumlah = input.Jumlah,
+                    Harga = input.Harga,
                     Status = input.Status
                 };
 
-                _context.Pemasoks.Add(entity);
+                _context.Menus.Add(entity);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetById), new { id = entity.IdPemasok }, entity);
+                return CreatedAtAction(nameof(GetById), new { id = entity.IdMenu }, entity);
             }
             catch (DbUpdateException)
             {
-                return Conflict("ID Pemasok sudah ada, gunakan ID yang berbeda");
+                return Conflict("ID Menu Makanan sudah ada, gunakan ID yang berbeda");
             }
             catch (Exception ex)
             {
@@ -72,36 +71,35 @@ namespace DaffaCatering.API.Controllers
             }
         }
 
-        // PUT - Update Pemasok, berdasarkan ID
+        // UPDATE
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] PemasokDto input)
+        public async Task<IActionResult> Update(string id, [FromBody] MenuDto input)
         {
-            if (id != input.IdPemasok)
+            if (id != input.IdMenu)
                 return BadRequest("ID tidak sesuai");
 
-            var existing = await _context.Pemasoks.FindAsync(id);
+            var existing = await _context.Menus.FindAsync(id);
             if (existing == null)
                 return NotFound();
 
-            existing.NamaPemasok = input.NamaPemasok;
-            existing.NoKontak = input.NoKontak;
-            existing.Alamat = input.Alamat;
-            existing.TglBergabung = input.TglBergabung;
+            existing.NamaMenu = input.NamaMenu;
+            existing.Jumlah = input.Jumlah;
+            existing.Harga = input.Harga;
             existing.Status = input.Status;
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // DELETE - Hapus pemasok
+        // DELETE
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var existing = await _context.Pemasoks.FindAsync(id);
+            var existing = await _context.Menus.FindAsync(id);
             if (existing == null)
                 return NotFound();
 
-            _context.Pemasoks.Remove(existing);
+            _context.Menus.Remove(existing);
             await _context.SaveChangesAsync();
             return NoContent();
         }

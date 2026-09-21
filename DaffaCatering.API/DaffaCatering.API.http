@@ -79,3 +79,39 @@ Content-Type: application/json
   "idSatuan": "SBB0000011",
   "namaSatuan": "Test Satuan Bahan Baku 11"
 }
+
+### ============ User Role ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/Role
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/Role/R004
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/Role
+Content-Type: application/json
+
+{
+  "idRole": "R005",
+  "namaRole": "Test Role 5"
+}
+
+### ============ Menu Makanan ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/Menu
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/Menu/MN0000014 // Yang sudah ada di database
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/Menu
+Content-Type: application/json
+
+{
+  "idMenu": "MN0000015",
+  "idSatuan": "SBB0000011",
+  "namaMenu": "Test Menu 15",
+  "jumlah": 10,
+  "harga": 25000,
+  "status": true
+}
