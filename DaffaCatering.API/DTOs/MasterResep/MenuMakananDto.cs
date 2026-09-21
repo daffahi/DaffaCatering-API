@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DaffaCatering.API.DTOs
+namespace DaffaCatering.API.DTOs.MasterResep
 {
-    public class MenuDto
+    public class MenuMakananDto
     {
         [Required(ErrorMessage = "ID Menu Makanan wajib diisi")]
         [StringLength(10, ErrorMessage = "ID Menu Makanan maksimal 10 karakter")]

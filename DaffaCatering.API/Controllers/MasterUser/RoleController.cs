@@ -1,60 +1,60 @@
 ﻿using DaffaCatering.API.Data;
 using DaffaCatering.API.Models;
-using DaffaCatering.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DaffaCatering.API.DTOs.MasterUser;
 
-namespace DaffaCatering.API.Controllers
+namespace DaffaCatering.API.Controllers.MasterUser
 {
     [ApiController]
     [Route("api/[controller]")]
 
-    public class SatuanBahanBakuController : ControllerBase
+    public class RoleController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
 
-        public SatuanBahanBakuController(DaffaCateringContext context)
+        public RoleController(DaffaCateringContext context)
         {
             _context = context;
         }
 
-        // GET semua satuan bahan baku
+        // GET semua role
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var data = await _context.SatuanBahanBakus.ToListAsync();
+            var data = await _context.Roles.ToListAsync();
             return Ok(data);
         }
 
-        // GET satu satuan bahan baku berdasarkan ID
+        // GET satu role berdasarkan ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var data = await _context.SatuanBahanBakus.FindAsync(id);
+            var data = await _context.Roles.FindAsync(id);
             if (data == null)
                 return NotFound();
             return Ok(data);
         }
 
-        // POST - Create satuan bahan baku baru
+        // POST - Create Role
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] SatuanBahanBakuDto input)
+        public async Task<IActionResult> Create([FromBody] RoleDto input)
         {
             try
             {
-                var entity = new SatuanBahanBaku
+                var entity = new Role
                 {
-                    IdSatuan = input.IdSatuan,
-                    NamaSatuan = input.NamaSatuan
+                    IdRole = input.IdRole,
+                    NamaRole = input.NamaRole
                 };
 
-                _context.SatuanBahanBakus.Add(entity);
+                _context.Roles.Add(entity);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetById), new { id = entity.IdSatuan }, entity);
+                return CreatedAtAction(nameof(GetById), new { id = entity.IdRole }, entity);
             }
             catch (DbUpdateException)
             {
-                return Conflict("ID Satuan Bahan Baku sudah ada, gunakan ID yang berbeda");
+                return Conflict("ID Role sudah ada, gunakan ID yang berbeda");
             }
             catch (Exception ex)
             {
@@ -62,32 +62,32 @@ namespace DaffaCatering.API.Controllers
             }
         }
 
-        // PUT - Update satuan bahan baku berdasarkan ID
+        // PUT - Update role berdasarkan ID
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] SatuanBahanBakuDto input)
+        public async Task<IActionResult> Update(string id, [FromBody] RoleDto input)
         {
-            if (id != input.IdSatuan)
+            if (id != input.IdRole)
                 return BadRequest("ID tidak sesuai");
 
-            var existing = await _context.SatuanBahanBakus.FindAsync(id);
+            var existing = await _context.Roles.FindAsync(id);
             if (existing == null)
                 return NotFound();
 
-            existing.NamaSatuan = input.NamaSatuan;
+            existing.NamaRole = input.NamaRole;
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // DELETE - Hapus satuan bahan baku berdasarkan ID
+        // DELETE - Hapus role berdasarkan ID
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var existing = await _context.SatuanBahanBakus.FindAsync(id);
+            var existing = await _context.Roles.FindAsync(id);
             if (existing == null)
                 return NotFound();
 
-            _context.SatuanBahanBakus.Remove(existing);
+            _context.Roles.Remove(existing);
             await _context.SaveChangesAsync();
             return NoContent();
         }

@@ -1,10 +1,10 @@
 ﻿using DaffaCatering.API.Data;
 using DaffaCatering.API.Models;
-using DaffaCatering.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DaffaCatering.API.DTOs.MasterSatuanBahanBaku;
 
-namespace DaffaCatering.API.Controllers
+namespace DaffaCatering.API.Controllers.MasterSatuanBahanBaku
 {
     [ApiController]
     [Route("api/[controller]")]

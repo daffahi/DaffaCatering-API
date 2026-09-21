@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DaffaCatering.API.DTOs
+namespace DaffaCatering.API.DTOs.MasterPemasok
 {
     public class PemasokDto
     {

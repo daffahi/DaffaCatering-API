@@ -1,19 +1,19 @@
 ﻿using DaffaCatering.API.Data;
 using DaffaCatering.API.Models;
-using DaffaCatering.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DaffaCatering.API.DTOs.MasterResep;
 
-namespace DaffaCatering.API.Controllers
+namespace DaffaCatering.API.Controllers.MasterResep
 {
     [ApiController]
     [Route("api/[controller]")]
 
-    public class MenuController : ControllerBase
+    public class MenuMakananController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
 
-        public MenuController(DaffaCateringContext context)
+        public MenuMakananController(DaffaCateringContext context)
         {
             _context = context;
         }
@@ -43,7 +43,7 @@ namespace DaffaCatering.API.Controllers
 
         // CREATE & error handling untuk duplicate ID
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] MenuDto input)
+        public async Task<IActionResult> Create([FromBody] MenuMakananDto input)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace DaffaCatering.API.Controllers
 
         // UPDATE
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] MenuDto input)
+        public async Task<IActionResult> Update(string id, [FromBody] MenuMakananDto input)
         {
             if (id != input.IdMenu)
                 return BadRequest("ID tidak sesuai");

@@ -114,13 +114,13 @@ Content-Type: application/json
 
 ### ============ Menu Makanan ============
 ### Get All
-GET {{DaffaCatering.API_HostAddress}}/api/Menu
+GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/Menu/MN0000014
+GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan/MN0000014
 
 ### Create
-POST {{DaffaCatering.API_HostAddress}}/api/Menu
+POST {{DaffaCatering.API_HostAddress}}/api/MenuMakanan
 Content-Type: application/json
 
 {

@@ -19,4 +19,11 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Penjualan\" />
+    <Folder Include="Controllers\Pembelian\" />
+    <Folder Include="DTOs\Penjualan\" />
+    <Folder Include="DTOs\Pembelian\" />
+  </ItemGroup>
+
 </Project>
