@@ -3,7 +3,7 @@
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
 ### DELETE {{DaffaCatering.API_HostAddress}}/api/{namaTabel}/{idKolom}
 
-### ============ Role ============
+### ============ ROLE PENGGUNA ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Role
 
@@ -19,8 +19,8 @@ Content-Type: application/json
   "namaRole": "Test Role 5"
 }
 
-### ============ User ============
-### Get Allf
+### ============ MASTER PENGGUNA ============
+### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/User
 
 ### Get By ID
@@ -38,7 +38,7 @@ Content-Type: application/json
   "status": true
 }
 
-### ============ Satuan Bahan Baku ============
+### ============ SATUAN BAHAN BAKU ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
 
@@ -54,7 +54,7 @@ Content-Type: application/json
   "namaSatuan": "Test Satuan Bahan Baku 11"
 }
 
-### ============ Konversi Satuan ============
+### ============ KONVERSI SATUAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
 
@@ -72,7 +72,7 @@ Content-Type: application/json
   "nilaiKonversi": 15.00
 }
 
-### ============ Pemasok ============
+### ============ MASTER PEMASOK ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Pemasok
 
@@ -92,7 +92,7 @@ Content-Type: application/json
   "tglBergabung": "2026-01-01"
 }
 
-### ============ Pelanggan ============
+### ============ MASTER PELANGGAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan
 
@@ -112,7 +112,7 @@ Content-Type: application/json
   "tglBergabung": "2026-01-01"
 }
 
-### ============ Menu Makanan ============
+### ============ MASTER MENU MAKANAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan
 
@@ -132,7 +132,7 @@ Content-Type: application/json
   "status": true
 }
 
-### ============ HeaderBahanBaku ============
+### ============ HEADER BAHAN BAKU + DETAIL BAHAN BAKU ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 
@@ -140,15 +140,19 @@ GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku?status=true
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000015
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku/BB0000016
 
-### Create
+### Create dengan Detail
 POST {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
 Content-Type: application/json
 
 {
   "idBahanBaku": "BB0000016",
-  "namaBahanBaku": "Test Bahan Baku",
+  "namaBahanBaku": "Test Bahan Baku dengan Detail",
   "jenis": true,
-  "status": true
+  "status": true,
+  "details": [
+    { "tglKadaluwarsa": "2026-12-01", "idSatuan": "SBB0000010", "stokAwal": 100, "sisaStok": 100 },
+    { "tglKadaluwarsa": "2026-11-15", "idSatuan": "SBB0000010", "stokAwal": 50, "sisaStok": 50 }
+  ]
 }

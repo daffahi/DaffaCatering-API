@@ -15,5 +15,7 @@ namespace DaffaCatering.API.DTOs.MasterBahanBaku
         public bool Jenis { get; set; }
 
         public bool Status { get; set; }
+
+        public List<DetailBahanBakuDto> Details { get; set; } = new();
     }
 }

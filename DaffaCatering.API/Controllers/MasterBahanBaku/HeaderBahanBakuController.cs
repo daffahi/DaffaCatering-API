@@ -34,7 +34,10 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var data = await _context.HeaderBahanBakus.FindAsync(id);
+            var data = await _context.HeaderBahanBakus
+                .Include(h => h.DetailBahanBakus)
+                .FirstOrDefaultAsync(h => h.IdBahanBaku == id);
+
             if (data == null)
                 return NotFound();
             return Ok(data);
@@ -45,9 +48,10 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] HeaderBahanBakuDto input)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var entity = new HeaderBahanBaku
+                var entity = new Models.HeaderBahanBaku
                 {
                     IdBahanBaku = input.IdBahanBaku,
                     NamaBahanBaku = input.NamaBahanBaku,
@@ -55,16 +59,32 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
                     Status = input.Status
                 };
 
+                foreach (var detailInput in input.Details)
+                {
+                    entity.DetailBahanBakus.Add(new Models.DetailBahanBaku
+                    {
+                        IdBahanBaku = input.IdBahanBaku,
+                        TglKadaluwarsa = detailInput.TglKadaluwarsa,
+                        IdSatuan = detailInput.IdSatuan,
+                        StokAwal = detailInput.StokAwal,
+                        SisaStok = detailInput.SisaStok
+                    });
+                }
+
                 _context.HeaderBahanBakus.Add(entity);
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
                 return CreatedAtAction(nameof(GetById), new { id = entity.IdBahanBaku }, entity);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
-                return Conflict("ID Bahan Baku sudah ada, gunakan ID yang berbeda");
+                await transaction.RollbackAsync();
+                return Conflict($"Gagal menyimpan — ID sudah ada atau ID Satuan tidak valid. Detail: {ex.InnerException?.Message}");
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
             }
         }
