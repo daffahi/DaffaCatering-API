@@ -3,6 +3,22 @@
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
 ### DELETE {{DaffaCatering.API_HostAddress}}/api/{namaTabel}/{idKolom}
 
+### ============ Role ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/Role
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/Role/R004
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/Role
+Content-Type: application/json
+
+{
+  "idRole": "R005",
+  "namaRole": "Test Role 5"
+}
+
 ### ============ User ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/User
@@ -20,22 +36,6 @@ Content-Type: application/json
   "namaUser": "Test User 5",
   "password": "TestPassword123",
   "status": true
-}
-
-### ============ Role ============
-### Get All
-GET {{DaffaCatering.API_HostAddress}}/api/Role
-
-### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/Role/R004
-
-### Create
-POST {{DaffaCatering.API_HostAddress}}/api/Role
-Content-Type: application/json
-
-{
-  "idRole": "R005",
-  "namaRole": "Test Role 5"
 }
 
 ### ============ Satuan Bahan Baku ============
