@@ -134,3 +134,22 @@ Content-Type: application/json
   "password": "TestPassword123",
   "status": true
 }
+
+### ============ Konversi Satuan ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan/KNV0000003 // Yang sudah ada di database
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
+Content-Type: application/json
+
+{
+  "idKonversi": "KNV0000004",
+  "idSatuanBesar": "SBB0000010",
+  "idSatuanKecil": "SBB0000007",
+  "nilaiKonversi": 15.00
+  "status": true
+}
