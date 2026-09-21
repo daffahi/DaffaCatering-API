@@ -2,7 +2,7 @@
 
 namespace DaffaCatering.API.DTOs.Pembelian
 {
-    public class DetailPembelianDto
+    public class DetailPenerimaanDto
     {
         [Required(ErrorMessage = "ID Bahan Baku wajib diisi")]
         [StringLength(10)]
@@ -15,7 +15,10 @@ namespace DaffaCatering.API.DTOs.Pembelian
         [Required(ErrorMessage = "Jumlah wajib diisi")]
         public decimal Jumlah { get; set; }
 
-        [Required(ErrorMessage = "Harga wajib diisi")]
-        public decimal Harga { get; set; }
+        [Required(ErrorMessage = "Tanggal Kadaluwarsa wajib diisi")]
+        public DateOnly TglKadaluwarsa { get; set; }
+
+        [StringLength(10)]
+        public string? StatusBahanBaku { get; set; }
     }
 }

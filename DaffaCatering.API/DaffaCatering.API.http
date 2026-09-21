@@ -1,7 +1,7 @@
 @DaffaCatering.API_HostAddress = http://localhost:5247
 
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
-### DELETE {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000011
+### DELETE {{DaffaCatering.API_HostAddress}}/api/DetailBahanBaku/BB0000017
 
 ### ============ ROLE PENGGUNA ============
 ### Get All
@@ -152,8 +152,8 @@ Content-Type: application/json
   "jenis": true,
   "status": true,
   "details": [
-    { "tglKadaluwarsa": "2026-12-01", "idSatuan": "SBB0000011", "stokAwal": 100, "sisaStok": 10 },
-    { "tglKadaluwarsa": "2026-11-15", "idSatuan": "SBB0000011", "stokAwal": 50, "sisaStok": 10 }
+    { "tglKadaluwarsa": "2026-12-01", "idSatuan": "SBB0000011", "stokAwal": 100, "sisaStok": 100 },
+    { "tglKadaluwarsa": "2026-11-15", "idSatuan": "SBB0000011", "stokAwal": 50, "sisaStok": 50 }
   ]
 }
 
@@ -176,5 +176,28 @@ Content-Type: application/json
   "details": [
     { "idBahanBaku": "BB0000016", "idSatuan": "SBB0000011", "jumlah": 10, "harga": 5000 },
     { "idBahanBaku": "BB0000017", "idSatuan": "SBB0000011", "jumlah": 2, "harga": 5000 }
+  ]
+}
+
+### ============ HEADER PENERIMAAN + DETAIL PENERIMAAN ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenerimaan
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenerimaan/PN0000001
+
+### Create - Terima barang dari pembelian PB0000010
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderPenerimaan
+Content-Type: application/json
+
+{
+  "idPenerimaan": "PNM0000014",
+  "idPemasok": "PMS0000013",
+  "idPembelian": "PB0000010",
+  "tglPenerimaan": "2026-09-22",
+  "status": "Selesai",
+  "details": [
+    { "idBahanBaku": "BB0000016", "idSatuan": "SBB0000011", "jumlah": 10, "tglKadaluwarsa": "2027-03-01", "statusBahanBaku": "Baik" },
+    { "idBahanBaku": "BB0000017", "idSatuan": "SBB0000011", "jumlah": 2, "tglKadaluwarsa": "2027-02-15", "statusBahanBaku": "Baik" }
   ]
 }
