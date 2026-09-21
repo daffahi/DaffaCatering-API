@@ -1,6 +1,6 @@
 @DaffaCatering.API_HostAddress = http://localhost:5247
 
-### POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
+### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
 DELETE {{DaffaCatering.API_HostAddress}}/api/{namaTabel}/{idKolom}
 
 ### ============ HeaderBahanBaku ============
@@ -49,7 +49,7 @@ Content-Type: application/json
 GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan/PL0000001
+GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan/PL00000013
 
 ### Create
 POST {{DaffaCatering.API_HostAddress}}/api/Pelanggan
@@ -62,4 +62,20 @@ Content-Type: application/json
   "noKontak": "081298765432",
   "status": true,
   "tglBergabung": "2026-01-01"
+}
+
+### ============ Satuan Bahan Baku ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000011
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
+Content-Type: application/json
+
+{
+  "idSatuan": "SBB0000011",
+  "namaSatuan": "Test Satuan Bahan Baku 11"
 }
