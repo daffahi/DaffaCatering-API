@@ -1,9 +1,13 @@
 ﻿using DaffaCatering.API.Data;
 using DaffaCatering.API.DTOs.MasterUser;
-using DaffaCatering.API.DTOs.MasterUser;
+using DaffaCatering.API.DTOs.User;
 using DaffaCatering.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace DaffaCatering.API.Controllers.User
 {
@@ -12,10 +16,12 @@ namespace DaffaCatering.API.Controllers.User
     public class UserController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
+        private readonly IConfiguration _config;
 
-        public UserController(DaffaCateringContext context)
+        public UserController(DaffaCateringContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         [HttpGet]
@@ -85,6 +91,42 @@ namespace DaffaCatering.API.Controllers.User
             _context.Users.Remove(existing);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto input)
+        {
+            var user = await _context.Users.FindAsync(input.IdUser);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(input.Password, user.Password))
+                return Unauthorized("ID User atau Password salah");
+
+            if (!user.Status)
+                return Unauthorized("Akun ini tidak aktif");
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.IdUser),
+                new Claim(ClaimTypes.Name, user.NamaUser),
+                new Claim(ClaimTypes.Role, user.IdRole)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(double.Parse(_config["Jwt:ExpiresInMinutes"]!)),
+                signingCredentials: creds
+            );
+
+            return Ok(new
+            {
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                expiresIn = _config["Jwt:ExpiresInMinutes"] + " menit"
+            });
         }
     }
 }

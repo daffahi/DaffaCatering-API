@@ -309,3 +309,13 @@ Content-Type: application/json
     { "idMenu": "MN0000015", "idSatuan": "SBB0000011", "jumlah": 2, "harga": 25000 }
   ]
 }
+
+### ============ AUTH ============
+### Login
+POST {{DaffaCatering.API_HostAddress}}/api/User/login
+Content-Type: application/json
+
+{
+  "idUser": "U001",
+  "password": "Admin123"
+}
