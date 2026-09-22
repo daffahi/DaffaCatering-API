@@ -240,3 +240,24 @@ Content-Type: application/json
     { "idBahanBaku": "BB0000016", "tglKadaluwarsa": "2027-06-01", "idSatuan": "SBB0000011", "stokFisik": 2, "keterangan": "Ditemukan batch baru saat stock opname" }
   ]
 }
+
+### ============ HEADER RESEP + DETAIL RESEP ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderResep
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderResep/RS0000012
+
+### Create - Resep untuk 1 menu, dengan 2 komposisi bahan baku
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderResep
+Content-Type: application/json
+
+{
+  "idResep": "RS0000013",
+  "idMenu": "MN0000015",
+  "status": true,
+  "details": [
+    { "idBahanBaku": "BB0000016", "idSatuan": "SBB0000011", "jumlah": 2 },
+    { "idBahanBaku": "BB0000017", "idSatuan": "SBB0000011", "jumlah": 1 }
+  ]
+}
