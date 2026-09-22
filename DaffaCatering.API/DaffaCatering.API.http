@@ -286,3 +286,26 @@ Content-Type: application/json
     { "idMenu": "MN0000015", "idSatuan": "SBB0000011", "jumlah": 3, "harga": 25000 }
   ]
 }
+
+### ============ HEADER PENJUALAN + DETAIL PENJUALAN ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenjualan
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenjualan/PNJ0000010
+
+### Create - Menu terjual, stok bahan baku otomatis berkurang sesuai resep
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderPenjualan
+Content-Type: application/json
+
+{
+  "idPenjualan": "PNJ0000011",
+  "idPelanggan": "PLG0000013",
+  "tglPenjualan": "2026-09-22",
+  "metodePembayaran": "Cash",
+  "uangMuka": 0,
+  "status": "Selesai",
+  "details": [
+    { "idMenu": "MN0000015", "idSatuan": "SBB0000011", "jumlah": 2, "harga": 25000 }
+  ]
+}
