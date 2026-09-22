@@ -220,3 +220,23 @@ Content-Type: application/json
     { "idBahanBaku": "BB0000016", "jumlahPenggunaan": 5 }
   ]
 }
+
+### ============ HEADER PENYESUAIAN + DETAIL PENYESUAIAN ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenyesuaianBahanBaku
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenyesuaianBahanBaku/PSY0000007
+
+### Create - Koreksi + pecah 1 batch jadi 2 tanggal
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderPenyesuaianBahanBaku
+Content-Type: application/json
+
+{
+  "idPenyesuaian": "PSY0000008",
+  "tglPenyesuaian": "2026-09-22",
+  "details": [
+    { "idBahanBaku": "BB0000016", "tglKadaluwarsa": "2027-03-01", "idSatuan": "SBB0000011", "stokFisik": 3, "keterangan": "Koreksi setelah stock opname" },
+    { "idBahanBaku": "BB0000016", "tglKadaluwarsa": "2027-06-01", "idSatuan": "SBB0000011", "stokFisik": 2, "keterangan": "Ditemukan batch baru saat stock opname" }
+  ]
+}
