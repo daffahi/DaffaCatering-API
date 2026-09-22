@@ -52,7 +52,7 @@ namespace DaffaCatering.API.Controllers.MasterUser
                     IdUser = input.IdUser,
                     IdRole = input.IdRole,
                     NamaUser = input.NamaUser,
-                    Password = input.Password,
+                    Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
                     Status = input.Status
                 };
 
@@ -83,7 +83,7 @@ namespace DaffaCatering.API.Controllers.MasterUser
 
             existing.IdRole = input.IdRole;
             existing.NamaUser = input.NamaUser;
-            existing.Password = input.Password;
+            existing.Password = BCrypt.Net.BCrypt.HashPassword(input.Password);
             existing.Status = input.Status;
 
             await _context.SaveChangesAsync();
