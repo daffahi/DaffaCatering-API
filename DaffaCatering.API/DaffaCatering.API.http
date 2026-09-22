@@ -261,3 +261,28 @@ Content-Type: application/json
     { "idBahanBaku": "BB0000017", "idSatuan": "SBB0000011", "jumlah": 1 }
   ]
 }
+
+### ============ HEADER PESANAN + DETAIL PESANAN ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPesanan
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPesanan/PP0000007
+
+### Create
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderPesanan
+Content-Type: application/json
+
+{
+  "idPesanan": "PP0000009",
+  "idPelanggan": "PLG0000013",
+  "tglPesanan": "2026-09-22",
+  "tglPengambilan": "2026-09-25",
+  "metodePembayaran": "Cash",
+  "uangMuka": 50000,
+  "keterangan": "Test pesanan",
+  "status": "Open",
+  "details": [
+    { "idMenu": "MN0000015", "idSatuan": "SBB0000011", "jumlah": 3, "harga": 25000 }
+  ]
+}
