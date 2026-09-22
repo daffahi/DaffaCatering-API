@@ -201,3 +201,22 @@ Content-Type: application/json
     { "idBahanBaku": "BB0000017", "idSatuan": "SBB0000011", "jumlah": 2, "tglKadaluwarsa": "2027-02-15", "statusBahanBaku": "Baik" }
   ]
 }
+
+### ============ HEADER PENGGUNAAN + DETAIL PENGGUNAAN ============
+### Get All
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenggunaan
+
+### Get By ID
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenggunaan/PBP0000008
+
+### Create - FEFO otomatis pilih batch
+POST {{DaffaCatering.API_HostAddress}}/api/HeaderPenggunaan
+Content-Type: application/json
+
+{
+  "idPenggunaan": "PBP0000009",
+  "tglPenggunaan": "2026-09-22",
+  "details": [
+    { "idBahanBaku": "BB0000016", "jumlahPenggunaan": 5 }
+  ]
+}
