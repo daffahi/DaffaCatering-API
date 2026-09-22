@@ -1,14 +1,14 @@
 ﻿using DaffaCatering.API.Data;
+using DaffaCatering.API.DTOs.MasterUser;
+using DaffaCatering.API.DTOs.MasterUser;
 using DaffaCatering.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DaffaCatering.API.DTOs.MasterUser;
 
-namespace DaffaCatering.API.Controllers.MasterUser
+namespace DaffaCatering.API.Controllers.User
 {
     [ApiController]
     [Route("api/[controller]")]
-
     public class UserController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
@@ -18,41 +18,35 @@ namespace DaffaCatering.API.Controllers.MasterUser
             _context = context;
         }
 
-        // GET all data, dengan opsi filter ?status=true/false
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool? status)
         {
             var query = _context.Users.AsQueryable();
-
             if (status.HasValue)
                 query = query.Where(x => x.Status == status.Value);
-
             var data = await query.ToListAsync();
             return Ok(data);
         }
 
-        // GET satu data spesifik berdasarkan ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
             var data = await _context.Users.FindAsync(id);
-            if (data == null)
-                return NotFound();
+            if (data == null) return NotFound();
             return Ok(data);
         }
 
-        // CREATE & error handling untuk duplicate ID
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserDto input)
         {
             try
             {
-                var entity = new User
+                var entity = new Models.User
                 {
                     IdUser = input.IdUser,
                     IdRole = input.IdRole,
                     NamaUser = input.NamaUser,
-                    Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
+                    Password = BCrypt.Net.BCrypt.HashPassword(input.Password),  // ⬅ HASH, bukan plain
                     Status = input.Status
                 };
 
@@ -64,40 +58,30 @@ namespace DaffaCatering.API.Controllers.MasterUser
             {
                 return Conflict("ID User sudah ada, gunakan ID yang berbeda");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
-            }
         }
 
-        // UPDATE
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] UserDto input)
         {
-            if (id != input.IdUser)
-                return BadRequest("ID tidak sesuai");
+            if (id != input.IdUser) return BadRequest("ID tidak sesuai");
 
             var existing = await _context.Users.FindAsync(id);
-            if (existing == null)
-                return NotFound();
+            if (existing == null) return NotFound();
 
             existing.IdRole = input.IdRole;
             existing.NamaUser = input.NamaUser;
-            existing.Password = BCrypt.Net.BCrypt.HashPassword(input.Password);
+            existing.Password = BCrypt.Net.BCrypt.HashPassword(input.Password);  // ⬅ HASH juga di update
             existing.Status = input.Status;
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // DELETE
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var existing = await _context.Users.FindAsync(id);
-            if (existing == null)
-                return NotFound();
-
+            if (existing == null) return NotFound();
             _context.Users.Remove(existing);
             await _context.SaveChangesAsync();
             return NoContent();

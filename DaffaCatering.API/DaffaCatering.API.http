@@ -24,17 +24,17 @@ Content-Type: application/json
 GET {{DaffaCatering.API_HostAddress}}/api/User
 
 ### Get By ID
-GET {{DaffaCatering.API_HostAddress}}/api/User/U004
+GET {{DaffaCatering.API_HostAddress}}/api/User/U001
 
 ### Create
 POST {{DaffaCatering.API_HostAddress}}/api/User
 Content-Type: application/json
 
 {
-  "idUser": "U006",
-  "idRole": "R005",
-  "namaUser": "Test User",
-  "password": "TestPassword123",
+  "idUser": "U001",
+  "idRole": "R001",
+  "namaUser": "Admin",
+  "password": "Admin123",
   "status": true
 }
 
