@@ -46,7 +46,7 @@ namespace DaffaCatering.API.Controllers.User
                     IdUser = input.IdUser,
                     IdRole = input.IdRole,
                     NamaUser = input.NamaUser,
-                    Password = BCrypt.Net.BCrypt.HashPassword(input.Password),  // ⬅ HASH, bukan plain
+                    Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
                     Status = input.Status
                 };
 
@@ -54,9 +54,9 @@ namespace DaffaCatering.API.Controllers.User
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(GetById), new { id = entity.IdUser }, entity);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
-                return Conflict("ID User sudah ada, gunakan ID yang berbeda");
+                return Conflict($"Gagal menyimpan — cek ID atau data lain. Detail: {ex.InnerException?.Message}");
             }
         }
 
@@ -70,7 +70,7 @@ namespace DaffaCatering.API.Controllers.User
 
             existing.IdRole = input.IdRole;
             existing.NamaUser = input.NamaUser;
-            existing.Password = BCrypt.Net.BCrypt.HashPassword(input.Password);  // ⬅ HASH juga di update
+            existing.Password = BCrypt.Net.BCrypt.HashPassword(input.Password);
             existing.Status = input.Status;
 
             await _context.SaveChangesAsync();

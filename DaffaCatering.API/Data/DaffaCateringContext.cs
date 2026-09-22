@@ -763,7 +763,7 @@ public partial class DaffaCateringContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("namaUser");
             entity.Property(e => e.Password)
-                .HasMaxLength(25)
+                .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("password");
             entity.Property(e => e.Status).HasColumnName("status");

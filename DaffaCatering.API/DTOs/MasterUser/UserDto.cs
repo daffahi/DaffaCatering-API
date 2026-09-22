@@ -17,7 +17,7 @@ namespace DaffaCatering.API.DTOs.MasterUser
         public string NamaUser { get; set; } = null!;
 
         [Required(ErrorMessage = "Password wajib diisi")]
-        [StringLength(25, ErrorMessage = "Password maksimal 25 karakter")]
+        [StringLength(255, ErrorMessage = "Password maksimal 255 karakter")]
         public string Password { get; set; } = null!;
 
         public bool Status { get; set; }
