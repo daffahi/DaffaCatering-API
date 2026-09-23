@@ -1,4 +1,4 @@
-@DaffaCatering.API_HostAddress = http://localhost:5247
+@DaffaCatering.API_HostAddress = https://localhost:7177
 
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
 ### DELETE {{DaffaCatering.API_HostAddress}}/api/DetailBahanBaku/BB0000017
@@ -319,3 +319,16 @@ Content-Type: application/json
   "idUser": "U001",
   "password": "Admin123"
 }
+
+### Login dulu untuk dapat token
+POST {{DaffaCatering.API_HostAddress}}/api/User/login
+Content-Type: application/json
+
+{
+  "idUser": "U001",
+  "password": "Admin123"
+}
+
+### Get All Role - DENGAN token (harus 200)
+GET {{DaffaCatering.API_HostAddress}}/api/Role
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM

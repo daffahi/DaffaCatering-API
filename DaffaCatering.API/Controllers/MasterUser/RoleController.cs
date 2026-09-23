@@ -1,13 +1,15 @@
 ﻿using DaffaCatering.API.Data;
+using DaffaCatering.API.DTOs.MasterUser;
 using DaffaCatering.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DaffaCatering.API.DTOs.MasterUser;
 
 namespace DaffaCatering.API.Controllers.MasterUser
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
 
     public class RoleController : ControllerBase
     {
@@ -38,6 +40,7 @@ namespace DaffaCatering.API.Controllers.MasterUser
 
         // POST - Create Role
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] RoleDto input)
         {
             try
