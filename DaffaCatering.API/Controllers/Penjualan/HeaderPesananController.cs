@@ -1,6 +1,7 @@
 ﻿using DaffaCatering.API.Data;
-using DaffaCatering.API.Models;
 using DaffaCatering.API.DTOs.Penjualan;
+using DaffaCatering.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,8 @@ namespace DaffaCatering.API.Controllers.Penjualan
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+
     public class HeaderPesananController : ControllerBase
     {
         private readonly DaffaCateringContext _context;

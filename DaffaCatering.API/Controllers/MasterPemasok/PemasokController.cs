@@ -1,13 +1,15 @@
 ﻿using DaffaCatering.API.Data;
+using DaffaCatering.API.DTOs.MasterPemasok;
 using DaffaCatering.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DaffaCatering.API.DTOs.MasterPemasok;
 
 namespace DaffaCatering.API.Controllers.MasterPemasok
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
 
     public class PemasokController : ControllerBase
     {

@@ -1,13 +1,16 @@
 ﻿using DaffaCatering.API.Data;
+using DaffaCatering.API.DTOs.MasterBahanBaku;
 using DaffaCatering.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DaffaCatering.API.DTOs.MasterBahanBaku;
 
 namespace DaffaCatering.API.Controllers.MasterBahanBaku
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+
     public class HeaderBahanBakuController : ControllerBase
     {
         private readonly DaffaCateringContext _context;

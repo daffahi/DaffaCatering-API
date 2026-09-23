@@ -1,13 +1,15 @@
 ﻿using DaffaCatering.API.Data;
+using DaffaCatering.API.DTOs.MasterResep;
 using DaffaCatering.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DaffaCatering.API.DTOs.MasterResep;
 
 namespace DaffaCatering.API.Controllers.MasterResep
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
 
     public class MenuMakananController : ControllerBase
     {

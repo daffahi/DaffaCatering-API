@@ -2,6 +2,7 @@
 using DaffaCatering.API.DTOs.MasterUser;
 using DaffaCatering.API.DTOs.User;
 using DaffaCatering.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -13,6 +14,8 @@ namespace DaffaCatering.API.Controllers.User
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+
     public class UserController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
@@ -43,6 +46,7 @@ namespace DaffaCatering.API.Controllers.User
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] UserDto input)
         {
             try

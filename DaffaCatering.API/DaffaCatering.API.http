@@ -4,12 +4,25 @@
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
 ### DELETE {{DaffaCatering.API_HostAddress}}/api/DetailBahanBaku/BB0000017
 
+### ============ AUTH ============
+POST {{DaffaCatering.API_HostAddress}}/api/User/login
+Content-Type: application/json
+
+{
+  "idUser": "U001",
+  "password": "Admin123"
+}
+
 ### ============ ROLE PENGGUNA ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Role
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/Role/R004
+
+### Get All Role - DENGAN token (harus 200)
+GET {{DaffaCatering.API_HostAddress}}/api/Role
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Create
 POST {{DaffaCatering.API_HostAddress}}/api/Role
@@ -23,6 +36,7 @@ Content-Type: application/json
 ### ============ MASTER PENGGUNA ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/User
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/User/U001
@@ -42,6 +56,7 @@ Content-Type: application/json
 ### ============ SATUAN BAHAN BAKU ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/SatuanBahanBaku/SBB0000010
@@ -58,6 +73,7 @@ Content-Type: application/json
 ### ============ KONVERSI SATUAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/KonversiSatuan/KNV0000003
@@ -76,6 +92,7 @@ Content-Type: application/json
 ### ============ MASTER PEMASOK ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Pemasok
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/Pemasok/PMS0000012
@@ -96,6 +113,7 @@ Content-Type: application/json
 ### ============ MASTER PELANGGAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/Pelanggan/PLG0000012
@@ -116,6 +134,7 @@ Content-Type: application/json
 ### ============ MASTER MENU MAKANAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/MenuMakanan/MN0000015
@@ -136,6 +155,7 @@ Content-Type: application/json
 ### ============ HEADER BAHAN BAKU + DETAIL BAHAN BAKU ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get All (filter status=true)
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku?status=true
@@ -161,6 +181,7 @@ Content-Type: application/json
 ### ============ HEADER PEMBELIAN + DETAIL PEMBELIAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPembelian
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPembelian/PB0000010
@@ -183,6 +204,7 @@ Content-Type: application/json
 ### ============ HEADER PENERIMAAN + DETAIL PENERIMAAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenerimaan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenerimaan/PN0000001
@@ -206,6 +228,7 @@ Content-Type: application/json
 ### ============ HEADER PENGGUNAAN + DETAIL PENGGUNAAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenggunaan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenggunaan/PBP0000008
@@ -225,6 +248,7 @@ Content-Type: application/json
 ### ============ HEADER PENYESUAIAN + DETAIL PENYESUAIAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenyesuaianBahanBaku
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenyesuaianBahanBaku/PSY0000007
@@ -245,6 +269,7 @@ Content-Type: application/json
 ### ============ HEADER RESEP + DETAIL RESEP ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderResep
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderResep/RS0000012
@@ -266,6 +291,7 @@ Content-Type: application/json
 ### ============ HEADER PESANAN + DETAIL PESANAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPesanan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPesanan/PP0000007
@@ -291,6 +317,7 @@ Content-Type: application/json
 ### ============ HEADER PENJUALAN + DETAIL PENJUALAN ============
 ### Get All
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenjualan
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/HeaderPenjualan/PNJ0000010
@@ -310,26 +337,3 @@ Content-Type: application/json
     { "idMenu": "MN0000015", "idSatuan": "SBB0000011", "jumlah": 2, "harga": 25000 }
   ]
 }
-
-### ============ AUTH ============
-### Login
-POST {{DaffaCatering.API_HostAddress}}/api/User/login
-Content-Type: application/json
-
-{
-  "idUser": "U001",
-  "password": "Admin123"
-}
-
-### Login dulu untuk dapat token
-POST {{DaffaCatering.API_HostAddress}}/api/User/login
-Content-Type: application/json
-
-{
-  "idUser": "U001",
-  "password": "Admin123"
-}
-
-### Get All Role - DENGAN token (harus 200)
-GET {{DaffaCatering.API_HostAddress}}/api/Role
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
