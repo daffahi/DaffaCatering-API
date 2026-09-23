@@ -9,7 +9,7 @@ namespace DaffaCatering.API.Controllers.MasterUser
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "R001")]
 
     public class RoleController : ControllerBase
     {

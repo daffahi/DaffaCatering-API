@@ -9,7 +9,7 @@ namespace DaffaCatering.API.Controllers.Penjualan
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "R001,R002")]
 
     public class HeaderPesananController : ControllerBase
     {

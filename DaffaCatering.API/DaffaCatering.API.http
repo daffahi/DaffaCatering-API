@@ -1,6 +1,6 @@
 @DaffaCatering.API_HostAddress = https://localhost:7177
 
-### 5247
+### 5247 / 7177
 ### FORMAT > POST = Create, PUT = Update, DELETE = Delete, GET = Get All / Get By ID
 ### DELETE {{DaffaCatering.API_HostAddress}}/api/DetailBahanBaku/BB0000017
 
@@ -40,16 +40,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hc
 
 ### Get By ID
 GET {{DaffaCatering.API_HostAddress}}/api/User/U001
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTgzNDU1LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.vq3wknbgD2llPWNGxJOpQJad_FuonWalWa6dP9xqNEM
+
 
 ### Create
-POST {{DaffaCatering.API_HostAddress}}/api/User
+PUT {{DaffaCatering.API_HostAddress}}/api/User/U003
 Content-Type: application/json
 
 {
-  "idUser": "U001",
-  "idRole": "R001",
-  "namaUser": "Admin",
-  "password": "Admin123",
+  "idUser": "U003",
+  "idRole": "R003",
+  "namaUser": "Pembelian",
+  "password": "Pembelian123",
   "status": true
 }
 
@@ -337,3 +339,21 @@ Content-Type: application/json
     { "idMenu": "MN0000015", "idSatuan": "SBB0000011", "jumlah": 2, "harga": 25000 }
   ]
 }
+
+### ============ TEST ROLE-BASED AUTH ============
+### Login sebagai Pembelian (U003, role R003)
+POST {{DaffaCatering.API_HostAddress}}/api/User/login
+Content-Type: application/json
+
+{
+  "idUser": "U003",
+  "password": "Pembelian123"
+}
+
+### Coba akses HeaderBahanBaku (harus 403 - Pembelian bukan Persediaan)
+GET {{DaffaCatering.API_HostAddress}}/api/HeaderBahanBaku
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJSMDAxIiwiZXhwIjoxNzkwMTY1MDQ4LCJpc3MiOiJEYWZmYUNhdGVyaW5nQVBJIiwiYXVkIjoiRGFmZmFDYXRlcmluZ1VzZXJzIn0.jCaau8FZFD9iHWbnMYdTU3TjWphwlwVrmttNpenLGa0
+
+### Coba akses Pemasok (harus 200 - Pembelian boleh akses ini)
+GET {{DaffaCatering.API_HostAddress}}/api/Pemasok
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IlUwMDMiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiUGVtYmVsaWFuIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiUjAwMyIsImV4cCI6MTc5MDE5MjUxOCwiaXNzIjoiRGFmZmFDYXRlcmluZ0FQSSIsImF1ZCI6IkRhZmZhQ2F0ZXJpbmdVc2VycyJ9.ThgJ0rDCbGvj0zmmFpRengzm6nFiSomeNiuc9FFAViw

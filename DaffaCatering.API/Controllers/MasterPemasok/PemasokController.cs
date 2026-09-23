@@ -9,7 +9,7 @@ namespace DaffaCatering.API.Controllers.MasterPemasok
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "R001,R003")]
 
     public class PemasokController : ControllerBase
     {

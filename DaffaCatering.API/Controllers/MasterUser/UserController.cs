@@ -14,7 +14,7 @@ namespace DaffaCatering.API.Controllers.User
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "R001")]
 
     public class UserController : ControllerBase
     {
@@ -98,6 +98,7 @@ namespace DaffaCatering.API.Controllers.User
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDto input)
         {
             var user = await _context.Users.FindAsync(input.IdUser);

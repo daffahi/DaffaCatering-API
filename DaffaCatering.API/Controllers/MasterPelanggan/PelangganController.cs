@@ -9,7 +9,7 @@ namespace DaffaCatering.API.Controllers.MasterPelanggan
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "R001,R002")]
 
     public class PelangganController : ControllerBase
     {
