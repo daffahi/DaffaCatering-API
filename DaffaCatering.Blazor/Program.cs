@@ -11,6 +11,12 @@ builder.Services.AddHttpClient("API", client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
 });
 
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<DaffaCatering.Blazor.Services.JwtAuthStateProvider>();
+builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider>(
+    sp => sp.GetRequiredService<DaffaCatering.Blazor.Services.JwtAuthStateProvider>());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

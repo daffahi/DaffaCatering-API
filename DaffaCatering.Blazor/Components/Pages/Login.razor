@@ -1,0 +1,88 @@
+﻿@page "/login"
+@layout LoginLayout
+@attribute [AllowAnonymous]
+@inject IHttpClientFactory Factory
+@inject JwtAuthStateProvider AuthProvider
+@inject NavigationManager Nav
+
+<div class="card shadow-sm" style="width: 380px;">
+    <div class="card-body p-4">
+        <h4 class="text-center mb-1">Daffa Catering</h4>
+        <p class="text-center text-muted mb-4">Silakan login</p>
+
+        <EditForm Model="model" OnValidSubmit="ProsesLogin">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">ID User</label>
+                <InputText class="form-control" @bind-Value="model.IdUser" />
+                <ValidationMessage For="() => model.IdUser" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <InputText type="password" class="form-control" @bind-Value="model.Password" />
+                <ValidationMessage For="() => model.Password" />
+            </div>
+
+            @if (pesanError != "")
+            {
+                <div class="alert alert-danger py-2">@pesanError</div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@sedangProses">
+                @if (sedangProses)
+                {
+                    <span>Memproses...</span>
+                }
+                else
+                {
+                    <span>Login</span>
+                }
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginRequest model = new LoginRequest();
+    private string pesanError = "";
+    private bool sedangProses = false;
+
+    private async Task ProsesLogin()
+    {
+        pesanError = "";
+        sedangProses = true;
+
+        try
+        {
+            var http = Factory.CreateClient("API");
+            var response = await http.PostAsJsonAsync("api/User/login", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var hasil = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                if (hasil != null && hasil.Token != "")
+                {
+                    await AuthProvider.MasukAsync(hasil.Token);
+                    Nav.NavigateTo("/");
+                }
+                else
+                {
+                    pesanError = "Respons dari server tidak valid";
+                }
+            }
+            else
+            {
+                // Pesan dari API, misalnya "ID User atau Password salah"
+                pesanError = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Tidak bisa terhubung ke server: " + ex.Message;
+        }
+
+        sedangProses = false;
+    }
+}
