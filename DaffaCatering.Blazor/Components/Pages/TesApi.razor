@@ -1,0 +1,23 @@
+﻿@page "/tes-api"
+@inject IHttpClientFactory Factory
+
+<h3>Tes API</h3>
+<p>@hasil</p>
+
+@code {
+    string hasil = "Loading...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var http = Factory.CreateClient("API");
+        try
+        {
+            // ganti dengan endpoint GET yang sudah ada di API-mu
+            hasil = await http.GetStringAsync("api/SatuanBahanBaku");
+        }
+        catch (Exception ex)
+        {
+            hasil = "Error: " + ex.Message;
+        }
+    }
+}
