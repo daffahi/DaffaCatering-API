@@ -1,7 +1,10 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Daffa Catering</PageTitle>
 
-<h1>Home Page</h1>
-
-Welcome to Daffa Catering
+<div class="welcomeText-Style">
+	<AuthorizeView>
+    <h1 class="h1-style">Hai, @context.User.Identity?.Name</h1>
+	</AuthorizeView>
+	<p class="p-style">Welcome to Daffa Catering</p>
+</div>
