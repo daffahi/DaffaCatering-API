@@ -1,4 +1,5 @@
 using DaffaCatering.Blazor.Components;
+using DaffaCatering.Blazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,12 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<DaffaCatering.Blazor.Services.JwtAuthStateProvider>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider>(
     sp => sp.GetRequiredService<DaffaCatering.Blazor.Services.JwtAuthStateProvider>());
+builder.Services.AddScoped<AuthHeaderHandler>();
+
+builder.Services.AddHttpClient("API", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
+}).AddHttpMessageHandler<AuthHeaderHandler>();
 
 var app = builder.Build();
 

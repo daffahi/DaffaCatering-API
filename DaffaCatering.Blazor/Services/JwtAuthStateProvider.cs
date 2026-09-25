@@ -35,10 +35,17 @@ namespace DaffaCatering.Blazor.Services
 
         public async Task<string> AmbilTokenAsync()
         {
-            var hasil = await _storage.GetAsync<string>(KunciToken);
-            if (hasil.Success && !string.IsNullOrEmpty(hasil.Value))
+            try
             {
-                return hasil.Value;
+                var hasil = await _storage.GetAsync<string>(KunciToken);
+                if (hasil.Success && !string.IsNullOrEmpty(hasil.Value))
+                {
+                    return hasil.Value;
+                }
+            }
+            catch
+            {
+                // Interop belum siap, anggap belum ada token
             }
             return "";
         }
