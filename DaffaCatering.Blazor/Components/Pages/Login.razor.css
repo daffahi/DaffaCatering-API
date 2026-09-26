@@ -10,17 +10,17 @@
 }
 
 .btn-login {
-    background-color: #0077b6;
-    border-color: #0077b6;
+    background-color: #3a5a40;
+    border-color: #3a5a40;
     color: #fff;
 }
 
     .btn-login:hover {
-        background-color: #0077b6;
-        border-color: #0077b6;
+        background-color: #344e41;
+        border-color: #0f4c42;
     }
 
 ::deep .form-control:focus {
-    border-color: #0077b6;
+    border-color: #3a5a40;
     box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.25);
 }
