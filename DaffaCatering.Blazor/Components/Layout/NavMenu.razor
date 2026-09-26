@@ -17,15 +17,33 @@
                 }
             </NavLink>
         </div>
+
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="master-data" title="Master Data">
+            <button class="nav-link btn-submenu" @onclick="ToggleMasterData" title="Master Data">
                 <i class="fa-solid fa-database fa-fw"></i>
                 @if (!Collapsed)
                 {
                     <span>Master Data</span>
+                    <i class="fa-solid fa-chevron-down chevron @(masterDataOpen ? "rotated" : "")"></i>
                 }
-            </NavLink>
+            </button>
+
+            @if (masterDataOpen && !Collapsed)
+            {
+                <div class="submenu">
+                    <NavLink class="nav-link submenu-link" href="pelanggan">
+                        <i class="fa-solid fa-circle-dot fa-fw"></i> Customers
+                    </NavLink>
+                    <NavLink class="nav-link submenu-link" href="pemasok">
+                        <i class="fa-solid fa-circle-dot fa-fw"></i> Pemasok
+                    </NavLink>
+                    <NavLink class="nav-link submenu-link" href="bahan-baku">
+                        <i class="fa-solid fa-circle-dot fa-fw"></i> Bahan Baku
+                    </NavLink>
+                </div>
+            }
         </div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="sales-data" title="Sales">
                 <i class="fa-solid fa-cart-shopping fa-fw"></i>
@@ -69,4 +87,11 @@
 @code {
     [Parameter]
     public bool Collapsed { get; set; }
+
+    private bool masterDataOpen = false;
+
+    private void ToggleMasterData()
+    {
+        masterDataOpen = !masterDataOpen;
+    }
 }

@@ -122,3 +122,40 @@
         overflow-y: auto;
     }
 }
+
+.btn-submenu {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.chevron {
+    margin-left: auto;
+    font-size: 0.6rem;
+    transition: transform 0.2s ease;
+}
+
+    .chevron.rotated {
+        transform: rotate(180deg);
+    }
+
+.submenu {
+    display: flex;
+    flex-direction: column;
+    padding-left: 1.5rem;
+}
+
+.submenu-link {
+    height: 2.5rem !important;
+    font-size: 0.85rem !important;
+    color: #c0c0c0 !important;
+}
+
+    .submenu-link i {
+        font-size: 0.4rem;
+    }
+        .submenu-link i.fa-circle-dot {
+            font-size: 0.4rem !important;
+        }
