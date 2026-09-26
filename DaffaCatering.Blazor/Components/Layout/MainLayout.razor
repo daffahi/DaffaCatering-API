@@ -10,9 +10,33 @@
             </div>
 
             <main>
-                <div class="top-row px-4">
-                    <span class="me-3">@context.User.Identity?.Name</span>
-                    <button class="btn-logout btn btn-sm btn-outline-secondary" @onclick="Keluar">Logout</button>
+                <div class="top-row px-3">
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-icon position-relative" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-bell"></i>
+                                @* <span class="notif-dot"></span> *@
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">Notifikasi</h6></li>
+                                <li><a class="dropdown-item" href="#">Belum ada notifikasi baru</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn profile-btn dropdown-toggle" data-bs-toggle="dropdown">
+                                <span class="avatar">@InisialNama</span>
+                                <span>@context.User.Identity?.Name</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end profile-menu">
+                                <li>
+                                    <button class="dropdown-item" @onclick="Keluar">
+                                        <i class="fa-solid fa-right-from-bracket fa-fw"></i> Logout
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <article class="content px-4">
@@ -33,6 +57,16 @@
 </div>
 
 @code {
+    private string namaUserSaatIni = "";
+
+    private string InisialNama => string.IsNullOrEmpty(namaUserSaatIni) ? "?" : namaUserSaatIni.Substring(0, 1).ToUpper();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        namaUserSaatIni = authState.User.Identity?.Name ?? "";
+    }
+
     private async Task Keluar()
     {
         await AuthProvider.KeluarAsync();
