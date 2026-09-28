@@ -24,7 +24,8 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool? status)
         {
-            var query = _context.HeaderBahanBakus.AsQueryable();
+            //var query = _context.HeaderBahanBakus.AsQueryable();
+            var query = _context.HeaderBahanBakus.Include(x => x.DetailBahanBakus).AsQueryable();
 
             if (status.HasValue)
                 query = query.Where(x => x.Status == status.Value);

@@ -1,10 +1,145 @@
 ﻿@page "/"
 
+@using System.Net.Http.Headers
+@using System.Net.Http.Json
+@using DaffaCatering.Blazor.Services
+
+@inject IHttpClientFactory HttpClientFactory
+@inject JwtAuthStateProvider AuthStateProvider
+
 <PageTitle>Daffa Catering</PageTitle>
 
 <div class="welcomeText-Style">
-	<AuthorizeView>
-    <h1 class="h1-style">Hello, @context.User.Identity?.Name</h1>
-	</AuthorizeView>
-	<p class="p-style">Welcome to Daffa Catering</p>
+    <h1 class="h1-style">Dashboard</h1>
+
+    <AuthorizeView>
+        <p class="p-style">
+            Welcome back, @context.User.Identity?.Name!
+        </p>
+    </AuthorizeView>
 </div>
+
+<div class="dashboard-cards">
+
+    <!-- Sales Card -->
+    <div class="dashboard-card">
+        <div class="card-icon sales-icon">
+            <i class="bi bi-currency-dollar"></i>
+        </div>
+
+        <div class="card-content">
+            <div class="card-title">
+                @totalSales Sales
+            </div>
+
+            <div class="card-subtitle">
+                Total sales
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Card -->
+    <div class="dashboard-card">
+        <div class="card-icon">
+            <i class="bi bi-clock"></i>
+        </div>
+
+        <div class="card-content">
+            <div class="card-title">
+                @waitingPayments Pending
+            </div>
+
+            <div class="card-subtitle">
+                Waiting payments
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Card -->
+    <div class="dashboard-card">
+        <div class="card-icon">
+            <i class="bi bi-cash-stack"></i>
+        </div>
+
+        <div class="card-content">
+            <div class="card-title">
+                @totalRevenue.ToString("C0", new System.Globalization.CultureInfo("id-ID"))
+            </div>
+
+            <div class="card-subtitle">
+                Total revenue
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Card -->
+    <div class="dashboard-card">
+        <div class="card-icon">
+            <i class="bi bi-box-seam"></i>
+        </div>
+
+        <div class="card-content">
+            <div class="card-title">
+                @lowStock Low Stock
+            </div>
+
+            <div class="card-subtitle">
+                Items need attention
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+    private int totalSales = 0;
+    private int waitingPayments = 0;
+    private decimal totalRevenue = 0;
+    private int lowStock = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await AuthStateProvider.AmbilTokenAsync();
+
+        var client = HttpClientFactory.CreateClient("API");
+
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // SALES
+        var sales = await client.GetFromJsonAsync<List<PenjualanResponse>>(
+            "api/HeaderPenjualan"
+        );
+        totalSales = sales?.Count ?? 0;
+        totalRevenue = sales?.Sum(x => x.Total) ?? 0;
+
+        // LOW STOCK
+        var bahanBaku = await client.GetFromJsonAsync<List<BahanBakuResponse>>(
+            "api/HeaderBahanBaku"
+        );
+
+        lowStock = bahanBaku?.SelectMany(x => x.DetailBahanBakus).Count(x => (x.SisaStok ?? 0) <= 10) ?? 0;
+    }
+
+    // SALES RESPONSE
+    public class PenjualanResponse
+    {
+        public string IdPenjualan { get; set; } = "";
+        public decimal Total { get; set; }
+        public string? Status { get; set; }
+    }
+
+    // BAHAN BAKU RESPONSE
+    public class BahanBakuResponse
+    {
+        public string IdBahanBaku { get; set; } = "";
+        public string NamaBahanBaku { get; set; } = "";
+
+        public List<DetailBahanBakuResponse> DetailBahanBakus { get; set; } = new();
+    }
+    public class DetailBahanBakuResponse
+    {
+        public decimal? SisaStok { get; set; }
+    }
+}

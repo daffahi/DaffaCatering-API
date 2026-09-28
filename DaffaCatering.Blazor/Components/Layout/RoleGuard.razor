@@ -1,0 +1,15 @@
+﻿<AuthorizeView Roles="@Roles">
+    <Authorized>
+        @ChildContent
+    </Authorized>
+    <NotAuthorized>
+        <div class="alert alert-warning mt-3">
+            You do not have access to this page.
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public string Roles { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
