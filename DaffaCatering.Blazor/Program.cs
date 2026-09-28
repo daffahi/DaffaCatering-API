@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using DaffaCatering.Blazor.Components;
 using DaffaCatering.Blazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -14,15 +14,11 @@ builder.Services.AddHttpClient("API", client =>
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<DaffaCatering.Blazor.Services.JwtAuthStateProvider>();
-builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider>(
-    sp => sp.GetRequiredService<DaffaCatering.Blazor.Services.JwtAuthStateProvider>());
-builder.Services.AddScoped<AuthHeaderHandler>();
+builder.Services.AddScoped<JwtAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(
+    sp => sp.GetRequiredService<JwtAuthStateProvider>());
 
-builder.Services.AddHttpClient("API", client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
-}).AddHttpMessageHandler<AuthHeaderHandler>();
+builder.Services.AddScoped<PelangganService>();
 
 var app = builder.Build();
 
