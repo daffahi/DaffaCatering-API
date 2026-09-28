@@ -66,11 +66,11 @@ namespace DaffaCatering.API.Controllers.MasterPemasok
             }
             catch (DbUpdateException)
             {
-                return Conflict("ID Pemasok sudah ada, gunakan ID yang berbeda");
+                return Conflict("A supplier ID already exists; please use a different ID");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
@@ -79,7 +79,7 @@ namespace DaffaCatering.API.Controllers.MasterPemasok
         public async Task<IActionResult> Update(string id, [FromBody] PemasokDto input)
         {
             if (id != input.IdPemasok)
-                return BadRequest("ID tidak sesuai");
+                return BadRequest("ID does not match");
 
             var existing = await _context.Pemasoks.FindAsync(id);
             if (existing == null)

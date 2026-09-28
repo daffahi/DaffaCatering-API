@@ -19,6 +19,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(
     sp => sp.GetRequiredService<JwtAuthStateProvider>());
 
 builder.Services.AddScoped<PelangganService>();
+builder.Services.AddScoped<PemasokService>();
 
 var app = builder.Build();
 

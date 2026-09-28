@@ -1,16 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+
 namespace DaffaCatering.Blazor.Models
 {
-    public class PelangganModels
+    public class PemasokModels
     {
-        [Required(ErrorMessage = "Customer ID is required")]
+        [Required(ErrorMessage = "Supplier ID is required")]
         [StringLength(10)]
-        public string IdPelanggan { get; set; } = "";
+        public string IdPemasok { get; set; } = "";
 
-        [Required(ErrorMessage = "Customer name is required")]
+        [Required(ErrorMessage = "Supplier name is required")]
         [StringLength(50)]
-        public string NamaPelanggan { get; set; } = "";
+        public string NamaPemasok { get; set; } = "";
 
         [StringLength(20)]
         public string? NoKontak { get; set; }
