@@ -4,18 +4,18 @@ namespace DaffaCatering.API.DTOs.MasterPemasok
 {
     public class PemasokDto
     {
-        [Required(ErrorMessage = "Supplier ID is required")]
-        [StringLength(10, ErrorMessage = "Supplier ID must be at most 10 characters")]
+        [Required(ErrorMessage = "ID Pemasok wajib diisi")]
+        [StringLength(10, ErrorMessage = "ID Pemasok maksimal 10 karakter")]
         public string IdPemasok { get; set; } = null!;
 
-        [Required(ErrorMessage = "Supplier Name is required")]
-        [StringLength(50, ErrorMessage = "Supplier Name must be at most 50 characters")]
+        [Required(ErrorMessage = "Nama Pemasok wajib diisi")]
+        [StringLength(50, ErrorMessage = "Nama Pemasok maksimal 50 karakter")]
         public string NamaPemasok { get; set; } = null!;
 
         [StringLength(20)]
         public string? NoKontak { get; set; }
 
-        [StringLength(255, ErrorMessage = "Address must be at most 255 characters")]
+        [StringLength(255, ErrorMessage = "Alamat maksimal 255 karakter")]
         public string? Alamat { get; set; }
 
         public DateOnly TglBergabung { get; set; }
