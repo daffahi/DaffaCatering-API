@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using DaffaCatering.Blazor.Components;
 using DaffaCatering.Blazor.Services;
+using DaffaCatering.Blazor.Services.MasterBahanBaku;
+using DaffaCatering.Blazor.Services.MasterPelanggan;
+using DaffaCatering.Blazor.Services.MasterPemasok;
+using DaffaCatering.Blazor.Services.MasterSatuanBahanBaku;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +24,8 @@ builder.Services.AddScoped<AuthenticationStateProvider>(
 
 builder.Services.AddScoped<PelangganService>();
 builder.Services.AddScoped<PemasokService>();
+builder.Services.AddScoped<BahanBakuService>();
+builder.Services.AddScoped<SatuanBahanBakuService>();
 
 var app = builder.Build();
 
