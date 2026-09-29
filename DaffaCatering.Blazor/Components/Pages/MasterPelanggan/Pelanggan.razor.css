@@ -565,12 +565,21 @@ tbody tr {
     width: 100%;
     max-width: 540px;
     max-height: 92vh;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     background: #fff;
     border-radius: 20px;
     box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .45);
     animation: pop .22s cubic-bezier(.2, .9, .3, 1.2);
 }
+
+    .dialog ::deep form {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
 
 @keyframes fade {
     from {
@@ -595,6 +604,7 @@ tbody tr {
 }
 
 .dialog-head {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: .9rem;
@@ -641,6 +651,9 @@ tbody tr {
 
 .dialog-body {
     padding: 1.5rem;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .row2 {
@@ -758,6 +771,7 @@ tbody tr {
 }
 
 .dialog-foot {
+    flex-shrink: 0;
     display: flex;
     justify-content: flex-end;
     gap: .6rem;
@@ -845,5 +859,23 @@ tbody tr {
 
     .overlay, .dialog {
         animation: none;
+    }
+}
+
+@media (max-height: 800px) {
+    .dialog-head {
+        padding: .9rem 1.25rem;
+    }
+
+    .dialog-body {
+        padding: 1rem 1.25rem;
+    }
+
+    .dialog-foot {
+        padding: .75rem 1.25rem;
+    }
+
+    .field {
+        margin-bottom: .75rem;
     }
 }
