@@ -4,11 +4,11 @@ namespace DaffaCatering.Blazor.Models.MasterSatuanBahanBaku
 {
     public class SatuanBahanBakuModels
     {
-        [Required(ErrorMessage = "Raw Material Unit ID is required")]
+        [Required(ErrorMessage = "ID Satuan Bahan Baku wajib diisi")]
         [StringLength(10)]
         public string IdSatuan { get; set; } = "";
 
-        [Required(ErrorMessage = "Raw Material Unit Name is required")]
+        [Required(ErrorMessage = "Nama Satuan Bahan Baku wajib diisi")]
         [StringLength(50)]
         public string NamaSatuan { get; set; } = "";
     }

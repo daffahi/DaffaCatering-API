@@ -4,11 +4,11 @@ namespace DaffaCatering.Blazor.Models.MasterPelanggan
 {
     public class PelangganModels
     {
-        [Required(ErrorMessage = "Customer ID is required")]
+        [Required(ErrorMessage = "Nomor ID Pelanggan wajib diisi")]
         [StringLength(10)]
         public string IdPelanggan { get; set; } = "";
 
-        [Required(ErrorMessage = "Customer name is required")]
+        [Required(ErrorMessage = "Nama pelanggan wajib diisi")]
         [StringLength(50)]
         public string NamaPelanggan { get; set; } = "";
 

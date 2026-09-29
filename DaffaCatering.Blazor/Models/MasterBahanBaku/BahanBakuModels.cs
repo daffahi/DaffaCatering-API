@@ -4,11 +4,11 @@ namespace DaffaCatering.Blazor.Models.MasterBahanBaku
 {
     public class BahanBakuModels
     {
-        [Required(ErrorMessage = "Raw Material ID is required")]
+        [Required(ErrorMessage = "ID Bahan Baku wajib diisi")]
         [StringLength(10)]
         public string IdBahanBaku { get; set; } = "";
 
-        [Required(ErrorMessage = "Raw Material name is required")]
+        [Required(ErrorMessage = "Nama bahan baku wajib diisi")]
         [StringLength(50)]
         public string NamaBahanBaku { get; set; } = "";
 
@@ -21,11 +21,11 @@ namespace DaffaCatering.Blazor.Models.MasterBahanBaku
 
     public class DetailBahanBakuModel
     {
-        [Required(ErrorMessage = "Unit ID is required")]
+        [Required(ErrorMessage = "ID Unit wajib diisi")]
         [StringLength(10)]
         public string IdSatuan { get; set; } = "";
 
-        [Required(ErrorMessage = "Expiry date is required")]
+        [Required(ErrorMessage = "Tanggal kedaluwarsa wajib diisi")]
         public DateOnly TglKadaluwarsa { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
         public decimal StokAwal { get; set; }

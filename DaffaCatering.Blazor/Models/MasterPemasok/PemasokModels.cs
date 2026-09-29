@@ -5,11 +5,11 @@ namespace DaffaCatering.Blazor.Models.MasterPemasok
 {
     public class PemasokModels
     {
-        [Required(ErrorMessage = "Supplier ID is required")]
+        [Required(ErrorMessage = "ID Pemasok wajib diisi")]
         [StringLength(10)]
         public string IdPemasok { get; set; } = "";
 
-        [Required(ErrorMessage = "Supplier name is required")]
+        [Required(ErrorMessage = "Nama Pemasok wajib diisi")]
         [StringLength(50)]
         public string NamaPemasok { get; set; } = "";
 
