@@ -1,121 +1,239 @@
 ﻿@page "/pemasok"
+
 @inject PemasokService PemasokService
 
-<h3>Suppliers</h3>
-
-@if (isLoading)
-{
-    <p><em>Loading...</em></p>
+@{
+    var view = Filtered.ToList();
 }
-else
-{
-    <button class="btn btn-success mb-3" @onclick="BukaModalTambah">
-        <i class="fa-solid fa-plus"></i> Add Supplier
-    </button>
+
+<div class="pemasok-page">
+    
+    <section class="hero">
+        <div class="hero-top">
+            <div>
+                <span class="eyebrow">Master Data</span>
+				<h1>Pemasok</h1>
+				<p>Kelola data pemasok dalam satu tempat</p>
+            </div>
+            <button class="btn-add" @onclick="BukaModalTambah">
+                <i class="fa-solid fa-plus"></i> Tambah Pemasok
+            </button>
+        </div>
+
+        <div class="hero-stats">
+            <div class="chip">
+                <span class="chip-value">@daftarPemasok.Count</span>
+                <span class="chip-label">Total</span>
+            </div>
+            <div class="chip">
+                <span class="chip-value">@JumlahAktif</span>
+                <span class="chip-label">Aktif</span>
+            </div>
+            <div class="chip">
+                <span class="chip-value">@(daftarPemasok.Count - JumlahAktif)</span>
+                <span class="chip-label">Tidak Aktif</span>
+            </div>
+        </div>
+    </section>
 
     @if (!string.IsNullOrEmpty(pesanError))
     {
-        <div class="alert alert-danger">@pesanError</div>
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
     }
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Address</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in daftarPemasok)
-            {
-                <tr>
-                    <td>@item.IdPemasok</td>
-                    <td>@item.NamaPemasok</td>
-                    <td>@item.NoKontak</td>
-                    <td>@item.Alamat</td>
-                    <td>
-                        @if (item.Status)
-                        {
-                            <span class="badge bg-success">Active</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">Inactive</span>
-                        }
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => BukaModalEdit(item)">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" @onclick="() => HapusData(item.IdPemasok)">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <section class="panel">
+        <div class="toolbar">
+            <label class="search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Cari ID, Nama, kontak, atau alamat..."
+                       @bind="teksCari" @bind:event="oninput" />
+            </label>
 
-@if (modalTampil)
-{
-    <div class="modal show d-block" style="background-color: rgba(0,0,0,0.5);" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@(isEditMode ? "Edit" : "Add") Supplier</h5>
-                    <button type="button" class="btn-close" @onclick="TutupModal"></button>
+            <div class="toolbar-right">
+                <div class="segmented">
+                    <button class="@Seg(FilterStatus.Semua)" @onclick="() => filterStatus = FilterStatus.Semua">
+                        Semua <span>@daftarPemasok.Count</span>
+                    </button>
+                    <button class="@Seg(FilterStatus.Aktif)" @onclick="() => filterStatus = FilterStatus.Aktif">
+                        Aktif <span>@JumlahAktif</span>
+                    </button>
+                    <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => filterStatus = FilterStatus.NonAktif">
+                        Tidak Aktif <span>@(daftarPemasok.Count - JumlahAktif)</span>
+                    </button>
                 </div>
+                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
+                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="skeleton">
+                @for (var s = 0; s < 6; s++)
+                {
+                    <div class="sk-row">
+                        <div class="sk-avatar"></div>
+                        <div class="sk-lines"><div></div><div></div></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pemasok</th>
+                            <th>Kontak</th>
+                            <th class="col-addr">Alamat</th>
+                            <th class="col-date">Bergabung</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (item, i) in view.Select((item, i) => (item, i)))
+                        {
+                            <tr @key="item.IdPemasok" style="--i:@Math.Min(i, 12)">
+                                <td>
+                                    <div class="who">
+                                        <div class="avatar tone-@Warna(item.NamaPemasok)">@Inisial(item.NamaPemasok)</div>
+                                        <div>
+                                            <div class="name">@item.NamaPemasok</div>
+                                            <div class="sub">@item.IdPemasok</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">@item.NoKontak</td>
+                                <td class="col-addr muted">@item.Alamat</td>
+                                <td class="col-date muted">@($"{item.TglBergabung:dd MMM yyyy}")</td>
+                                <td>
+                                    <span class="pill @(item.Status ? "on" : "off")">
+                                        <i></i>@(item.Status ? "Aktif" : "Tidak Aktif")
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <button class="icon-btn" title="Ubah" @onclick="() => BukaModalEdit(item)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="icon-btn @(item.Status ? "warn" : "ok")"
+                                            title="@(item.Status ? "Nonaktifkan" : "Aktifkan")"
+                                            @onclick="() => UbahStatus(item)">
+                                        <i class="fa-solid @(item.Status ? "fa-user-slash" : "fa-user-check")"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (view.Count == 0)
+                {
+                    <div class="empty">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                        <strong>Pemasok tidak ditemukan</strong>
+                        <span>Coba ubah kata kunci atau filter status.</span>
+                    </div>
+                }
+            </div>
+
+            <div class="panel-foot">
+                Menampilkan <b>@view.Count</b> dari <b>@daftarPemasok.Count</b> pelanggan
+            </div>
+        }
+
+    </section>
+
+    @if (modalTampil)
+    {
+        <div class="overlay" @onclick="TutupModal">
+            <div class="dialog" @onclick:stopPropagation>
                 <EditForm Model="formModel" OnValidSubmit="SimpanData">
                     <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">ID Supplier</label>
-                            <InputText class="form-control" @bind-Value="formModel.IdPemasok" disabled="@isEditMode" />
-                            <ValidationMessage For="() => formModel.IdPemasok" />
+
+                    <header class="dialog-head">
+                        <div class="dialog-icon">
+                            <i class="fa-solid @(isEditMode ? "fa-user-pen" : "fa-user-plus")"></i>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <InputText class="form-control" @bind-Value="formModel.NamaPemasok" />
+                        <div>
+                            <h5>@(isEditMode ? "Ubah" : "Tambah") Pemasok</h5>
+                            <p>@(isEditMode ? "Perbarui data pemasok" : "Isi data pemasok baru")</p>
+                        </div>
+                        <button type="button" class="dialog-close" @onclick="TutupModal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </header>
+
+                    <div class="dialog-body">
+                        <div class="row2">
+                            <div class="field">
+                                <label>ID Pemasok <span class="auto-tag">Auto</span></label>
+                                <InputText @bind-Value="formModel.IdPemasok" disabled="true" />
+                            </div>
+                            <div class="field">
+                                <label>Tanggal Bergabung</label>
+                                <InputDate @bind-Value="formModel.TglBergabung" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Nama Pemasok</label>
+                            <InputText @bind-Value="formModel.NamaPemasok" />
                             <ValidationMessage For="() => formModel.NamaPemasok" />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Contact</label>
-                            <InputText class="form-control" @bind-Value="formModel.NoKontak" />
+
+                        <div class="field">
+                            <label>Kontak</label>
+                            <InputText @bind-Value="formModel.NoKontak" />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <InputTextArea class="form-control" @bind-Value="formModel.Alamat" />
+
+                        <div class="field">
+                            <label>Alamat</label>
+                            <InputTextArea rows="3" @bind-Value="formModel.Alamat" />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Join Date</label>
-                            <InputDate class="form-control" @bind-Value="formModel.TglBergabung" />
-                        </div>
-                        <div class="form-check">
-                            <InputCheckbox class="form-check-input" @bind-Value="formModel.Status" />
-                            <label class="form-check-label">Active</label>
-                        </div>
+
+                        <label class="switch">
+                            <InputCheckbox @bind-Value="formModel.Status" />
+                            <span class="sw-track"></span>
+                            <span>@(formModel.Status ? "Aktif" : "Tidak Aktif")</span>
+                        </label>
 
                         @if (!string.IsNullOrEmpty(modalError))
                         {
-                            <div class="alert alert-danger mt-2">@modalError</div>
+                            <div class="banner in-dialog">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span>@modalError</span>
+                            </div>
                         }
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="TutupModal">Cancel</button>
-                        <button type="submit" class="btn btn-success" disabled="@sedangSimpan">
-                            @(sedangSimpan ? "Saving..." : "Save")
+
+                    <footer class="dialog-foot">
+                        <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
+                        <button type="submit" class="btn-solid" disabled="@sedangSimpan">
+                            @if (sedangSimpan)
+                            {
+                                <i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>
+                            }
+                            else
+                            {
+                                <span>Simpan</span>
+                            }
                         </button>
-                    </div>
+                    </footer>
                 </EditForm>
             </div>
         </div>
-    </div>
-}
+    }
+    
+</div>
 
 @code {
     private List<PemasokModels> daftarPemasok = new();
@@ -128,6 +246,57 @@ else
     private string modalError = "";
     private PemasokModels formModel = new();
 
+    // --- filter & pencarian ---
+    private enum FilterStatus { Semua, Aktif, NonAktif }
+
+    private string teksCari = "";
+    private FilterStatus filterStatus = FilterStatus.Semua;
+
+    private int JumlahAktif => daftarPemasok.Count(c => c.Status);
+
+    private IEnumerable<PemasokModels> Filtered => daftarPemasok
+        .Where(c => filterStatus switch
+        {
+            FilterStatus.Aktif => c.Status,
+            FilterStatus.NonAktif => !c.Status,
+            _ => true
+        })
+        .Where(c => string.IsNullOrWhiteSpace(teksCari)
+            || (c.IdPemasok ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NamaPemasok ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NoKontak ?? "").Contains(teksCari)
+            || (c.Alamat ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+
+    private string Seg(FilterStatus f) => filterStatus == f ? "seg active" : "seg";
+
+    private static string Inisial(string? nama)
+    {
+        var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length == 0 ? "?"
+             : p.Length == 1 ? p[0][..1].ToUpper()
+             : (p[0][..1] + p[^1][..1]).ToUpper();
+    }
+
+    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
+
+    // --- ID otomatis: PLG + 7 digit ---
+    private static string BuatIdBerikutnya(IEnumerable<PemasokModels> data)
+    {
+        const string prefix = "PMS";
+
+        var max = data
+            .Select(c => c.IdPemasok)
+            .Where(id => !string.IsNullOrEmpty(id)
+                         && id.StartsWith(prefix)
+                         && int.TryParse(id[prefix.Length..], out _))
+            .Select(id => int.Parse(id[prefix.Length..]))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return $"{prefix}{max + 1:D7}"; 
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await MuatData();
@@ -136,22 +305,40 @@ else
     private async Task MuatData()
     {
         isLoading = true;
+        pesanError = "";
         try
         {
             daftarPemasok = await PemasokService.GetAllAsync();
         }
         catch (Exception ex)
         {
-            pesanError = "Failed to load data: " + ex.Message;
+            pesanError = "Gagal memuat data: " + ex.Message;
         }
         isLoading = false;
     }
 
-    private void BukaModalTambah()
+    private async Task BukaModalTambah()
     {
-        formModel = new PemasokModels();
+        formModel = new PemasokModels
+        {
+            TglBergabung = DateOnly.FromDateTime(DateTime.Now),
+            Status = true
+        };
         isEditMode = false;
         modalError = "";
+
+        try
+        {
+            // ambil data terbaru supaya nomor urut tidak basi
+            var terbaru = await PemasokService.GetAllAsync();
+            formModel.IdPemasok = BuatIdBerikutnya(terbaru);
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            return;
+        }
+
         modalTampil = true;
     }
 
@@ -198,9 +385,22 @@ else
         sedangSimpan = false;
     }
 
-    private async Task HapusData(string id)
+    // Master data tidak dihapus: cukup aktifkan / nonaktifkan
+    private async Task UbahStatus(PemasokModels item)
     {
-        var (success, error) = await PemasokService.DeleteAsync(id);
+        pesanError = "";
+
+        var salinan = new PemasokModels
+        {
+            IdPemasok = item.IdPemasok,
+            NamaPemasok = item.NamaPemasok,
+            NoKontak = item.NoKontak,
+            Alamat = item.Alamat,
+            TglBergabung = item.TglBergabung,
+            Status = !item.Status
+        };
+
+        var (success, error) = await PemasokService.UpdateAsync(salinan.IdPemasok, salinan);
         if (success)
         {
             await MuatData();
