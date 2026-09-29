@@ -66,7 +66,7 @@
                     <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => filterStatus = FilterStatus.NonAktif">
                         Tidak Aktif <span>@(daftarPelanggan.Count - JumlahAktif)</span>
                     </button>
-                </div>1
+                </div>
                 <button class="btn-refresh" title="Refresh" @onclick="MuatData">
                     <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
                 </button>
