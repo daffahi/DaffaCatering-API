@@ -24,3 +24,33 @@
     border-color: #3a5a40;
     box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.25);
 }
+
+.password-wrapper {
+    position: relative;
+}
+
+    .password-wrapper .form-control {
+        padding-right: 2.5rem;
+    }
+
+.btn-toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6b7280;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+    .btn-toggle-password:hover {
+        color: #0f4c42;
+    }
+
+    .btn-toggle-password:focus {
+        outline: none;
+        box-shadow: none;
+    }

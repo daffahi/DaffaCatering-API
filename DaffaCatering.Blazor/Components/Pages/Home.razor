@@ -101,25 +101,42 @@
     protected override async Task OnInitializedAsync()
     {
         var token = await AuthStateProvider.AmbilTokenAsync();
-
         var client = HttpClientFactory.CreateClient("API");
-
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
 
         // SALES
-        var sales = await client.GetFromJsonAsync<List<PenjualanResponse>>(
-            "api/HeaderPenjualan"
-        );
-        totalSales = sales?.Count ?? 0;
-        totalRevenue = sales?.Sum(x => x.Total) ?? 0;
+        try
+        {
+            var sales = await client.GetFromJsonAsync<List<PenjualanResponse>>(
+                "api/HeaderPenjualan"
+            );
+            totalSales = sales?.Count ?? 0;
+            totalRevenue = sales?.Sum(x => x.Total) ?? 0;
+        }
+        catch (HttpRequestException)
+        {
+            totalSales = 0;
+            totalRevenue = 0;
+        }
 
         // LOW STOCK
-        var bahanBaku = await client.GetFromJsonAsync<List<BahanBakuResponse>>(
-            "api/HeaderBahanBaku"
-        );
+        try
+        {
+            var bahanBaku = await client.GetFromJsonAsync<List<BahanBakuResponse>>(
+                "api/HeaderBahanBaku"
+            );
 
-        lowStock = bahanBaku?.SelectMany(x => x.DetailBahanBakus).Count(x => (x.SisaStok ?? 0) <= 10) ?? 0;
+            int batasMinimum = 10;
+
+            lowStock = bahanBaku?
+                .SelectMany(x => x.DetailBahanBakus)
+                .Count(d => (d.SisaStok ?? 0) < batasMinimum) ?? 0;
+        }
+        catch (HttpRequestException)
+        {
+            lowStock = 0;
+        }
     }
 
     // SALES RESPONSE
