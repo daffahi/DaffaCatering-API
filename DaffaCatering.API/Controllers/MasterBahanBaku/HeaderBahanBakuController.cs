@@ -93,7 +93,7 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
             }
         }
 
-        // PUT - Update data yang sudah ada, berdasarkan ID
+        // PUT - Update data yang sudah ada
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] HeaderBahanBakuDto input)
         {

@@ -65,11 +65,11 @@ namespace DaffaCatering.API.Controllers.MasterPelanggan
             }
             catch (DbUpdateException)
             {
-                return Conflict("The customer ID already exists, please use a different ID");
+                return Conflict("ID pelanggan tersebut sudah ada. Silakan gunakan ID yang lain");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
+                return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
             }
         }
 
@@ -78,7 +78,7 @@ namespace DaffaCatering.API.Controllers.MasterPelanggan
         public async Task<IActionResult> Update(string id, [FromBody] PelangganDto input)
         {
             if (id != input.IdPelanggan)
-                return BadRequest("ID does not match");
+                return BadRequest("ID tidak cocok");
 
             var existing = await _context.Pelanggans.FindAsync(id);
             if (existing == null)
