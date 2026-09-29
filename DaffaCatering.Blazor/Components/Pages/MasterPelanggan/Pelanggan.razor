@@ -139,7 +139,7 @@
                 {
                     <div class="empty">
                         <i class="fa-regular fa-face-frown-open"></i>
-                        <strong>Customer tidak ditemukan</strong>
+                        <strong>Pelanggan tidak ditemukan</strong>
                         <span>Coba ubah kata kunci atau filter status.</span>
                     </div>
                 }
@@ -163,8 +163,8 @@
                             <i class="fa-solid @(isEditMode ? "fa-user-pen" : "fa-user-plus")"></i>
                         </div>
                         <div>
-                            <h5>@(isEditMode ? "Edit" : "Add") Customer</h5>
-                            <p>@(isEditMode ? "Perbarui data pelanggan." : "Isi data pelanggan baru.")</p>
+                            <h5>@(isEditMode ? "Ubah" : "Tambah") Pelanggan</h5>
+                            <p>@(isEditMode ? "Perbarui data pelanggan" : "Isi data pelanggan baru")</p>
                         </div>
                         <button type="button" class="dialog-close" @onclick="TutupModal">
                             <i class="fa-solid fa-xmark"></i>
@@ -261,8 +261,8 @@
             _ => true
         })
         .Where(c => string.IsNullOrWhiteSpace(teksCari)
-            || (c.NamaPelanggan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
             || (c.IdPelanggan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NamaPelanggan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
             || (c.NoKontak ?? "").Contains(teksCari)
             || (c.Alamat ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
 
@@ -293,7 +293,7 @@
             .DefaultIfEmpty(0)
             .Max();
 
-        return $"{prefix}{max + 1:D7}";   // contoh: PLG0000014
+        return $"{prefix}{max + 1:D7}";
     }
 
     protected override async Task OnInitializedAsync()
@@ -311,7 +311,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Failed to load data: " + ex.Message;
+            pesanError = "Gagal memuat data: " + ex.Message;
         }
         isLoading = false;
     }
@@ -334,7 +334,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Failed to generate ID: " + ex.Message;
+            pesanError = "Gagal menghasilkan ID: " + ex.Message;
             return;
         }
 
