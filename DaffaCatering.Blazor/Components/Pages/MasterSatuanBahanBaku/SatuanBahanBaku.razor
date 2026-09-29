@@ -1,0 +1,178 @@
+﻿@page "/satuan-bahan-baku"
+@inject SatuanBahanBakuService SatuanBahanBakuService
+
+<h3>Raw Material Units</h3>
+
+@if (isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-success mb-3" @onclick="BukaModalTambah">
+        <i class="fa-solid fa-plus"></i> Add Customer
+    </button>
+
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="alert alert-danger">@pesanError</div>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in daftarSatuanBahanBaku)
+            {
+                <tr>
+                    <td>@item.IdSatuan</td>
+                    <td>@item.NamaSatuan</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => BukaModalEdit(item)">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => HapusData(item.IdSatuan)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (modalTampil)
+{
+    <div class="modal show d-block" style="background-color: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditMode ? "Edit" : "Add") Unit of Raw Materials</h5>
+                    <button type="button" class="btn-close" @onclick="TutupModal"></button>
+                </div>
+                <EditForm Model="formModel" OnValidSubmit="SimpanData">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">ID Unit</label>
+                            <InputText class="form-control" @bind-Value="formModel.IdSatuan" disabled="@isEditMode" />
+                            <ValidationMessage For="() => formModel.IdSatuan" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <InputText class="form-control" @bind-Value="formModel.NamaSatuan" />
+                            <ValidationMessage For="() => formModel.NamaSatuan" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(modalError))
+                        {
+                            <div class="alert alert-danger mt-2">@modalError</div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="TutupModal">Cancel</button>
+                        <button type="submit" class="btn btn-success" disabled="@sedangSimpan">
+                            @(sedangSimpan ? "Saving..." : "Save")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<SatuanBahanBakuModels> daftarSatuanBahanBaku = new();
+    private bool isLoading = true;
+    private string pesanError = "";
+
+    private bool modalTampil = false;
+    private bool isEditMode = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private SatuanBahanBakuModels formModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        try
+        {
+            daftarSatuanBahanBaku = await SatuanBahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Failed to load data: " + ex.Message;
+        }
+        isLoading = false;
+    }
+
+    private void BukaModalTambah()
+    {
+        formModel = new SatuanBahanBakuModels();
+        isEditMode = false;
+        modalError = "";
+        modalTampil = true;
+    }
+
+    private void BukaModalEdit(SatuanBahanBakuModels item)
+    {
+        formModel = new SatuanBahanBakuModels
+        {
+            IdSatuan = item.IdSatuan,
+            NamaSatuan = item.NamaSatuan
+        };
+        isEditMode = true;
+        modalError = "";
+        modalTampil = true;
+    }
+
+    private void TutupModal()
+    {
+        modalTampil = false;
+    }
+
+    private async Task SimpanData()
+    {
+        sedangSimpan = true;
+        modalError = "";
+
+        var (success, error) = isEditMode
+            ? await SatuanBahanBakuService.UpdateAsync(formModel.IdSatuan, formModel)
+            : await SatuanBahanBakuService.CreateAsync(formModel);
+
+        if (success)
+        {
+            modalTampil = false;
+            await MuatData();
+        }
+        else
+        {
+            modalError = error;
+        }
+
+        sedangSimpan = false;
+    }
+
+    private async Task HapusData(string id)
+    {
+        var (success, error) = await SatuanBahanBakuService.DeleteAsync(id);
+        if (success)
+        {
+            await MuatData();
+        }
+        else
+        {
+            pesanError = error;
+        }
+    }
+}
