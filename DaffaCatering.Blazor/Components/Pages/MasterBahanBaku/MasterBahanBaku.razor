@@ -1,0 +1,308 @@
+﻿@page "/master-bahan-baku"
+
+@inject BahanBakuService BahanBakuService
+
+<h3>Raw Materials</h3>
+
+@if (isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-success mb-3" @onclick="BukaModalTambah">
+        <i class="fa-solid fa-plus"></i> Add Raw Material
+    </button>
+
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="alert alert-danger">@pesanError</div>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Types of Raw Materials</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in daftarBahanBaku)
+            {
+                <tr>
+                    <td>@item.IdBahanBaku</td>
+                    <td>@item.NamaBahanBaku</td>
+                    <td>@(item.Jenis ? "Bahan Persediaan" : "Bahan Habis Pakai")</td>
+                    <td>
+                        @if (item.Status)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => BukaModalEdit(item)">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => HapusData(item.IdBahanBaku)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (modalTampil)
+{
+    <div class="modal show d-block" style="background-color: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditMode ? "Edit" : "Add") Raw Material</h5>
+                    <button type="button" class="btn-close" @onclick="TutupModal"></button>
+                </div>
+                <EditForm Model="formModel" OnValidSubmit="SimpanData">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">ID Raw Material</label>
+                            <InputText class="form-control" @bind-Value="formModel.IdBahanBaku" disabled="@isEditMode" />
+                            <ValidationMessage For="() => formModel.IdBahanBaku" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <InputText class="form-control" @bind-Value="formModel.NamaBahanBaku" />
+                            <ValidationMessage For="() => formModel.NamaBahanBaku" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Type</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="jenisBahanBaku"
+                                       checked="@formModel.Jenis" @onchange="() => formModel.Jenis = true" />
+                                <label class="form-check-label">Bahan Persediaan</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="jenisBahanBaku"
+                                       checked="@(!formModel.Jenis)" @onchange="() => formModel.Jenis = false" />
+                                <label class="form-check-label">Bahan Habis Pakai</label>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox class="form-check-input" @bind-Value="formModel.Status" />
+                            <label class="form-check-label">Active</label>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Stock Details</label>
+                            <button type="button" class="btn btn-sm btn-outline-success" @onclick="TambahBarisDetail">
+                                <i class="fa-solid fa-plus"></i> Add Row
+                            </button>
+                        </div>
+
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Unit</th>
+                                    <th>Expiry Date</th>
+                                    <th>Initial Stock</th>
+                                    <th>Remaining Stock</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < formModel.Details.Count; i++)
+                                {
+                                    var index = i;
+                                    var detail = formModel.Details[index];
+                                    <tr>
+                                        <td>
+                                            <input class="form-control form-control-sm"
+                                                   value="@detail.IdSatuan"
+                                                   @onchange="e => UbahIdSatuan(detail, e.Value)" />
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control form-control-sm"
+                                                   value="@detail.TglKadaluwarsa.ToString("yyyy-MM-dd")"
+                                                   @onchange="e => UbahTanggal(detail, e.Value?.ToString())" />
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control form-control-sm"
+                                                   value="@detail.StokAwal"
+                                                   @onchange="e => detail.StokAwal = ParseDecimal(e.Value)" />
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control form-control-sm"
+                                                   value="@detail.SisaStok"
+                                                   @onchange="e => detail.SisaStok = ParseDecimal(e.Value)" />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => HapusBarisDetail(index)">
+                                                <i class="fa-solid fa-minus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        @if (!string.IsNullOrEmpty(modalError))
+                        {
+                            <div class="alert alert-danger mt-2">@modalError</div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="TutupModal">Cancel</button>
+                        <button type="submit" class="btn btn-success" disabled="@sedangSimpan">
+                            @(sedangSimpan ? "Saving..." : "Save")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<BahanBakuModels> daftarBahanBaku = new();
+    private bool isLoading = true;
+    private string pesanError = "";
+
+    private bool modalTampil = false;
+    private bool isEditMode = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private BahanBakuModels formModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        try
+        {
+            daftarBahanBaku = await BahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Failed to load data: " + ex.Message;
+        }
+        isLoading = false;
+    }
+
+    private void BukaModalTambah()
+    {
+        formModel = new BahanBakuModels();
+        TambahBarisDetail();
+        isEditMode = false;
+        modalError = "";
+        modalTampil = true;
+    }
+
+    private void BukaModalEdit(BahanBakuModels item)
+    {
+        formModel = new BahanBakuModels
+        {
+            IdBahanBaku = item.IdBahanBaku,
+            NamaBahanBaku = item.NamaBahanBaku,
+            Jenis = item.Jenis,
+            Status = item.Status,
+            Details = item.Details.Select(d => new DetailBahanBakuModel
+            {
+                IdSatuan = d.IdSatuan,
+                TglKadaluwarsa = d.TglKadaluwarsa,
+                StokAwal = d.StokAwal,
+                SisaStok = d.SisaStok
+            }).ToList()
+        };
+
+        if (formModel.Details.Count == 0)
+            TambahBarisDetail();
+
+        isEditMode = true;
+        modalError = "";
+        modalTampil = true;
+    }
+
+    private void TutupModal()
+    {
+        modalTampil = false;
+    }
+
+    private void TambahBarisDetail()
+    {
+        formModel.Details.Add(new DetailBahanBakuModel());
+    }
+
+    private void HapusBarisDetail(int index)
+    {
+        formModel.Details.RemoveAt(index);
+    }
+
+    private void UbahIdSatuan(DetailBahanBakuModel detail, object? nilai)
+    {
+        detail.IdSatuan = nilai?.ToString() ?? "";
+    }
+
+    private void UbahTanggal(DetailBahanBakuModel detail, string? nilai)
+    {
+        if (DateOnly.TryParse(nilai, out var hasil))
+        {
+            detail.TglKadaluwarsa = hasil;
+        }
+    }
+
+    private decimal ParseDecimal(object? nilai)
+    {
+        return decimal.TryParse(nilai?.ToString(), out var hasil) ? hasil : 0;
+    }
+
+    private async Task SimpanData()
+    {
+        sedangSimpan = true;
+        modalError = "";
+
+        var (success, error) = isEditMode
+            ? await BahanBakuService.UpdateAsync(formModel.IdBahanBaku, formModel)
+            : await BahanBakuService.CreateAsync(formModel);
+
+        if (success)
+        {
+            modalTampil = false;
+            await MuatData();
+        }
+        else
+        {
+            modalError = error;
+        }
+
+        sedangSimpan = false;
+    }
+
+    private async Task HapusData(string id)
+    {
+        var (success, error) = await BahanBakuService.DeleteAsync(id);
+        if (success)
+        {
+            await MuatData();
+        }
+        else
+        {
+            pesanError = error;
+        }
+    }
+}
