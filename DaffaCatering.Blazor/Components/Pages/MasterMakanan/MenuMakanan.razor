@@ -1,0 +1,182 @@
+﻿@page "/menu-makanan"
+
+@inject MenuMakananService MenuMakananService
+
+@{
+    var view = Filtered.ToList();
+}
+
+@code {
+    private List<MenuMakananModels> daftarMenuMakanan = new();
+    private bool isLoading = true;
+    private string pesanError = "";
+
+    private bool modalTampil = false;
+    private bool isEditMode = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private MenuMakananModels formModel = new();
+
+    // --- filter & pencarian ---
+    private enum FilterStatus { Semua, Aktif, NonAktif }
+
+    private string teksCari = "";
+    private FilterStatus filterStatus = FilterStatus.Semua;
+
+    private int JumlahAktif => daftarMenuMakanan.Count(c => c.Status);
+
+    private IEnumerable<MenuMakananModels> Filtered => daftarMenuMakanan
+        .Where(c => filterStatus switch
+        {
+            FilterStatus.Aktif => c.Status,
+            FilterStatus.NonAktif => !c.Status,
+            _ => true
+        })
+        .Where(c => string.IsNullOrWhiteSpace(teksCari)
+            || (c.IdMenu ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.IdSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NamaMenu ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+
+    private string Seg(FilterStatus f) => filterStatus == f ? "seg active" : "seg";
+
+    private static string Inisial(string? nama)
+    {
+        var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length == 0 ? "?"
+             : p.Length == 1 ? p[0][..1].ToUpper()
+             : (p[0][..1] + p[^1][..1]).ToUpper();
+    }
+
+    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
+
+    // --- ID otomatis: PLG + 7 digit ---
+    private static string BuatIdBerikutnya(IEnumerable<MenuMakananModels> data)
+    {
+        const string prefix = "MN";
+
+        var max = data
+            .Select(c => c.IdMenu)
+            .Where(id => !string.IsNullOrEmpty(id)
+                         && id.StartsWith(prefix)
+                         && int.TryParse(id[prefix.Length..], out _))
+            .Select(id => int.Parse(id[prefix.Length..]))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return $"{prefix}{max + 1:D7}";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        pesanError = "";
+        try
+        {
+            daftarMenuMakanan = await MenuMakananService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat data: " + ex.Message;
+        }
+        isLoading = false;
+    }
+
+    private async Task BukaModalTambah()
+    {
+        formModel = new MenuMakananModels
+        {
+            Status = true
+        };
+        isEditMode = false;
+        modalError = "";
+
+        try
+        {
+            // ambil data terbaru supaya nomor urut tidak basi
+            var terbaru = await MenuMakananService.GetAllAsync();
+            formModel.IdMenu = BuatIdBerikutnya(terbaru);
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            return;
+        }
+
+        modalTampil = true;
+    }
+
+    private void BukaModalEdit(MenuMakananModels item)
+    {
+        formModel = new MenuMakananModels
+        {
+            IdMenu = item.IdMenu,
+            IdSatuan = item.IdSatuan,
+            NamaMenu = item.NamaMenu,
+            Jumlah = item.Jumlah,
+            Harga = item.Harga,
+            Status = item.Status
+        };
+        isEditMode = true;
+        modalError = "";
+        modalTampil = true;
+    }
+
+    private void TutupModal()
+    {
+        modalTampil = false;
+    }
+
+    private async Task SimpanData()
+    {
+        sedangSimpan = true;
+        modalError = "";
+
+        var (success, error) = isEditMode
+            ? await MenuMakananService.UpdateAsync(formModel.IdMenu, formModel)
+            : await MenuMakananService.CreateAsync(formModel);
+
+        if (success)
+        {
+            modalTampil = false;
+            await MuatData();
+        }
+        else
+        {
+            modalError = error;
+        }
+
+        sedangSimpan = false;
+    }
+
+    // Master data tidak dihapus: cukup aktifkan / nonaktifkan
+    private async Task UbahStatus(MenuMakananModels item)
+    {
+        pesanError = "";
+
+        var salinan = new MenuMakananModels
+        {
+            IdMenu = item.IdMenu,
+            IdSatuan = item.IdSatuan,
+            NamaMenu = item.NamaMenu,
+            Jumlah = item.Jumlah,
+            Harga = item.Harga,
+            Status = !item.Status
+        };
+
+        var (success, error) = await MenuMakananService.UpdateAsync(salinan.IdMenu, salinan);
+        if (success)
+        {
+            await MuatData();
+        }
+        else
+        {
+            pesanError = error;
+        }
+    }
+}
