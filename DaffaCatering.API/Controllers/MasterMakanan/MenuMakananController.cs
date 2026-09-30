@@ -1,11 +1,11 @@
 ﻿using DaffaCatering.API.Data;
-using DaffaCatering.API.DTOs.MasterResep;
+using DaffaCatering.API.DTOs.MasterMakanan;
 using DaffaCatering.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace DaffaCatering.API.Controllers.MasterResep
+namespace DaffaCatering.API.Controllers.MasterMakanan
 {
     [ApiController]
     [Route("api/[controller]")]
