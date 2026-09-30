@@ -29,6 +29,7 @@ builder.Services.AddScoped<BahanBakuService>();
 builder.Services.AddScoped<SatuanBahanBakuService>();
 builder.Services.AddScoped<KonversiSatuanService>();
 builder.Services.AddScoped<ResepService>();
+builder.Services.AddScoped<MenuMakananService>();
 
 var app = builder.Build();
 
