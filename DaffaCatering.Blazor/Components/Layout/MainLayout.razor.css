@@ -25,6 +25,7 @@ main {
     height: 3.5rem;
     display: flex;
     align-items: center;
+    z-index: 10;
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
@@ -45,6 +46,7 @@ main {
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;
+        z-index: 10;
     }
 
         .top-row ::deep a, .top-row ::deep .btn-link {
@@ -67,7 +69,7 @@ main {
     .top-row {
         position: sticky;
         top: 0;
-        z-index: 1;
+        z-index: 10;
     }
 
         .top-row.auth ::deep a:first-child {
