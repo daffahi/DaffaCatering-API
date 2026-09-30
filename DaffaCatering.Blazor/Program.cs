@@ -26,6 +26,7 @@ builder.Services.AddScoped<PelangganService>();
 builder.Services.AddScoped<PemasokService>();
 builder.Services.AddScoped<BahanBakuService>();
 builder.Services.AddScoped<SatuanBahanBakuService>();
+builder.Services.AddScoped<KonversiSatuanService>();
 
 var app = builder.Build();
 
