@@ -5,6 +5,7 @@ using DaffaCatering.Blazor.Services.MasterBahanBaku;
 using DaffaCatering.Blazor.Services.MasterPelanggan;
 using DaffaCatering.Blazor.Services.MasterPemasok;
 using DaffaCatering.Blazor.Services.MasterSatuanBahanBaku;
+using DaffaCatering.Blazor.Services.MasterMakanan;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services.AddScoped<PemasokService>();
 builder.Services.AddScoped<BahanBakuService>();
 builder.Services.AddScoped<SatuanBahanBakuService>();
 builder.Services.AddScoped<KonversiSatuanService>();
+builder.Services.AddScoped<ResepService>();
 
 var app = builder.Build();
 
