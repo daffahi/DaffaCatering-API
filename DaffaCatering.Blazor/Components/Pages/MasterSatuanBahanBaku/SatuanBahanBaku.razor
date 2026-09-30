@@ -1,93 +1,184 @@
 ﻿@page "/satuan-bahan-baku"
+
 @inject SatuanBahanBakuService SatuanBahanBakuService
 
-<h3>Raw Material Units</h3>
-
-@if (isLoading)
-{
-    <p><em>Loading...</em></p>
+@{
+    var view = Filtered.ToList();
 }
-else
-{
-    <button class="btn btn-success mb-3" @onclick="BukaModalTambah">
-        <i class="fa-solid fa-plus"></i> Add Customer
-    </button>
+
+<div class="satuan-bahan-baku-page">
+
+    <section class="hero">
+        <div class="hero-top">
+            <div>
+                <span class="eyebrow">Master Data</span>
+                <h1>Satuan Bahan Baku</h1>
+                <p>Kelola data satuan bahan baku dalam satu tempat</p>
+            </div>
+            <button class="btn-add" @onclick="BukaModalTambah">
+                <i class="fa-solid fa-plus"></i> Tambah Satuan Bahan Baku
+            </button>
+        </div>
+
+        <div class="hero-stats">
+            <div class="chip">
+                <span class="chip-value">@daftarSatuan.Count</span>
+                <span class="chip-label">Total</span>
+            </div>
+        </div>
+    </section>
 
     @if (!string.IsNullOrEmpty(pesanError))
     {
-        <div class="alert alert-danger">@pesanError</div>
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
     }
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in daftarSatuanBahanBaku)
-            {
-                <tr>
-                    <td>@item.IdSatuan</td>
-                    <td>@item.NamaSatuan</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => BukaModalEdit(item)">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" @onclick="() => HapusData(item.IdSatuan)">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <section class="panel">
+        <div class="toolbar">
+            <label class="search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Cari ID atau nama satuan..."
+                       @bind="teksCari" @bind:event="oninput" />
+            </label>
 
-@if (modalTampil)
-{
-    <div class="modal show d-block" style="background-color: rgba(0,0,0,0.5);" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@(isEditMode ? "Edit" : "Add") Unit of Raw Materials</h5>
-                    <button type="button" class="btn-close" @onclick="TutupModal"></button>
-                </div>
+            <div class="toolbar-right">
+                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
+                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="skeleton">
+                @for (var s = 0; s < 6; s++)
+                {
+                    <div class="sk-row">
+                        <div class="sk-avatar"></div>
+                        <div class="sk-lines"><div></div><div></div></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Satuan Bahan Baku</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (item, i) in view.Select((item, i) => (item, i)))
+                        {
+                            <tr @key="item.IdSatuan" style="--i:@Math.Min(i, 12)">
+                                <td>
+                                    <div class="who">
+                                        <div class="avatar tone-@Warna(item.NamaSatuan)">@Inisial(item.NamaSatuan)</div>
+                                        <div>
+                                            <div class="name">@item.NamaSatuan</div>
+                                            <div class="sub">@item.IdSatuan</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="actions">
+                                    <button class="icon-btn" title="Ubah" @onclick="() => BukaModalEdit(item)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (view.Count == 0)
+                {
+                    <div class="empty">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                        <strong>Satuan bahan baku tidak ditemukan</strong>
+                        <span>Coba ubah kata kunci pencarian.</span>
+                    </div>
+                }
+            </div>
+
+            <div class="panel-foot">
+                Menampilkan <b>@view.Count</b> dari <b>@daftarSatuan.Count</b> satuan bahan baku
+            </div>
+        }
+
+    </section>
+
+    @if (modalTampil)
+    {
+        <div class="overlay" @onclick="TutupModal">
+            <div class="dialog" @onclick:stopPropagation>
                 <EditForm Model="formModel" OnValidSubmit="SimpanData">
                     <DataAnnotationsValidator />
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">ID Unit</label>
-                            <InputText class="form-control" @bind-Value="formModel.IdSatuan" disabled="@isEditMode" />
-                            <ValidationMessage For="() => formModel.IdSatuan" />
+
+                    <header class="dialog-head">
+                        <div class="dialog-icon">
+                            <i class="fa-solid @(isEditMode ? "fa-pen" : "fa-plus")"></i>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <InputText class="form-control" @bind-Value="formModel.NamaSatuan" />
+                        <div>
+                            <h5>@(isEditMode ? "Ubah" : "Tambah") Satuan Bahan Baku</h5>
+                            <p>@(isEditMode ? "Perbarui data satuan bahan baku" : "Isi data satuan bahan baku baru")</p>
+                        </div>
+                        <button type="button" class="dialog-close" @onclick="TutupModal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </header>
+
+                    <div class="dialog-body">
+                        <div class="field">
+                            <label>ID Satuan <span class="auto-tag">Auto</span></label>
+                            <InputText @bind-Value="formModel.IdSatuan" disabled="true" />
+                        </div>
+
+                        <div class="field">
+                            <label>Nama Satuan</label>
+                            <InputText @bind-Value="formModel.NamaSatuan" placeholder="Contoh: Kg, Liter, Pcs" />
                             <ValidationMessage For="() => formModel.NamaSatuan" />
                         </div>
 
                         @if (!string.IsNullOrEmpty(modalError))
                         {
-                            <div class="alert alert-danger mt-2">@modalError</div>
+                            <div class="banner in-dialog">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span>@modalError</span>
+                            </div>
                         }
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="TutupModal">Cancel</button>
-                        <button type="submit" class="btn btn-success" disabled="@sedangSimpan">
-                            @(sedangSimpan ? "Saving..." : "Save")
+
+                    <footer class="dialog-foot">
+                        <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
+                        <button type="submit" class="btn-solid" disabled="@sedangSimpan">
+                            @if (sedangSimpan)
+                            {
+                                <i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>
+                            }
+                            else
+                            {
+                                <span>Simpan</span>
+                            }
                         </button>
-                    </div>
+                    </footer>
                 </EditForm>
             </div>
         </div>
-    </div>
-}
+    }
+
+</div>
 
 @code {
-    private List<SatuanBahanBakuModels> daftarSatuanBahanBaku = new();
+    private List<SatuanBahanBakuModels> daftarSatuan = new();
     private bool isLoading = true;
     private string pesanError = "";
 
@@ -97,6 +188,42 @@ else
     private string modalError = "";
     private SatuanBahanBakuModels formModel = new();
 
+    // --- pencarian ---
+    private string teksCari = "";
+
+    private IEnumerable<SatuanBahanBakuModels> Filtered => daftarSatuan
+        .Where(c => string.IsNullOrWhiteSpace(teksCari)
+            || (c.IdSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NamaSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+
+    private static string Inisial(string? nama)
+    {
+        var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length == 0 ? "?"
+             : p.Length == 1 ? p[0][..1].ToUpper()
+             : (p[0][..1] + p[^1][..1]).ToUpper();
+    }
+
+    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
+
+    // --- ID otomatis: SBB + 7 digit ---
+    private static string BuatIdBerikutnya(IEnumerable<SatuanBahanBakuModels> data)
+    {
+        const string prefix = "SBB";
+
+        var max = data
+            .Select(c => c.IdSatuan)
+            .Where(id => !string.IsNullOrEmpty(id)
+                         && id.StartsWith(prefix)
+                         && int.TryParse(id[prefix.Length..], out _))
+            .Select(id => int.Parse(id[prefix.Length..]))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return $"{prefix}{max + 1:D7}";
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await MuatData();
@@ -105,22 +232,36 @@ else
     private async Task MuatData()
     {
         isLoading = true;
+        pesanError = "";
         try
         {
-            daftarSatuanBahanBaku = await SatuanBahanBakuService.GetAllAsync();
+            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
         }
         catch (Exception ex)
         {
-            pesanError = "Failed to load data: " + ex.Message;
+            pesanError = "Gagal memuat data: " + ex.Message;
         }
         isLoading = false;
     }
 
-    private void BukaModalTambah()
+    private async Task BukaModalTambah()
     {
         formModel = new SatuanBahanBakuModels();
         isEditMode = false;
         modalError = "";
+
+        try
+        {
+            // ambil data terbaru supaya nomor urut tidak basi
+            var terbaru = await SatuanBahanBakuService.GetAllAsync();
+            formModel.IdSatuan = BuatIdBerikutnya(terbaru);
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            return;
+        }
+
         modalTampil = true;
     }
 
@@ -161,18 +302,5 @@ else
         }
 
         sedangSimpan = false;
-    }
-
-    private async Task HapusData(string id)
-    {
-        var (success, error) = await SatuanBahanBakuService.DeleteAsync(id);
-        if (success)
-        {
-            await MuatData();
-        }
-        else
-        {
-            pesanError = error;
-        }
     }
 }
