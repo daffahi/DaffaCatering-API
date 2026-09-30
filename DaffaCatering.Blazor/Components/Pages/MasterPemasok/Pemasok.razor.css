@@ -820,6 +820,10 @@ tbody tr {
 
 /* ---------- Responsive & a11y ---------- */
 @media (hover: none) {
+    .actions .icon-btn {
+        opacity: 1
+    }
+
     .icon-btn {
         opacity: 1;
     }
