@@ -130,8 +130,8 @@
             int batasMinimum = 10;
 
             lowStock = bahanBaku?
-                .SelectMany(x => x.DetailBahanBakus)
-                .Count(d => (d.SisaStok ?? 0) < batasMinimum) ?? 0;
+                .Where(x => x.Status && x.Jenis)
+                .Count(x => x.Details.Sum(d => d.SisaStok ?? 0) < batasMinimum) ?? 0;
         }
         catch (HttpRequestException)
         {
@@ -152,9 +152,12 @@
     {
         public string IdBahanBaku { get; set; } = "";
         public string NamaBahanBaku { get; set; } = "";
+        public bool Jenis { get; set; }  
+        public bool Status { get; set; }
 
-        public List<DetailBahanBakuResponse> DetailBahanBakus { get; set; } = new();
+        public List<DetailBahanBakuResponse> Details { get; set; } = new();
     }
+
     public class DetailBahanBakuResponse
     {
         public decimal? SisaStok { get; set; }
