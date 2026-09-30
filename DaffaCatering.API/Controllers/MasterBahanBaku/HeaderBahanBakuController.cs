@@ -24,13 +24,32 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool? status)
         {
-            //var query = _context.HeaderBahanBakus.AsQueryable();
-            var query = _context.HeaderBahanBakus.Include(x => x.DetailBahanBakus).AsQueryable();
+            var query = _context.HeaderBahanBakus.AsNoTracking().AsQueryable();
 
             if (status.HasValue)
                 query = query.Where(x => x.Status == status.Value);
 
-            var data = await query.ToListAsync();
+            var data = await query
+                .OrderBy(x => x.IdBahanBaku)
+                .Select(x => new HeaderBahanBakuDto
+                {
+                    IdBahanBaku = x.IdBahanBaku,
+                    NamaBahanBaku = x.NamaBahanBaku,
+                    Jenis = x.Jenis,
+                    Status = x.Status,
+                    Details = x.DetailBahanBakus
+                        .OrderBy(d => d.TglKadaluwarsa)
+                        .Select(d => new DetailBahanBakuDto
+                        {
+                            IdSatuan = d.IdSatuan,
+                            TglKadaluwarsa = d.TglKadaluwarsa,
+                            StokAwal = d.StokAwal ?? 0,
+                            SisaStok = d.SisaStok ?? 0
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+
             return Ok(data);
         }
 
@@ -39,8 +58,26 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         public async Task<IActionResult> GetById(string id)
         {
             var data = await _context.HeaderBahanBakus
-                .Include(h => h.DetailBahanBakus)
-                .FirstOrDefaultAsync(h => h.IdBahanBaku == id);
+                .AsNoTracking()
+                .Where(h => h.IdBahanBaku == id)
+                .Select(h => new HeaderBahanBakuDto
+                {
+                    IdBahanBaku = h.IdBahanBaku,
+                    NamaBahanBaku = h.NamaBahanBaku,
+                    Jenis = h.Jenis,
+                    Status = h.Status,
+                    Details = h.DetailBahanBakus
+                        .OrderBy(d => d.TglKadaluwarsa)
+                        .Select(d => new DetailBahanBakuDto
+                        {
+                            IdSatuan = d.IdSatuan,
+                            TglKadaluwarsa = d.TglKadaluwarsa,
+                            StokAwal = d.StokAwal ?? 0,
+                            SisaStok = d.SisaStok ?? 0
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
 
             if (data == null)
                 return NotFound();
@@ -93,14 +130,20 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
             }
         }
 
-        // PUT - Update data yang sudah ada
+        // PUT - Update header + detail (update yang ada, tambah yang baru, tidak menghapus)
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] HeaderBahanBakuDto input)
         {
             if (id != input.IdBahanBaku)
                 return BadRequest("ID tidak sesuai");
 
-            var existing = await _context.HeaderBahanBakus.FindAsync(id);
+            if (input.Details.GroupBy(d => d.TglKadaluwarsa).Any(g => g.Count() > 1))
+                return BadRequest("Tanggal kadaluwarsa tidak boleh sama dalam satu bahan baku");
+
+            var existing = await _context.HeaderBahanBakus
+                .Include(h => h.DetailBahanBakus)
+                .FirstOrDefaultAsync(h => h.IdBahanBaku == id);
+
             if (existing == null)
                 return NotFound();
 
@@ -108,7 +151,39 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
             existing.Jenis = input.Jenis;
             existing.Status = input.Status;
 
-            await _context.SaveChangesAsync();
+            foreach (var d in input.Details)
+            {
+                var row = existing.DetailBahanBakus
+                    .FirstOrDefault(x => x.TglKadaluwarsa == d.TglKadaluwarsa);
+
+                if (row != null) // UPDATE
+                {
+                    row.IdSatuan = d.IdSatuan;
+                    row.StokAwal = d.StokAwal;
+                    row.SisaStok = d.SisaStok;
+                }
+                else // INSERT
+                {
+                    existing.DetailBahanBakus.Add(new Models.DetailBahanBaku
+                    {
+                        IdBahanBaku = id,
+                        TglKadaluwarsa = d.TglKadaluwarsa,
+                        IdSatuan = d.IdSatuan,
+                        StokAwal = d.StokAwal,
+                        SisaStok = d.SisaStok
+                    });
+                }
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return Conflict($"Gagal menyimpan — ID Satuan tidak valid atau data bentrok. Detail: {ex.InnerException?.Message}");
+            }
+
             return NoContent();
         }
 
