@@ -1,10 +1,10 @@
-﻿using DaffaCatering.Blazor.Models.MasterMakanan;
+﻿using DaffaCatering.Blazor.Models;
 
-namespace DaffaCatering.Blazor.Services.MasterMakanan
+namespace DaffaCatering.Blazor.Services
 {
-    public class ResepService : CrudServiceBase<ResepModels>
+    public class ResepService : CrudServiceBase<ResepModel>
     {
         public ResepService(IHttpClientFactory factory, JwtAuthStateProvider auth)
-            : base(factory, auth, "api/Resep") { }
+            : base(factory, auth, "api/HeaderResep") { }
     }
 }
