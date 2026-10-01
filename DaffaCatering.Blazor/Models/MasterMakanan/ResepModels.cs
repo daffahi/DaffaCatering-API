@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DaffaCatering.Blazor.Models.MasterMakanan
+namespace DaffaCatering.Blazor.Models
 {
-    public class ResepModels
+    public class ResepModel
     {
         [Required(ErrorMessage = "ID Resep wajib diisi")]
         [StringLength(10)]
         public string IdResep { get; set; } = "";
 
-        [Required(ErrorMessage = "ID Menu wajib diisi")]
+        [Required(ErrorMessage = "Menu Makanan wajib dipilih")]
         [StringLength(10)]
         public string IdMenu { get; set; } = "";
 
@@ -19,14 +19,8 @@ namespace DaffaCatering.Blazor.Models.MasterMakanan
 
     public class DetailResepModel
     {
-        [Required(ErrorMessage = "ID Bahan Baku wajib diisi")]
-        [StringLength(10)]
         public string IdBahanBaku { get; set; } = "";
-
-        [Required(ErrorMessage = "ID Satuan Bahan Baku wajib diisi")]
-        [StringLength(10)]
         public string IdSatuan { get; set; } = "";
-
         public decimal Jumlah { get; set; }
     }
 }
