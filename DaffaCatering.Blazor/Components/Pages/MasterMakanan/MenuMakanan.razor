@@ -1,13 +1,248 @@
 ﻿@page "/menu-makanan"
 
 @inject MenuMakananService MenuMakananService
+@inject SatuanBahanBakuService SatuanBahanBakuService
 
 @{
     var view = Filtered.ToList();
 }
 
+<div class="menu-makanan-page">
+
+    <section class="hero">
+        <div class="hero-top">
+            <div>
+                <span class="eyebrow">Master Data</span>
+                <h1>Menu Makanan</h1>
+                <p>Kelola data menu makanan dalam satu tempat</p>
+            </div>
+            <button class="btn-add" @onclick="BukaModalTambah">
+                <i class="fa-solid fa-plus"></i> Tambah Menu Makanan
+            </button>
+        </div>
+
+        <div class="hero-stats">
+            <div class="chip">
+                <span class="chip-value">@daftarMenuMakanan.Count</span>
+                <span class="chip-label">Total</span>
+            </div>
+            <div class="chip">
+                <span class="chip-value">@JumlahAktif</span>
+                <span class="chip-label">Aktif</span>
+            </div>
+            <div class="chip">
+                <span class="chip-value">@(daftarMenuMakanan.Count - JumlahAktif)</span>
+                <span class="chip-label">Tidak Aktif</span>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    <section class="panel">
+        <div class="toolbar">
+            <label class="search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Cari ID atau Nama"
+                       @bind="teksCari" @bind:event="oninput" />
+            </label>
+
+            <div class="toolbar-right">
+                <div class="segmented">
+                    <button class="@Seg(FilterStatus.Semua)" @onclick="() => filterStatus = FilterStatus.Semua">
+                        Semua <span>@daftarMenuMakanan.Count</span>
+                    </button>
+                    <button class="@Seg(FilterStatus.Aktif)" @onclick="() => filterStatus = FilterStatus.Aktif">
+                        Aktif <span>@JumlahAktif</span>
+                    </button>
+                    <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => filterStatus = FilterStatus.NonAktif">
+                        Tidak Aktif <span>@(daftarMenuMakanan.Count - JumlahAktif)</span>
+                    </button>
+                </div>
+                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
+                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="skeleton">
+                @for (var s = 0; s < 6; s++)
+                {
+                    <div class="sk-row">
+                        <div class="sk-avatar"></div>
+                        <div class="sk-lines"><div></div><div></div></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Menu Makanan</th>
+                            <th>Satuan</th>
+                            <th>Jumlah</th>
+                            <th>Harga</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (item, i) in view.Select((item, i) => (item, i)))
+                        {
+                            <tr @key="item.IdMenu" style="--i:@Math.Min(i, 12)">
+                                <td>
+                                    <div class="who">
+                                        <div class="avatar tone-@Warna(item.NamaMenu)">@Inisial(item.NamaMenu)</div>
+                                        <div>
+                                            <div class="name">@item.NamaMenu</div>
+                                            <div class="sub">@item.IdMenu</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="mono">@NamaSatuan(item.IdSatuan)</td>
+                                <td class="mono">@item.Jumlah</td>
+                                <td class="mono">@item.Harga.ToString("C0")</td>
+                                <td>
+                                    <span class="pill @(item.Status ? "on" : "off")">
+                                        <i></i>@(item.Status ? "Aktif" : "Tidak Aktif")
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <button class="icon-btn" title="Edit" @onclick="() => BukaModalEdit(item)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="icon-btn @(item.Status ? "warn" : "ok")"
+                                            title="@(item.Status ? "Nonaktifkan" : "Aktifkan")"
+                                            @onclick="() => UbahStatus(item)">
+                                        <i class="fa-solid @(item.Status ? "fa-ban" : "fa-user-check")"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (view.Count == 0)
+                {
+                    <div class="empty">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                        <strong>Menu Makanan tidak ditemukan</strong>
+                        <span>Coba ubah kata kunci atau filter status.</span>
+                    </div>
+                }
+            </div>
+
+            <div class="panel-foot">
+                Menampilkan <b>@view.Count</b> dari <b>@daftarMenuMakanan.Count</b> menu makanan
+            </div>
+        }
+    </section>
+
+    @if (modalTampil)
+    {
+        <div class="overlay" @onclick="TutupModal">
+            <div class="dialog" @onclick:stopPropagation>
+                <EditForm Model="formModel" OnValidSubmit="SimpanData">
+                    <DataAnnotationsValidator />
+
+                    <header class="dialog-head">
+                        <div class="dialog-icon">
+                            <i class="fa-solid @(isEditMode ? "fa-pen" : "fa-plus")"></i>
+                        </div>
+                        <div>
+                            <h5>@(isEditMode ? "Ubah" : "Tambah") Menu Makanan</h5>
+                            <p>@(isEditMode ? "Perbarui data menu makanan" : "Isi data menu makanan baru")</p>
+                        </div>
+                        <button type="button" class="dialog-close" @onclick="TutupModal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </header>
+
+                    <div class="dialog-body">
+                        <div class="row2">
+                            <div class="field">
+                                <label>ID Menu <span class="auto-tag">Auto</span></label>
+                                <input value="@formModel.IdMenu" disabled />
+                            </div>
+                            <div class="field">
+                                <label>Satuan</label>
+                                <InputSelect @bind-Value="formModel.IdSatuan">
+                                    <option value="">-- Pilih Satuan --</option>
+                                    @foreach (var s in daftarSatuan)
+                                    {
+                                        <option value="@s.IdSatuan">@s.NamaSatuan</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => formModel.IdSatuan" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Nama Menu</label>
+                            <InputText @bind-Value="formModel.NamaMenu" @onblur="KapitalisasiNamaMenu" />
+                            <ValidationMessage For="() => formModel.NamaMenu" />
+                        </div>
+
+                        <div class="row2">
+                            <div class="field">
+                                <label>Jumlah</label>
+                                <input value="1" disabled />
+                            </div>
+                            <div class="field">
+                                <label>Harga</label>
+                                <InputNumber @bind-Value="formModel.Harga" step="1" />
+                                <ValidationMessage For="() => formModel.Harga" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Status</label>
+                            <label class="switch">
+                                <InputCheckbox @bind-Value="formModel.Status" />
+                                <span class="sw-track"></span>
+                                <span>@(formModel.Status ? "Aktif" : "Tidak Aktif")</span>
+                            </label>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(modalError))
+                        {
+                            <div class="banner in-dialog">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span>@modalError</span>
+                            </div>
+                        }
+                    </div>
+
+                    <footer class="dialog-foot">
+                        <button type="button" class="btn-ghost" @onclick="TutupModal">Batal</button>
+                        <button type="submit" class="btn-solid" disabled="@sedangSimpan">
+                            @(sedangSimpan ? "Menyimpan..." : "Simpan")
+                        </button>
+                    </footer>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+</div>
+
 @code {
     private List<MenuMakananModels> daftarMenuMakanan = new();
+    private List<SatuanBahanBakuModels> daftarSatuan = new();
     private bool isLoading = true;
     private string pesanError = "";
 
@@ -17,7 +252,6 @@
     private string modalError = "";
     private MenuMakananModels formModel = new();
 
-    // --- filter & pencarian ---
     private enum FilterStatus { Semua, Aktif, NonAktif }
 
     private string teksCari = "";
@@ -34,7 +268,6 @@
         })
         .Where(c => string.IsNullOrWhiteSpace(teksCari)
             || (c.IdMenu ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || (c.IdSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
             || (c.NamaMenu ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
 
     private string Seg(FilterStatus f) => filterStatus == f ? "seg active" : "seg";
@@ -47,10 +280,11 @@
              : (p[0][..1] + p[^1][..1]).ToUpper();
     }
 
-    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
 
-    // --- ID otomatis: PLG + 7 digit ---
+    private string NamaSatuan(string idSatuan) =>
+        daftarSatuan.FirstOrDefault(s => s.IdSatuan == idSatuan)?.NamaSatuan ?? idSatuan;
+
     private static string BuatIdBerikutnya(IEnumerable<MenuMakananModels> data)
     {
         const string prefix = "MN";
@@ -69,6 +303,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await MuatSatuan();
         await MuatData();
     }
 
@@ -87,18 +322,28 @@
         isLoading = false;
     }
 
+    private async Task MuatSatuan()
+    {
+        try
+        {
+            var semua = await SatuanBahanBakuService.GetAllAsync();
+            var diizinkan = new[] { "Bungkus", "Pcs", "Porsi" };
+            daftarSatuan = semua.Where(s => diizinkan.Contains(s.NamaSatuan)).ToList();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat satuan: " + ex.Message;
+        }
+    }
+
     private async Task BukaModalTambah()
     {
-        formModel = new MenuMakananModels
-        {
-            Status = true
-        };
+        formModel = new MenuMakananModels { Status = true, Jumlah = 1 };
         isEditMode = false;
         modalError = "";
 
         try
         {
-            // ambil data terbaru supaya nomor urut tidak basi
             var terbaru = await MenuMakananService.GetAllAsync();
             formModel.IdMenu = BuatIdBerikutnya(terbaru);
         }
@@ -119,7 +364,7 @@
             IdSatuan = item.IdSatuan,
             NamaMenu = item.NamaMenu,
             Jumlah = item.Jumlah,
-            Harga = item.Harga,
+            Harga = Math.Round(item.Harga, 0),
             Status = item.Status
         };
         isEditMode = true;
@@ -132,10 +377,34 @@
         modalTampil = false;
     }
 
+    private void KapitalisasiNamaMenu()
+    {
+        if (!string.IsNullOrEmpty(formModel.NamaMenu))
+        {
+            formModel.NamaMenu = char.ToUpper(formModel.NamaMenu[0]) + formModel.NamaMenu[1..];
+        }
+    }
+
+    private bool NamaMenuSudahAda()
+    {
+        return daftarMenuMakanan.Any(m =>
+            m.IdMenu != formModel.IdMenu &&
+            m.NamaMenu.Trim().Equals(formModel.NamaMenu.Trim(), StringComparison.OrdinalIgnoreCase));
+    }
+
     private async Task SimpanData()
     {
-        sedangSimpan = true;
         modalError = "";
+
+        if (NamaMenuSudahAda())
+        {
+            modalError = $"Nama menu \"{formModel.NamaMenu}\" sudah terdaftar";
+            return;
+        }
+
+        sedangSimpan = true;
+        formModel.Jumlah = 1;
+        formModel.Harga = Math.Round(formModel.Harga, 0);
 
         var (success, error) = isEditMode
             ? await MenuMakananService.UpdateAsync(formModel.IdMenu, formModel)
@@ -154,7 +423,6 @@
         sedangSimpan = false;
     }
 
-    // Master data tidak dihapus: cukup aktifkan / nonaktifkan
     private async Task UbahStatus(MenuMakananModels item)
     {
         pesanError = "";
