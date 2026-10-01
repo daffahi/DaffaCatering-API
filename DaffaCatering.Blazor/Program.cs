@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Components.Authorization;
 using DaffaCatering.Blazor.Components;
 using DaffaCatering.Blazor.Services;
 using DaffaCatering.Blazor.Services.MasterBahanBaku;
+using DaffaCatering.Blazor.Services.MasterMakanan;
 using DaffaCatering.Blazor.Services.MasterPelanggan;
 using DaffaCatering.Blazor.Services.MasterPemasok;
 using DaffaCatering.Blazor.Services.MasterSatuanBahanBaku;
-using DaffaCatering.Blazor.Services.MasterMakanan;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ builder.Services.AddScoped<SatuanBahanBakuService>();
 builder.Services.AddScoped<KonversiSatuanService>();
 builder.Services.AddScoped<ResepService>();
 builder.Services.AddScoped<MenuMakananService>();
+
+var cultureInfo = new CultureInfo("id-ID");
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 var app = builder.Build();
 
