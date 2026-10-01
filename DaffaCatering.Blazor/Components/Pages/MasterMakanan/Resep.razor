@@ -244,7 +244,7 @@
                                         <tr>
                                             <td>@NamaBahanBaku(d.IdBahanBaku)</td>
                                             <td>@NamaSatuan(d.IdSatuan)</td>
-                                            <td>@d.Jumlah</td>
+                                            <td>@d.Jumlah.ToString("0.##")</td>
                                             <td class="mini-actions">
                                                 <button type="button" class="icon-btn" @onclick="() => EditDetail(idx)">
                                                     <i class="fa-solid fa-pen"></i>
