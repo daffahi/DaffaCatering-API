@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Json;
-using static System.Net.WebRequestMethods;
 
 namespace DaffaCatering.Blazor.Services
 {
@@ -17,6 +16,14 @@ namespace DaffaCatering.Blazor.Services
         {
             await SiapkanTokenAsync();
             return await Http.GetFromJsonAsync<List<T>>(_endpoint) ?? new List<T>();
+        }
+
+        public async Task<T?> GetByIdAsync(string id)
+        {
+            await SiapkanTokenAsync();
+            var response = await Http.GetAsync($"{_endpoint}/{id}");
+            if (!response.IsSuccessStatusCode) return null;
+            return await response.Content.ReadFromJsonAsync<T>();
         }
 
         public async Task<(bool Success, string Error)> CreateAsync(T data)
