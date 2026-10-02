@@ -64,7 +64,7 @@ All business logic and data access live in the API. The Blazor project only rend
 - Visual Studio 2022+ or the `dotnet` CLI
 
 ### 1. Create the database
-Open `database/DaffaCateringDB.sql` in SQL Server Management Studio and run it. It creates `DaffaCateringDB` with the schema and sample (dummy) data.
+In SQL Server Management Studio, create an empty database named `DaffaCateringDB`, then open `database/DaffaCateringDB.sql` and run it. It creates the tables and inserts sample (dummy) data.
 
 ### 2. Configure the connection string
 The default in `DaffaCatering.API/appsettings.json` uses Windows Authentication on `localhost`:
