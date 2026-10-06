@@ -8,11 +8,11 @@ namespace DaffaCatering.API.DTOs.MasterBahanBaku
         [StringLength(10)]
         public string IdBahanBaku { get; set; } = null!;
 
-        // idSatuan tidak dimasukkan karena backend akan ambil otomatis dari batch yang dipilih
+        // Batch yang dipakai dipilih user (bahan baku + tanggal kadaluwarsa).
+        // idSatuan tidak dimasukkan karena backend mengambilnya dari batch tersebut.
+        public DateOnly TglKadaluwarsa { get; set; }
 
-        [Required]
+        [Range(0.01, 999999999, ErrorMessage = "Jumlah penggunaan harus lebih dari 0")]
         public decimal JumlahPenggunaan { get; set; }
-
-        // TglKadaluwarsa TIDAK diminta dari user — backend yang pilih otomatis (FEFO)
     }
 }
