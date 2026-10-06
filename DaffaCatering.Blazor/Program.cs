@@ -31,6 +31,7 @@ builder.Services.AddScoped<SatuanBahanBakuService>();
 builder.Services.AddScoped<KonversiSatuanService>();
 builder.Services.AddScoped<ResepService>();
 builder.Services.AddScoped<MenuMakananService>();
+builder.Services.AddScoped<PenggunaanService>();
 
 var cultureInfo = new CultureInfo("id-ID");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
