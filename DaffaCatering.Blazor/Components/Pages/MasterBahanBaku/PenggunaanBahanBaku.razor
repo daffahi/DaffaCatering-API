@@ -1,0 +1,757 @@
+﻿@page "/penggunaan-bahan-baku"
+
+@using System.Globalization
+@inject PenggunaanService PenggunaanService
+@inject BahanBakuService BahanBakuService
+@inject SatuanBahanBakuService SatuanBahanBakuService
+
+@{
+    var view = Filtered.ToList();
+}
+
+<div class="penggunaan-bahan-baku-page">
+
+    <section class="hero">
+        <div class="hero-top">
+            <div>
+                <span class="eyebrow">Persediaan</span>
+                <h1>Penggunaan Bahan Baku</h1>
+                <p>Catat bahan baku yang dipakai beserta tanggal kadaluwarsanya, stok batch tersebut berkurang otomatis</p>
+            </div>
+            <button class="btn-add" @onclick="BukaModalTambah">
+                <i class="fa-solid fa-plus"></i> Tambah Penggunaan
+            </button>
+        </div>
+
+        <div class="hero-stats">
+            <div class="chip">
+                <span class="chip-value">@daftarPenggunaan.Count</span>
+                <span class="chip-label">Total</span>
+            </div>
+            <div class="chip">
+                <span class="chip-value">@JumlahHariIni</span>
+                <span class="chip-label">Hari Ini</span>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrEmpty(pesanSukses))
+    {
+        <div class="banner ok">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@pesanSukses</span>
+            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    <section class="panel">
+        <div class="toolbar">
+            <label class="search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Cari nomor atau tanggal penggunaan..."
+                       @bind="teksCari" @bind:event="oninput" />
+            </label>
+
+            <div class="toolbar-right">
+                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
+                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="skeleton">
+                @for (var s = 0; s < 6; s++)
+                {
+                    <div class="sk-row">
+                        <div class="sk-avatar"></div>
+                        <div class="sk-lines"><div></div><div></div></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Penggunaan</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (item, i) in view.Select((item, i) => (item, i)))
+                        {
+                            <tr @key="item.IdPenggunaan" style="--i:@Math.Min(i, 12)">
+                                <td>
+                                    <div class="who">
+                                        <div class="avatar tone-@Warna(item.IdPenggunaan)">PB</div>
+                                        <div>
+                                            <div class="name">@item.IdPenggunaan</div>
+                                            <div class="sub">Penggunaan bahan baku</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@item.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (view.Count == 0)
+                {
+                    <div class="empty">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                        <strong>Penggunaan tidak ditemukan</strong>
+                        <span>Coba ubah kata kunci atau tambah penggunaan baru.</span>
+                    </div>
+                }
+            </div>
+
+            <div class="panel-foot">
+                Menampilkan <b>@view.Count</b> dari <b>@daftarPenggunaan.Count</b> penggunaan
+            </div>
+        }
+    </section>
+
+    @* ================= MODAL FORM PENGGUNAAN ================= *@
+    @if (modalTampil)
+    {
+        <div class="overlay" @onclick="TutupModal">
+            <div class="dialog wide" @onclick:stopPropagation>
+
+                <header class="dialog-head">
+                    <div class="dialog-icon"><i class="fa-solid fa-plus"></i></div>
+                    <div>
+                        <h5>Tambah Penggunaan Bahan Baku</h5>
+                        <p>Pilih bahan baku beserta tanggal kadaluwarsa yang dipakai</p>
+                    </div>
+                    <button type="button" class="dialog-close" @onclick="TutupModal">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </header>
+
+                <div class="dialog-body">
+
+                    @* ---------- HEADER ---------- *@
+                    <div class="row2">
+                        <div class="field">
+                            <label>No. Penggunaan <span class="auto-tag">Auto</span></label>
+                            <input type="text" value="@kodePenggunaan" disabled />
+                        </div>
+                        <div class="field">
+                            <label>Tanggal Penggunaan <b class="req">*</b></label>
+                            <input type="date" value="@tglPenggunaanInput" max="@Iso(HariIni)"
+                                   disabled="@(items.Count > 0)"
+                                   @onchange="e => tglPenggunaanInput = e.Value?.ToString() ?? string.Empty" />
+                            @if (items.Count > 0)
+                            {
+                                <span class="hint">Terkunci selama masih ada item.</span>
+                            }
+                        </div>
+                    </div>
+
+                    @* ---------- DETAIL ---------- *@
+                    <div class="section-head">
+                        <h6>Data Detail</h6>
+                        <span class="count-tag">@items.Count item</span>
+                    </div>
+
+                    <div class="detail-form @(indeksEdit >= 0 ? "editing" : "")">
+                        <div class="field">
+                            <label>Bahan Baku <b class="req">*</b></label>
+                            <div class="pick-row">
+                                <input type="text" readonly placeholder="Belum ada bahan baku dipilih"
+                                       value="@(batchDipilih is null ? "" : $"{batchDipilih.NamaBahanBaku} ({batchDipilih.IdBahanBaku})")" />
+                                <button type="button" class="btn-mini solid" @onclick="BukaPencarian">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Cari
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row4">
+                            <div class="field">
+                                <label>Tgl Kadaluwarsa</label>
+                                <input type="text" disabled
+                                       value="@(batchDipilih is null ? "" : FormatTgl(batchDipilih.Tgl))" />
+                            </div>
+                            <div class="field">
+                                <label>Stok Tersedia</label>
+                                <input type="text" disabled
+                                       value="@(batchDipilih is null ? "" : FormatAngka(batchDipilih.Sisa))" />
+                            </div>
+                            <div class="field">
+                                <label>Jumlah Penggunaan <b class="req">*</b></label>
+                                <input type="number" step="0.01" min="0" placeholder="0"
+                                       @bind="jumlahInput" @bind:event="oninput" />
+                            </div>
+                            <div class="field">
+                                <label>Satuan</label>
+                                <input type="text" disabled
+                                       value="@(batchDipilih is null ? "" : NamaSatuan(batchDipilih.IdSatuan))" />
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(detailError))
+                        {
+                            <div class="banner in-dialog">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span>@detailError</span>
+                            </div>
+                        }
+
+                        <div class="detail-actions">
+                            @if (indeksEdit >= 0)
+                            {
+                                <button type="button" class="btn-mini" @onclick="KosongkanInputDetail">Batal Ubah</button>
+                            }
+                            <button type="button" class="btn-mini solid" @onclick="TambahAtauUbahDetail">
+                                <i class="fa-solid @(indeksEdit >= 0 ? "fa-check" : "fa-plus")"></i>
+                                @(indeksEdit >= 0 ? "Perbarui Item" : "Tambah Item")
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="detail-wrap">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Bahan Baku</th>
+                                    <th>Jumlah Penggunaan</th>
+                                    <th>Sisa Stok</th>
+                                    <th>Satuan</th>
+                                    <th>Tgl Kadaluwarsa</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < items.Count; i++)
+                                {
+                                    var index = i;
+                                    var it = items[index];
+                                    <tr class="@(index == indeksEdit ? "row-edit" : "")">
+                                        <td>
+                                            <div class="name">@it.NamaBahanBaku</div>
+                                            <div class="sub">@it.IdBahanBaku</div>
+                                        </td>
+                                        <td class="mono">@FormatAngka(it.Jumlah)</td>
+                                        <td class="mono">@FormatAngka(it.StokSaatIni - it.Jumlah)</td>
+                                        <td>@NamaSatuan(it.IdSatuan)</td>
+                                        <td class="mono">@FormatTgl(it.Tgl)</td>
+                                        <td class="actions">
+                                            <button type="button" class="icon-btn" title="Ubah item"
+                                                    @onclick="() => MulaiUbahDetail(index)">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button type="button" class="icon-btn danger" title="Hapus item"
+                                                    @onclick="() => HapusDetail(index)">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        @if (items.Count == 0)
+                        {
+                            <div class="detail-empty">
+                                Belum ada item. Klik "Cari" untuk memilih bahan baku, isi jumlah, lalu klik "Tambah Item".
+                            </div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(modalError))
+                    {
+                        <div class="banner in-dialog">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>@modalError</span>
+                        </div>
+                    }
+                </div>
+
+                <footer class="dialog-foot">
+                    <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
+                    <button type="button" class="btn-solid" disabled="@sedangSimpan" @onclick="SimpanData">
+                        @if (sedangSimpan)
+                        {
+                            <i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>
+                        }
+                        else
+                        {
+                            <span>Simpan</span>
+                        }
+                    </button>
+                </footer>
+            </div>
+        </div>
+    }
+
+    @* ================= MODAL CARI BAHAN BAKU (padanan frmCariBahanBaku) ================= *@
+    @if (cariTampil)
+    {
+        var batchView = DaftarBatch.ToList();
+
+        <div class="overlay stacked" @onclick="TutupPencarian">
+            <div class="dialog wide" @onclick:stopPropagation>
+
+                <header class="dialog-head">
+                    <div class="dialog-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <div>
+                        <h5>Cari Bahan Baku</h5>
+                        <p>Klik baris untuk memilih bahan baku dengan tanggal kadaluwarsa tersebut</p>
+                    </div>
+                    <button type="button" class="dialog-close" @onclick="TutupPencarian">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </header>
+
+                <div class="dialog-body">
+                    <div class="batch-toolbar">
+                        <label class="search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" placeholder="Cari kode atau nama bahan baku..."
+                                   @bind="teksCariBatch" @bind:event="oninput" />
+                        </label>
+                        <div class="legend">
+                            <span class="pill exp"><i></i>Kadaluwarsa</span>
+                            <span class="pill soon"><i></i>&le; 7 hari</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(cariError))
+                    {
+                        <div class="banner in-dialog">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>@cariError</span>
+                        </div>
+                    }
+
+                    <div class="detail-wrap">
+                        <table class="detail-table batch-table">
+                            <thead>
+                                <tr>
+                                    <th>Kode</th>
+                                    <th>Bahan Baku</th>
+                                    <th>Tgl Kadaluwarsa</th>
+                                    <th>Stok</th>
+                                    <th>Satuan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in batchView)
+                                {
+                                    var row = r;
+                                    var status = StatusBatch(row.Tgl);
+                                    <tr class="row-@status" @onclick="() => PilihBatch(row)">
+                                        <td class="mono">@row.IdBahanBaku</td>
+                                        <td><div class="name">@row.NamaBahanBaku</div></td>
+                                        <td class="mono">
+                                            @FormatTgl(row.Tgl)
+                                            @if (status == "exp")
+                                            {
+                                                <span class="pill exp"><i></i>Kadaluwarsa</span>
+                                            }
+                                            else if (status == "soon")
+                                            {
+                                                <span class="pill soon"><i></i>&le; 7 hari</span>
+                                            }
+                                        </td>
+                                        <td class="mono">@FormatAngka(row.Sisa)</td>
+                                        <td>@NamaSatuan(row.IdSatuan)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        @if (batchView.Count == 0)
+                        {
+                            <div class="detail-empty">Bahan baku dengan stok tidak ditemukan.</div>
+                        }
+                    </div>
+                </div>
+
+                <footer class="dialog-foot">
+                    <button type="button" class="btn-ghost" @onclick="TutupPencarian">Tutup</button>
+                </footer>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    private static readonly CultureInfo IdCulture = new("id-ID");
+
+    private List<PenggunaanModels> daftarPenggunaan = new();
+    private List<BahanBakuModels> daftarBahanBaku = new();
+    private List<SatuanBahanBakuModels> daftarSatuan = new();
+    private bool isLoading = true;
+    private string pesanError = "";
+    private string pesanSukses = "";
+    private string teksCari = "";
+
+    // --- modal form ---
+    private bool modalTampil = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private string kodePenggunaan = "";
+    private string tglPenggunaanInput = "";
+
+    // --- input detail ---
+    private readonly List<ItemPenggunaan> items = new();
+    private int indeksEdit = -1;            // -1 = tambah item, >= 0 = ubah item
+    private BatchRow? batchDipilih;
+    private string jumlahInput = "";
+    private string detailError = "";
+
+    // --- modal cari ---
+    private bool cariTampil = false;
+    private string teksCariBatch = "";
+    private string cariError = "";
+
+    // Satu baris di dialog pencarian = satu batch (bahan baku + tgl kadaluwarsa)
+    private record BatchRow(string IdBahanBaku, string NamaBahanBaku, DateOnly Tgl, decimal Sisa, string IdSatuan);
+
+    private class ItemPenggunaan
+    {
+        public string IdBahanBaku { get; set; } = "";
+        public string NamaBahanBaku { get; set; } = "";
+        public DateOnly Tgl { get; set; }
+        public string IdSatuan { get; set; } = "";
+        public decimal Jumlah { get; set; }
+        public decimal StokSaatIni { get; set; }
+    }
+
+    // --- daftar penggunaan ---
+    private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
+
+    private int JumlahHariIni => daftarPenggunaan.Count(p => p.TglPenggunaan == HariIni);
+
+    private IEnumerable<PenggunaanModels> Filtered => daftarPenggunaan
+        .Where(p => string.IsNullOrWhiteSpace(teksCari)
+            || (p.IdPenggunaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || p.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture).Contains(teksCari, StringComparison.OrdinalIgnoreCase))
+        .OrderByDescending(p => p.IdPenggunaan);
+
+    // --- daftar batch untuk dialog pencarian ---
+    // Hanya bahan baku aktif dan batch yang masih ada stok (batch stok 0 memang tidak bisa dipakai)
+    private IEnumerable<BatchRow> DaftarBatch => daftarBahanBaku
+        .Where(b => b.Status)
+        .SelectMany(b => (b.Details ?? new List<DetailBahanBakuModel>())
+            .Where(d => d.SisaStok > 0)
+            .Select(d => new BatchRow(b.IdBahanBaku, b.NamaBahanBaku, d.TglKadaluwarsa, d.SisaStok, d.IdSatuan)))
+        .Where(r => string.IsNullOrWhiteSpace(teksCariBatch)
+            || r.IdBahanBaku.Contains(teksCariBatch, StringComparison.OrdinalIgnoreCase)
+            || r.NamaBahanBaku.Contains(teksCariBatch, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(r => r.NamaBahanBaku)
+        .ThenBy(r => r.Tgl);
+
+    // exp = merah (sudah kadaluwarsa), soon = kuning (<= 7 hari), fresh = normal (sama seperti WinForms)
+    private static string StatusBatch(DateOnly tgl)
+        => tgl < HariIni ? "exp" : tgl <= HariIni.AddDays(7) ? "soon" : "fresh";
+
+    // --- helper ---
+    private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
+
+    private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
+
+    private static string FormatTgl(DateOnly d) => d.ToString("dd MMM yyyy", IdCulture);
+
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private string NamaSatuan(string? id)
+        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
+
+    private static bool TryParseJumlah(string? teks, out decimal hasil)
+    {
+        hasil = 0;
+        var t = (teks ?? "").Trim().Replace(',', '.');
+        return t.Length > 0
+               && decimal.TryParse(t, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out hasil)
+               && hasil > 0;
+    }
+
+    // ID otomatis: PBP + 7 digit (sama seperti WinForms)
+    private static string BuatIdBerikutnya(IEnumerable<PenggunaanModels> data)
+    {
+        const string prefix = "PBP";
+
+        var max = data
+            .Select(p => p.IdPenggunaan)
+            .Where(id => !string.IsNullOrEmpty(id)
+                         && id.StartsWith(prefix)
+                         && int.TryParse(id[prefix.Length..], out _))
+            .Select(id => int.Parse(id[prefix.Length..]))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return $"{prefix}{max + 1:D7}";
+    }
+
+    // --- muat data ---
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        pesanError = "";
+
+        try
+        {
+            daftarPenggunaan = await PenggunaanService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat penggunaan: " + ex.Message;
+        }
+
+        try
+        {
+            daftarBahanBaku = await BahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat bahan baku: " + ex.Message;
+        }
+
+        try
+        {
+            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat satuan: " + ex.Message;
+        }
+
+        isLoading = false;
+    }
+
+    // --- modal form ---
+    private async Task BukaModalTambah()
+    {
+        pesanSukses = "";
+        pesanError = "";
+        modalError = "";
+        cariTampil = false;
+        items.Clear();
+        KosongkanInputDetail();
+
+        try
+        {
+            // data terbaru supaya nomor urut dan stok tidak basi
+            var terbaru = await PenggunaanService.GetAllAsync();
+            daftarBahanBaku = await BahanBakuService.GetAllAsync();
+            kodePenggunaan = BuatIdBerikutnya(terbaru);
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal menyiapkan form: " + ex.Message;
+            return;
+        }
+
+        tglPenggunaanInput = Iso(HariIni);
+        modalTampil = true;
+    }
+
+    private void TutupModal()
+    {
+        cariTampil = false;
+        modalTampil = false;
+    }
+
+    // --- modal cari ---
+    private void BukaPencarian()
+    {
+        teksCariBatch = "";
+        cariError = "";
+        cariTampil = true;
+    }
+
+    private void TutupPencarian()
+    {
+        cariTampil = false;
+    }
+
+    private void PilihBatch(BatchRow r)
+    {
+        if (r.Tgl < HariIni)
+        {
+            cariError = $"{r.NamaBahanBaku} dengan tanggal kadaluwarsa {FormatTgl(r.Tgl)} sudah kadaluwarsa dan tidak dapat dipakai.";
+            return;
+        }
+
+        batchDipilih = r;
+        detailError = "";
+        cariError = "";
+        cariTampil = false;
+    }
+
+    // --- detail ---
+    private void KosongkanInputDetail()
+    {
+        indeksEdit = -1;
+        batchDipilih = null;
+        jumlahInput = "";
+        detailError = "";
+    }
+
+    private void MulaiUbahDetail(int index)
+    {
+        var it = items[index];
+
+        indeksEdit = index;
+        detailError = "";
+        batchDipilih = new BatchRow(it.IdBahanBaku, it.NamaBahanBaku, it.Tgl, it.StokSaatIni, it.IdSatuan);
+        jumlahInput = it.Jumlah.ToString("0.##", CultureInfo.InvariantCulture);
+    }
+
+    private void TambahAtauUbahDetail()
+    {
+        detailError = "";
+
+        if (batchDipilih is null)
+        {
+            detailError = "Harap pilih bahan baku.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(jumlahInput))
+        {
+            detailError = "Harap masukkan jumlah penggunaan.";
+            return;
+        }
+
+        if (!TryParseJumlah(jumlahInput, out var jumlah))
+        {
+            detailError = "Jumlah penggunaan harus berupa angka lebih dari 0.";
+            return;
+        }
+
+        if (batchDipilih.Tgl < HariIni)
+        {
+            detailError = "Bahan baku sudah kadaluwarsa.";
+            return;
+        }
+
+        if (jumlah > batchDipilih.Sisa)
+        {
+            detailError = $"Jumlah penggunaan melebihi stok saat ini ({FormatAngka(batchDipilih.Sisa)} {NamaSatuan(batchDipilih.IdSatuan)}).";
+            return;
+        }
+
+        // Duplikat = bahan baku yang sama dengan tanggal kadaluwarsa yang sama
+        var kembar = items
+            .Where((it, i) => i != indeksEdit)
+            .Any(it => it.IdBahanBaku == batchDipilih.IdBahanBaku && it.Tgl == batchDipilih.Tgl);
+
+        if (kembar)
+        {
+            detailError = $"Bahan baku {batchDipilih.NamaBahanBaku} dengan tanggal kadaluwarsa {FormatTgl(batchDipilih.Tgl)} sudah ada dalam daftar penggunaan.";
+            return;
+        }
+
+        var item = new ItemPenggunaan
+        {
+            IdBahanBaku = batchDipilih.IdBahanBaku,
+            NamaBahanBaku = batchDipilih.NamaBahanBaku,
+            Tgl = batchDipilih.Tgl,
+            IdSatuan = batchDipilih.IdSatuan,
+            Jumlah = jumlah,
+            StokSaatIni = batchDipilih.Sisa
+        };
+
+        if (indeksEdit == -1) items.Add(item);   // TAMBAH ITEM
+        else items[indeksEdit] = item;           // UBAH ITEM
+
+        KosongkanInputDetail();
+    }
+
+    private void HapusDetail(int index)
+    {
+        items.RemoveAt(index);
+
+        if (indeksEdit == index) KosongkanInputDetail();
+        else if (indeksEdit > index) indeksEdit--;
+    }
+
+    // --- simpan ---
+    private async Task SimpanData()
+    {
+        modalError = "";
+
+        if (!DateOnly.TryParseExact(tglPenggunaanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                                    DateTimeStyles.None, out var tgl))
+        {
+            modalError = "Harap isi tanggal penggunaan.";
+            return;
+        }
+
+        if (tgl > HariIni)
+        {
+            modalError = "Tanggal penggunaan tidak boleh lebih dari hari ini.";
+            return;
+        }
+
+        if (items.Count == 0)
+        {
+            modalError = $"Harap tambah bahan baku untuk penggunaan {kodePenggunaan}.";
+            return;
+        }
+
+        sedangSimpan = true;
+        try
+        {
+            var model = new PenggunaanModels
+            {
+                IdPenggunaan = kodePenggunaan,
+                TglPenggunaan = tgl,
+                Details = items.Select(i => new DetailPenggunaanInputModel
+                {
+                    IdBahanBaku = i.IdBahanBaku,
+                    TglKadaluwarsa = i.Tgl,
+                    JumlahPenggunaan = i.Jumlah
+                }).ToList()
+            };
+
+            var (success, error) = await PenggunaanService.CreateAsync(model);
+
+            if (success)
+            {
+                pesanSukses = $"No. Penggunaan {kodePenggunaan} berhasil ditambahkan.";
+                modalTampil = false;
+                await MuatData();
+            }
+            else
+            {
+                modalError = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            modalError = "Gagal menyimpan: " + ex.Message;
+        }
+        finally
+        {
+            sedangSimpan = false;
+        }
+    }
+}
