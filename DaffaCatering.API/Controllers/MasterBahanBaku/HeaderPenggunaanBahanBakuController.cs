@@ -40,6 +40,15 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] HeaderPenggunaanBahanBakuDto input)
         {
+            // Satu baris per kombinasi bahan baku + tanggal kadaluwarsa (aturan yang sama dengan WinForms)
+            var adaKembar = input.Details
+                .GroupBy(d => new { d.IdBahanBaku, d.TglKadaluwarsa })
+                .Any(g => g.Count() > 1);
+            if (adaKembar)
+                return BadRequest("Bahan baku dengan tanggal kadaluwarsa yang sama tidak boleh muncul lebih dari satu kali.");
+
+            var hariIni = DateOnly.FromDateTime(DateTime.Today);
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -51,46 +60,42 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
 
                 foreach (var detailInput in input.Details)
                 {
-                    decimal sisaDibutuhkan = detailInput.JumlahPenggunaan;
+                    // Batch yang dipilih user: bahan baku + tanggal kadaluwarsa
+                    var batch = await _context.DetailBahanBakus.FirstOrDefaultAsync(d =>
+                        d.IdBahanBaku == detailInput.IdBahanBaku &&
+                        d.TglKadaluwarsa == detailInput.TglKadaluwarsa);
 
-                    // Ambil semua batch bahan baku ini yang masih ada stok,
-                    // urutkan dari tanggal kadaluwarsa PALING DEKAT (FEFO)
-                    var batches = await _context.DetailBahanBakus
-                        .Where(d => d.IdBahanBaku == detailInput.IdBahanBaku && d.SisaStok > 0)
-                        .OrderBy(d => d.TglKadaluwarsa)
-                        .ToListAsync();
+                    if (batch == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return BadRequest($"Batch '{detailInput.IdBahanBaku}' dengan tanggal kadaluwarsa {detailInput.TglKadaluwarsa:dd MMM yyyy} tidak ditemukan.");
+                    }
 
-                    decimal totalTersedia = batches.Sum(b => b.SisaStok ?? 0);
-                    if (totalTersedia < sisaDibutuhkan)
+                    if (batch.TglKadaluwarsa < hariIni)
+                    {
+                        await transaction.RollbackAsync();
+                        return BadRequest($"Bahan baku '{detailInput.IdBahanBaku}' dengan tanggal kadaluwarsa {detailInput.TglKadaluwarsa:dd MMM yyyy} sudah kadaluwarsa.");
+                    }
+
+                    decimal stok = batch.SisaStok ?? 0;
+                    if (stok < detailInput.JumlahPenggunaan)
                     {
                         await transaction.RollbackAsync();
                         return BadRequest(
-                            $"Stok '{detailInput.IdBahanBaku}' tidak cukup. " +
-                            $"Dibutuhkan {sisaDibutuhkan}, tersedia {totalTersedia}");
+                            $"Stok '{detailInput.IdBahanBaku}' (kadaluwarsa {detailInput.TglKadaluwarsa:dd MMM yyyy}) tidak cukup. " +
+                            $"Dibutuhkan {detailInput.JumlahPenggunaan}, tersedia {stok}");
                     }
 
-                    // Ambil dari batch dengan expired paling dekat dulu (FEFO),
-                    // pecah ke beberapa batch kalau 1 batch nggak cukup
-                    foreach (var batch in batches)
+                    batch.SisaStok = stok - detailInput.JumlahPenggunaan;
+
+                    entity.DetailPenggunaans.Add(new Models.DetailPenggunaan
                     {
-                        if (sisaDibutuhkan <= 0) break;
-
-                        decimal ambilDariBatchIni = Math.Min(batch.SisaStok ?? 0, sisaDibutuhkan);
-
-                        // Kurangi stok di batch ini
-                        batch.SisaStok -= ambilDariBatchIni;
-                        sisaDibutuhkan -= ambilDariBatchIni;
-
-                        // Catat detail penggunaan untuk batch spesifik ini
-                        entity.DetailPenggunaans.Add(new Models.DetailPenggunaan
-                        {
-                            IdPenggunaan = input.IdPenggunaan,
-                            IdBahanBaku = detailInput.IdBahanBaku,
-                            TglKadaluwarsa = batch.TglKadaluwarsa,
-                            IdSatuan = batch.IdSatuan,
-                            JumlahPenggunaan = ambilDariBatchIni
-                        });
-                    }
+                        IdPenggunaan = input.IdPenggunaan,
+                        IdBahanBaku = detailInput.IdBahanBaku,
+                        TglKadaluwarsa = batch.TglKadaluwarsa,
+                        IdSatuan = batch.IdSatuan,
+                        JumlahPenggunaan = detailInput.JumlahPenggunaan
+                    });
                 }
 
                 _context.HeaderPenggunaans.Add(entity);
