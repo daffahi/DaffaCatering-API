@@ -10,7 +10,6 @@ namespace DaffaCatering.Blazor.Models.MasterBahanBaku
 
         public DateOnly TglPenggunaan { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-        // Dikirim ke API saat POST (bentuknya sama dengan HeaderPenggunaanBahanBakuDto)
         public List<DetailPenggunaanModel> Details { get; set; } = new();
     }
 
