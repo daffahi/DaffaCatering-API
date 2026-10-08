@@ -1171,3 +1171,72 @@ tbody tr {
 .batch-table .pill {
     margin-left: .4rem;
 }
+
+/* ---------- Penggunaan: accordion ---------- */
+
+.usage-row {
+    cursor: pointer;
+}
+
+    .usage-row:hover td {
+        background: var(--brand-50);
+    }
+
+.usage-chevron {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    display: grid;
+    place-items: center;
+    transition: transform .2s ease, background .15s ease;
+}
+
+    .usage-chevron.open {
+        transform: rotate(180deg);
+        background: var(--brand-100);
+        color: var(--brand-800);
+    }
+
+.usage-detail-row td {
+    padding: 0.5rem 1.25rem 0.5rem;
+    background: var(--brand-50);
+}
+
+.usage-detail {
+    padding: .9rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.usage-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .usage-detail-table th {
+        padding: .55rem .75rem;
+        text-align: left;
+        font-size: .7rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--muted);
+        border-bottom: 1px solid var(--line);
+    }
+
+    .usage-detail-table td {
+        padding: .65rem .75rem;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .usage-detail-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+.usage-total {
+    font-weight: 700;
+    color: var(--brand-800);
+}
