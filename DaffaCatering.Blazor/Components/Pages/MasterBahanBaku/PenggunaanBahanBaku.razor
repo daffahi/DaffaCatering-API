@@ -61,7 +61,7 @@
         <div class="toolbar">
             <label class="search">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari nomor atau tanggal penggunaan..."
+                <input type="text" placeholder="Cari nomor penggunaan atau nama bahan baku..."
                        @bind="teksCari" @bind:event="oninput" />
             </label>
 
@@ -92,23 +92,93 @@
                         <tr>
                             <th>Penggunaan</th>
                             <th>Tanggal</th>
+                            <th>Jumlah Detail</th>
+                            <th>Total Digunakan</th>
+                            <th></th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach (var (item, i) in view.Select((item, i) => (item, i)))
                         {
-                            <tr @key="item.IdPenggunaan" style="--i:@Math.Min(i, 12)">
+                            var total = item.Details.Sum(x => x.JumlahPenggunaan);
+                            var jumlahDetail = item.Details.Count;
+                            var isOpen = expandedId == item.IdPenggunaan;
+
+                            <tr class="usage-row"
+                                @key="item.IdPenggunaan"
+                                style="--i:@Math.Min(i, 12)"
+                                @onclick="() => ToggleDetail(item.IdPenggunaan)">
+
                                 <td>
                                     <div class="who">
-                                        <div class="avatar tone-@Warna(item.IdPenggunaan)">PB</div>
+                                        <div class="avatar tone-@Warna(item.IdPenggunaan)">
+                                            PB
+                                        </div>
+
                                         <div>
                                             <div class="name">@item.IdPenggunaan</div>
                                             <div class="sub">Penggunaan bahan baku</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td>@item.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture)</td>
+
+                                <td>
+                                    @item.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture)
+                                </td>
+
+                                <td>
+                                    @jumlahDetail bahan
+                                </td>
+
+                                <td class="usage-total">
+                                    @FormatAngka(total) item
+                                </td>
+
+                                <td>
+                                    <button type="button"
+                                            class="usage-chevron @(isOpen ? "open" : "")"
+                                            @onclick:stopPropagation="true"
+                                            @onclick="() => ToggleDetail(item.IdPenggunaan)">
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                </td>
                             </tr>
+
+                            @if (isOpen)
+                            {
+                                <tr class="usage-detail-row">
+                                    <td colspan="5">
+                                        <div class="usage-detail">
+
+                                            <table class="usage-detail-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Bahan Baku</th>
+                                                        <th>Jumlah</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    @foreach (var detail in item.Details)
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                @detail.NamaBahanBaku
+                                                            </td>
+
+                                                            <td>
+                                                                @FormatAngka(detail.JumlahPenggunaan)
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
@@ -118,7 +188,7 @@
                     <div class="empty">
                         <i class="fa-regular fa-face-frown-open"></i>
                         <strong>Penggunaan tidak ditemukan</strong>
-                        <span>Coba ubah kata kunci atau tambah penggunaan baru.</span>
+                        <span>Coba ubah kata kunci atau tambah penggunaan baru</span>
                     </div>
                 }
             </div>
@@ -396,6 +466,13 @@
 </div>
 
 @code {
+    private string? expandedId;
+
+    private void ToggleDetail(string id)
+    {
+        expandedId = expandedId == id ? null : id;
+    }
+
     private static readonly CultureInfo IdCulture = new("id-ID");
 
     private List<PenggunaanModels> daftarPenggunaan = new();
@@ -446,7 +523,9 @@
     private IEnumerable<PenggunaanModels> Filtered => daftarPenggunaan
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
             || (p.IdPenggunaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || p.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture).Contains(teksCari, StringComparison.OrdinalIgnoreCase))
+            || p.Details.Any(d =>
+                (d.NamaBahanBaku ?? "")
+                    .Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
         .OrderByDescending(p => p.IdPenggunaan);
 
     // --- daftar batch untuk dialog pencarian ---
@@ -724,7 +803,7 @@
             {
                 IdPenggunaan = kodePenggunaan,
                 TglPenggunaan = tgl,
-                Details = items.Select(i => new DetailPenggunaanInputModel
+                Details = items.Select(i => new DetailPenggunaanModel
                 {
                     IdBahanBaku = i.IdBahanBaku,
                     TglKadaluwarsa = i.Tgl,
