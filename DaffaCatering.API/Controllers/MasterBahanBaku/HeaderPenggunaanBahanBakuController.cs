@@ -23,9 +23,27 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var data = await _context.HeaderPenggunaans.ToListAsync();
-            return Ok(data);
-        }
+            var data = await _context.HeaderPenggunaans
+            .Include(x => x.DetailPenggunaans)
+            .ThenInclude(x => x.IdBahanBakuNavigation)
+            .Select(x => new
+            {
+                x.IdPenggunaan,
+                x.TglPenggunaan,
+
+                Details = x.DetailPenggunaans.Select(d => new
+                {
+                    d.IdBahanBaku,
+                    NamaBahanBaku = d.IdBahanBakuNavigation.NamaBahanBaku,
+                    d.IdSatuan,
+                    d.TglKadaluwarsa,
+                    d.JumlahPenggunaan
+                }).ToList()
+            })
+            .ToListAsync();
+
+                return Ok(data);
+            }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
