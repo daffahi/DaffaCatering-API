@@ -135,6 +135,7 @@
     </nav>
 </div>
 
+
 @code {
     [Parameter]
     public bool Collapsed { get; set; }
@@ -147,20 +148,32 @@
     private void ToggleMasterData()
     {
         masterDataOpen = !masterDataOpen;
+        penjualanOpen = false;
+        pembelianOpen = false;
+        inventoryOpen = false;
     }
 
     private void TogglePenjualan()
     {
         penjualanOpen = !penjualanOpen;
+        masterDataOpen = false;
+        pembelianOpen = false;
+        inventoryOpen = false;
     }
 
     private void TogglePembelian()
     {
         pembelianOpen = !pembelianOpen;
+        masterDataOpen = false;
+        penjualanOpen = false;
+        inventoryOpen = false;
     }
 
     private void ToggleInventory()
     {
         inventoryOpen = !inventoryOpen;
+        masterDataOpen = false;
+        penjualanOpen = false;
+        pembelianOpen = false;
     }
 }
