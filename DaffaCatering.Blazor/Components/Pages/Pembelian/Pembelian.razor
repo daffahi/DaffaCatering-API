@@ -1,0 +1,122 @@
+﻿@page "/pembelian-bahan-baku"
+
+@using System.Globalization
+@inject PembelianService PembelianService
+@inject PemasokService PemasokService
+@inject BahanBakuService BahanBakuService
+@inject SatuanBahanBakuService SatuanBahanBakuService
+
+<div class="pembelian-page">
+
+	<section class="hero">
+		<div class="hero-top">
+			<div>
+				<span class="eyebrow">Pembelian</span>
+				<h1>Pembelian Bahan Baku</h1>
+				<p>Catat transaksi pembelian dari pemasok</p>
+			</div>
+			<button class="btn-add" @onclick="">
+				<i class="fa-solid fa-plus"></i> Tambah Pembelian
+			</button>
+		</div>
+
+		<div class="hero-stats">
+			<div class="chip">
+				<span class="chip-value">@daftarPembelian.Count</span>
+				<span class="chip-label">Total</span>
+			</div>
+            <div class="chip">
+                <span class="chip-value">@JumlahHariIni</span>
+                <span class="chip-label">Hari Ini</span>
+            </div>
+		</div>
+	</section>
+
+	@if (!string.IsNullOrEmpty(pesanSukses))
+    {
+        <div class="banner ok">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@pesanSukses</span>
+            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly CultureInfo IdCulture = new("id-ID");
+    private List<PembelianModels> daftarPembelian = new();
+    private List<PemasokModels> daftarPemasok = new();
+    private List<BahanBakuModels> daftarBahanBaku = new();
+    private List<SatuanBahanBakuModels> daftarSatuan = new();
+	private bool isLoading = true;
+    private string pesanError = "";
+    private string pesanSukses = "";
+
+    private bool modalTampil = false;
+    private bool isEditMode = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private PembelianModels formModel = new();
+
+    private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
+    private int JumlahHariIni => daftarPembelian.Count(p => p.TglPembelian == HariIni);
+
+    // --- muat data ---
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        pesanError = "";
+
+        try
+        {
+            daftarPembelian = await PembelianService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat transaksi pembelian: " + ex.Message;
+        }
+        try
+        {
+            daftarPemasok = await PemasokService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat pemasok: " + ex.Message;
+        }
+        try
+        {
+            daftarBahanBaku = await BahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat bahan baku: " + ex.Message;
+        }
+        try
+        {
+            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat satuan: " + ex.Message;
+        }
+        isLoading = false;
+    }
+}
