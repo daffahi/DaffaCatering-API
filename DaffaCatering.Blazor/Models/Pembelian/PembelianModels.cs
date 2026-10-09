@@ -16,7 +16,7 @@ namespace DaffaCatering.Blazor.Models.Pembelian
 
         public decimal total { get; set; }
 
-        public bool Status { get; set; } = true;
+        public string? Status { get; set; }
 
         public List<DetailPembelian> Details { get; set; } = new();
     }
