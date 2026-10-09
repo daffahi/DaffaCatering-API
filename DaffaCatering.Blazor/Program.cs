@@ -6,6 +6,7 @@ using DaffaCatering.Blazor.Services.MasterMakanan;
 using DaffaCatering.Blazor.Services.MasterPelanggan;
 using DaffaCatering.Blazor.Services.MasterPemasok;
 using DaffaCatering.Blazor.Services.MasterSatuanBahanBaku;
+using DaffaCatering.Blazor.Services.Pembelian;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Globalization;
 
@@ -34,6 +35,7 @@ builder.Services.AddScoped<ResepService>();
 builder.Services.AddScoped<MenuMakananService>();
 builder.Services.AddScoped<PenggunaanService>();
 builder.Services.AddScoped<PenyesuaianBahanBakuService>();
+builder.Services.AddScoped<PembelianService>();
 
 var cultureInfo = new CultureInfo("id-ID");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
