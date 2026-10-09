@@ -11,4 +11,9 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Penjualan\" />
+    <Folder Include="Services\Penjualan\" />
+  </ItemGroup>
+
 </Project>
