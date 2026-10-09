@@ -57,23 +57,47 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="sales-data" title="Sales">
+            <button class="nav-link btn-submenu" @onclick="TogglePenjualan" title="Penjualan">
                 <i class="fa-solid fa-cart-shopping fa-fw"></i>
                 @if (!Collapsed)
                 {
                     <span>Penjualan</span>
+                    <i class="fa-solid fa-chevron-down chevron @(penjualanOpen ? "rotated" : "")"></i>
                 }
-            </NavLink>
+            </button>
+            @if ( penjualanOpen && !Collapsed)
+            {
+                <div class="submenu">
+                    <NavLink class="nav-link submenu-link" href="pesanan-penjualan">
+                        <i class="fa-solid fa-circle-dot fa-fw"></i> Pesanan Penjualan
+                    </NavLink>
+                    <NavLink class="nav-link submenu-link" href="penjualan">
+                        <i class="fa-solid fa-circle-dot fa-fw"></i> Penjualan
+                    </NavLink>
+                </div>
+            }
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="purchase-data" title="Purchase">
+            <button class="nav-link btn-submenu" @onclick="TogglePembelian" title="Pembelian">
                 <i class="fa-solid fa-truck-fast fa-fw"></i>
                 @if (!Collapsed)
                 {
                     <span>Pembelian</span>
+                    <i class="fa-solid fa-chevron-down chevron @(pembelianOpen ? "rotated" : "")"></i>
                 }
-            </NavLink>
+            </button>
+            @if ( pembelianOpen && !Collapsed)
+            {
+                <div class="submenu">
+                    <NavLink class="nav-link submenu-link" href="pembelian-bahan-baku">
+                        <i class="fa-solid fa-circle-dot fa-fw"></i> Pembelian
+                    </NavLink>
+                    <NavLink class="nav-link submenu-link" href="penerimaan-bahan-baku">
+                        <i class="fa-solid fa-circle-dot fa-fw"></i> Penerimaan BB
+                    </NavLink>
+                </div>
+            }
         </div>
 
         <div class="nav-item px-3">
@@ -116,11 +140,23 @@
     public bool Collapsed { get; set; }
 
     private bool masterDataOpen = false;
+    private bool penjualanOpen = false;
+    private bool pembelianOpen = false;
     private bool inventoryOpen = false;
 
     private void ToggleMasterData()
     {
         masterDataOpen = !masterDataOpen;
+    }
+
+    private void TogglePenjualan()
+    {
+        penjualanOpen = !penjualanOpen;
+    }
+
+    private void TogglePembelian()
+    {
+        pembelianOpen = !pembelianOpen;
     }
 
     private void ToggleInventory()
