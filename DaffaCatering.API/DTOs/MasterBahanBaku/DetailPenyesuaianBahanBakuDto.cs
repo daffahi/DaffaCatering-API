@@ -13,6 +13,7 @@ namespace DaffaCatering.API.DTOs.MasterBahanBaku
         public string IdSatuan { get; set; } = null!;
 
         [Required(ErrorMessage = "Stok fisik hasil hitung wajib diisi")]
+        [Range(0, 999999999, ErrorMessage = "Stok fisik tidak boleh negatif")]
         public decimal StokFisik { get; set; }
 
         [Required]
