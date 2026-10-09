@@ -20,10 +20,29 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
             _context = context;
         }
 
+        // Dikembalikan dengan properti "Details" supaya cocok dengan PenyesuaianBahanBakuModels di Blazor
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var data = await _context.HeaderPenyesuaians.ToListAsync();
+            var data = await _context.HeaderPenyesuaians
+                .AsNoTracking()
+                .OrderByDescending(h => h.IdPenyesuaian)
+                .Select(h => new
+                {
+                    h.IdPenyesuaian,
+                    h.TglPenyesuaian,
+                    Details = h.DetailPenyesuaians.Select(d => new
+                    {
+                        d.IdBahanBaku,
+                        d.IdSatuan,
+                        d.StokFisik,
+                        d.SelisihStok,
+                        d.TglKadaluwarsa,
+                        d.Keterangan
+                    }).ToList()
+                })
+                .ToListAsync();
+
             return Ok(data);
         }
 
@@ -31,8 +50,24 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         public async Task<IActionResult> GetById(string id)
         {
             var data = await _context.HeaderPenyesuaians
-                .Include(h => h.DetailPenyesuaians)
-                .FirstOrDefaultAsync(h => h.IdPenyesuaian == id);
+                .AsNoTracking()
+                .Where(h => h.IdPenyesuaian == id)
+                .Select(h => new
+                {
+                    h.IdPenyesuaian,
+                    h.TglPenyesuaian,
+                    Details = h.DetailPenyesuaians.Select(d => new
+                    {
+                        d.IdBahanBaku,
+                        d.IdSatuan,
+                        d.StokFisik,
+                        d.SelisihStok,
+                        d.TglKadaluwarsa,
+                        d.Keterangan
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
             if (data == null) return NotFound();
             return Ok(data);
         }
@@ -40,6 +75,16 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] HeaderPenyesuaianBahanBakuDto input)
         {
+            // Bahan baku + tanggal kadaluwarsa yang sama tidak boleh muncul dua kali
+            var adaDuplikat = input.Details
+                .GroupBy(d => new { d.IdBahanBaku, d.TglKadaluwarsa })
+                .Any(g => g.Count() > 1);
+
+            if (adaDuplikat)
+            {
+                return BadRequest("Ada bahan baku dengan tanggal kadaluwarsa yang sama dalam satu penyesuaian");
+            }
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -56,17 +101,27 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
                         d => d.IdBahanBaku == detailInput.IdBahanBaku
                           && d.TglKadaluwarsa == detailInput.TglKadaluwarsa);
 
-                    decimal stokSistemSebelumnya = existingBatch?.SisaStok ?? 0;
-                    decimal selisih = detailInput.StokFisik - stokSistemSebelumnya;
+                    decimal selisih;
 
                     if (existingBatch != null)
                     {
+                        // SisaStok bertipe decimal? sehingga harus diubah ke decimal dulu
+                        decimal stokSebelumnya = 0;
+                        if (existingBatch.SisaStok != null)
+                        {
+                            stokSebelumnya = existingBatch.SisaStok.Value;
+                        }
+
                         // Batch sudah ada -> koreksi stoknya jadi sesuai stok fisik
+                        selisih = detailInput.StokFisik - stokSebelumnya;
                         existingBatch.SisaStok = detailInput.StokFisik;
                     }
                     else
                     {
-                        // Batch baru (misal hasil pecah dari batch lama ke tanggal baru)
+                        // Batch baru (hasil pecah dari batch lama ke tanggal baru).
+                        // Selisih 0 karena stoknya dipindahkan dari batch lain (sama seperti WinForms)
+                        selisih = 0;
+
                         _context.DetailBahanBakus.Add(new Models.DetailBahanBaku
                         {
                             IdBahanBaku = detailInput.IdBahanBaku,
@@ -75,6 +130,31 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
                             StokAwal = detailInput.StokFisik,
                             SisaStok = detailInput.StokFisik
                         });
+
+                        // FEFO: kurangi stok dari batch dengan tanggal kadaluwarsa terdekat
+                        decimal sisaKurang = detailInput.StokFisik;
+
+                        var batchLain = await _context.DetailBahanBakus
+                            .Where(d => d.IdBahanBaku == detailInput.IdBahanBaku
+                                     && d.TglKadaluwarsa != detailInput.TglKadaluwarsa
+                                     && d.SisaStok > 0)
+                            .OrderBy(d => d.TglKadaluwarsa)
+                            .ToListAsync();
+
+                        foreach (var batch in batchLain)
+                        {
+                            if (sisaKurang <= 0) break;
+
+                            decimal stokBatch = 0;
+                            if (batch.SisaStok != null)
+                            {
+                                stokBatch = batch.SisaStok.Value;
+                            }
+
+                            decimal dikurangi = Math.Min(stokBatch, sisaKurang);
+                            batch.SisaStok = stokBatch - dikurangi;
+                            sisaKurang -= dikurangi;
+                        }
                     }
 
                     // Catat histori penyesuaian, termasuk selisihnya
@@ -94,7 +174,10 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return CreatedAtAction(nameof(GetById), new { id = entity.IdPenyesuaian }, entity);
+                // Jangan kembalikan entity utuh (ada navigation property yang bisa berputar saat diserialisasi)
+                return CreatedAtAction(nameof(GetById),
+                    new { id = entity.IdPenyesuaian },
+                    new { entity.IdPenyesuaian, entity.TglPenyesuaian });
             }
             catch (Exception ex)
             {
