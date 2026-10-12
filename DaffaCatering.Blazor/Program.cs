@@ -1,12 +1,12 @@
 using DaffaCatering.Blazor.Components;
 using DaffaCatering.Blazor.Services;
-using DaffaCatering.Blazor.Services.MasterBahanbaku;
 using DaffaCatering.Blazor.Services.MasterBahanBaku;
 using DaffaCatering.Blazor.Services.MasterMakanan;
 using DaffaCatering.Blazor.Services.MasterPelanggan;
 using DaffaCatering.Blazor.Services.MasterPemasok;
 using DaffaCatering.Blazor.Services.MasterSatuanBahanBaku;
 using DaffaCatering.Blazor.Services.Pembelian;
+using DaffaCatering.Blazor.Services.Persediaan;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Globalization;
 
@@ -26,16 +26,23 @@ builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(
     sp => sp.GetRequiredService<JwtAuthStateProvider>());
 
+// MASTER DATA //
 builder.Services.AddScoped<PelangganService>();
 builder.Services.AddScoped<PemasokService>();
 builder.Services.AddScoped<BahanBakuService>();
 builder.Services.AddScoped<SatuanBahanBakuService>();
 builder.Services.AddScoped<KonversiSatuanService>();
-builder.Services.AddScoped<ResepService>();
 builder.Services.AddScoped<MenuMakananService>();
+builder.Services.AddScoped<ResepService>();
+
+// PENJUALAN //
+
+// PEMBELIAN //
+builder.Services.AddScoped<PembelianService>();
+
+// PERSEDIAAN //
 builder.Services.AddScoped<PenggunaanService>();
 builder.Services.AddScoped<PenyesuaianBahanBakuService>();
-builder.Services.AddScoped<PembelianService>();
 
 var cultureInfo = new CultureInfo("id-ID");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
