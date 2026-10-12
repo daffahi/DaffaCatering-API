@@ -1,6 +1,6 @@
-﻿using DaffaCatering.Blazor.Models.MasterBahanBaku;
+﻿using DaffaCatering.Blazor.Models.Persediaan;
 
-namespace DaffaCatering.Blazor.Services.MasterBahanBaku
+namespace DaffaCatering.Blazor.Services.Persediaan
 {
     public class PenggunaanService : CrudServiceBase<PenggunaanModels>
     {

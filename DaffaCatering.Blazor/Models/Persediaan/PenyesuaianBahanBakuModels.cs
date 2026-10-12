@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DaffaCatering.Blazor.Models.MasterBahanBaku
+namespace DaffaCatering.Blazor.Models.Persediaan
 {
     public class PenyesuaianBahanBakuModels
     {
