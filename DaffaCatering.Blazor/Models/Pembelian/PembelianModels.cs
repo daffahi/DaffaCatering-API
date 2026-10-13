@@ -12,11 +12,13 @@ namespace DaffaCatering.Blazor.Models.Pembelian
         [StringLength(10)]
         public string IdPemasok { get; set; } = "";
 
+        public string NamaPemasok{ get; set; } = "";
+
         public DateOnly TglPembelian { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
         public decimal total { get; set; }
 
-        public string? Status { get; set; }
+        public string Status { get; set; } = "";
 
         public List<DetailPembelian> Details { get; set; } = new();
     }
