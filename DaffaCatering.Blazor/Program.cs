@@ -39,6 +39,7 @@ builder.Services.AddScoped<ResepService>();
 
 // PEMBELIAN //
 builder.Services.AddScoped<PembelianService>();
+builder.Services.AddScoped<PenerimaanService>();
 
 // PERSEDIAAN //
 builder.Services.AddScoped<PenggunaanService>();
