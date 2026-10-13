@@ -113,7 +113,7 @@
                                 <td>
                                     <div class="who">
                                         <div class="avatar tone-@Warna(item.IdPenggunaan)">
-                                            PB
+                                            PBP
                                         </div>
 
                                         <div>
@@ -523,9 +523,7 @@
     private IEnumerable<PenggunaanModels> Filtered => daftarPenggunaan
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
             || (p.IdPenggunaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || p.Details.Any(d =>
-                (d.NamaBahanBaku ?? "")
-                    .Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
+            || p.Details.Any(d => (d.NamaBahanBaku ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
         .OrderByDescending(p => p.IdPenggunaan);
 
     // --- daftar batch untuk dialog pencarian ---
