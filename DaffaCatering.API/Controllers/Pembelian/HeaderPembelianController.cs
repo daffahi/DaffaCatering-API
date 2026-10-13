@@ -23,7 +23,9 @@ namespace DaffaCatering.API.Controllers.Pembelian
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] string? status)
         {
-            var query = _context.HeaderPembelians.AsQueryable();
+            var query = _context.HeaderPembelians
+                .Include(h => h.DetailPembelians)
+                .AsQueryable();
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(x => x.Status == status);
             var data = await query.ToListAsync();
@@ -101,17 +103,45 @@ namespace DaffaCatering.API.Controllers.Pembelian
             if (id != input.IdPembelian)
                 return BadRequest("ID tidak sesuai");
 
-            var existing = await _context.HeaderPembelians.FindAsync(id);
+            var existing = await _context.HeaderPembelians
+                .Include(h => h.DetailPembelians)
+                .FirstOrDefaultAsync(h => h.IdPembelian == id);
             if (existing == null)
                 return NotFound();
 
-            existing.IdPemasok = input.IdPemasok;
-            existing.TglPembelian = input.TglPembelian;
-            existing.Status = input.Status;
-            existing.Total = input.Details.Sum(d => d.Jumlah * d.Harga);
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                existing.IdPemasok = input.IdPemasok;
+                existing.TglPembelian = input.TglPembelian;
+                existing.Status = input.Status;
+                existing.Total = input.Details.Sum(d => d.Jumlah * d.Harga);
 
-            await _context.SaveChangesAsync();
-            return NoContent();
+                // hapus detail lama dulu, lalu simpan supaya key tidak bentrok
+                _context.DetailPembelians.RemoveRange(existing.DetailPembelians);
+                await _context.SaveChangesAsync();
+
+                foreach (var d in input.Details)
+                {
+                    _context.DetailPembelians.Add(new Models.DetailPembelian
+                    {
+                        IdPembelian = id,
+                        IdBahanBaku = d.IdBahanBaku,
+                        IdSatuan = d.IdSatuan,
+                        Jumlah = d.Jumlah,
+                        Harga = d.Harga
+                    });
+                }
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
