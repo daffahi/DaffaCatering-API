@@ -1,0 +1,410 @@
+﻿@page "/penerimaan-bahan-baku"
+
+@using System.Globalization
+@inject PenerimaanBahanBakuService PenerimaanService
+@inject PembelianService PembelianService
+@inject PemasokService PemasokService
+@inject BahanBakuService BahanBakuService
+@inject SatuanBahanBakuService SatuanBahanBakuService
+
+@{
+    var view = Filtered.ToList();
+}
+
+<div class="penerimaan-page">
+
+    <section class="hero">
+        <div class="hero-top">
+            <div>
+                <span class="eyebrow">Pembelian</span>
+                <h1>Penerimaan Bahan Baku</h1>
+                <p>Catat transaksi penerimaan bahan baku dari pembelian</p>
+            </div>
+            <button class="btn-add" @onclick="BukaModalTambah">
+                <i class="fa-solid fa-plus"></i> Tambah Penerimaan
+            </button>
+        </div>
+
+        <div class="hero-stats">
+            <div class="chip">
+                <span class="chip-value">@daftarPenerimaan.Count</span>
+                <span class="chip-label">Total</span>
+            </div>
+            <div class="chip">
+                <span class="chip-value">@JumlahHariIni</span>
+                <span class="chip-label">Hari ini</span>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrEmpty(pesanSukses))
+    {
+        <div class="banner ok">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@pesanSukses</span>
+            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    <section class="panel">
+        <div class="toolbar">
+            <label class="search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Cari nomor penerimaan atau nama pemasok..."
+                       @bind="teksCari" @bind:event="oninput" />
+            </label>
+
+            <div class="toolbar-right">
+                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
+                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="skeleton">
+                @for (var s = 0; s < 6; s++)
+                {
+                    <div class="sk-row">
+                        <div class="sk-avatar"></div>
+                        <div class="sk-lines"><div></div><div></div></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Penerimaan</th>
+                            <th>Tanggal</th>
+                            <th>Nama Pemasok</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var (item, i) in view.Select((item, i) => (item, i)))
+                        {
+                            var tutup = IsClose(item);
+
+                            <tr @key="item.IdPenerimaan" style="--i:@Math.Min(i, 12)">
+                                <td>
+                                    <div class="who">
+                                        <div class="avatar tone-@Warna(item.IdPenerimaan)">PNM</div>
+                                        <div>
+                                            <div class="name">@item.IdPenerimaan</div>
+                                            <div class="sub">Penerimaan</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@item.TglPenerimaan.ToString("dd MMMM yyyy", IdCulture)</td>
+                                <td>@NamaPemasok(item.IdPemasok)</td>
+                                <td>
+                                    <span class="pill @(tutup ? "closed" : "pending")">
+                                        <i></i>@(string.IsNullOrWhiteSpace(item.Status) ? "-" : item.Status)
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <button class="icon-btn"
+                                            title="@(tutup ? "Penerimaan sudah ditutup" : "Ubah")"
+                                            disabled="@tutup"
+                                            @onclick="() => BukaModalEdit(item)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (view.Count == 0)
+                {
+                    <div class="empty">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                        <strong>Penerimaan atau nama pemasok tidak ditemukan</strong>
+                        <span>Coba ubah kata kunci atau tambah penerimaan baru</span>
+                    </div>
+                }
+            </div>
+
+            <div class="panel-foot">
+                Menampilkan <b>@view.Count</b> dari <b>@daftarPenerimaan.Count</b> penerimaan
+            </div>
+        }
+    </section>
+
+    @* ================= MODAL FORM PENERIMAAN ================= *@
+    @if (modalTampil)
+    {
+        <div class="overlay" @onclick="TutupModal">
+            <div class="dialog wide" @onclick:stopPropagation>
+
+                <header class="dialog-head">
+                    <div class="dialog-icon">
+                        <i class="fa-solid @(isEditMode ? "fa-pen" : "fa-plus")"></i>
+                    </div>
+                    <div>
+                        <h5>@(isEditMode ? "Ubah" : "Tambah") Penerimaan Bahan Baku</h5>
+                        <p>@(isEditMode ? "Perbarui data penerimaan" : "Isi data penerimaan baru")</p>
+                    </div>
+                    <button type="button" class="dialog-close" @onclick="TutupModal">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </header>
+
+                <div class="dialog-body">
+
+                    @* ---------- HEADER ---------- *@
+                    <div class="row2">
+                        <div class="field">
+                            <label>No. Penerimaan <span class="auto-tag">Auto</span></label>
+                            <input type="text" value="@kodePenerimaan" disabled />
+                        </div>
+                        <div class="field">
+                            <label>Tanggal Pembelian <b class="req">*</b></label>
+                            <input type="date" value="@tglPenerimaanInput" max="@Iso(HariIni)"
+                                   disabled="@(items.Count > 0)"
+                                   @onchange="e => tglPenerimaanInput = e.Value?.ToString() ?? string.Empty" />
+                            @if (items.Count > 0)
+                            {
+                                <span class="hint">Terkunci selama masih ada item.</span>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    // =====================================================
+    // 1. STATE & MODEL
+    // =====================================================
+    private static readonly CultureInfo IdCulture = new("id-ID");
+
+    private record PemasokRow(string IdPemasok, string NamaPemasok);
+
+    private class ItemPenerimaan
+    {
+        public string IdBahanBaku { get; set; } = "";
+        public string NamaBahanBaku { get; set; } = "";
+        public string IdSatuan { get; set; } = "";
+        public decimal Jumlah { get; set; }
+        public DateOnly TglKadaluwarsa { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public string Status { get; set; } = "";
+    }
+
+    // --- data ---
+    private List<PenerimaanBahanBakuModels> daftarPenerimaan = new();
+    private List<PembelianModels> daftarPembelian = new();
+    private List<PemasokModels> daftarPemasok = new();
+    private List<BahanBakuModels> daftarBahanBaku = new();
+    private List<SatuanBahanBakuModels> daftarSatuan = new();
+
+    // --- halaman utama ---
+    private bool isLoading = true;
+    private string pesanSukses = "";
+    private string pesanError = "";
+    private string teksCari = "";
+
+    // --- modal form: header ---
+    private bool modalTampil = false;
+    private bool isEditMode = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private string kodePenerimaan = "";
+    private string tglPenerimaanInput = "";
+    private string statusEdit = "";
+    private PemasokRow? pemasokDipilih;
+
+    // --- modal form: detail ---
+    private readonly List<ItemPenerimaan> items = new();
+
+    // --- modal cari pembelian ---
+    private bool cariPembelian = false;
+    private string teksCariPembelian = "";
+
+    // --- modal cari pemasok ---
+    private bool cariPemasokTampil = false;
+    private string teksCariPemasok = "";
+
+    // =====================================================
+    // 2. LIFECYCLE & MUAT DATA
+    // =====================================================
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        pesanError = "";
+
+        try
+        {
+            daftarPenerimaan = await PenerimaanService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat penerimaan: " + ex.Message;
+        }
+        try
+        {
+            daftarPembelian = await PembelianService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat pembelian: " + ex.Message;
+        }
+        try
+        {
+            daftarPemasok = await PemasokService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat pemasok: " + ex.Message;
+        }
+        try
+        {
+            daftarBahanBaku = await BahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat bahan baku: " + ex.Message;
+        }
+        try
+        {
+            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError += " Gagal memuat satuan: " + ex.Message;
+        }
+
+        isLoading = false;
+    }
+
+    // =====================================================
+    // 3. HELPER UMUM (format & lookup nama)
+    // =====================================================
+    private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
+
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
+
+    private string NamaPemasok(string? id)
+        => daftarPemasok.FirstOrDefault(p => p.IdPemasok == id)?.NamaPemasok ?? (id ?? "-");
+
+    // =====================================================
+    // 4. HERO & DAFTAR PENERIMAAN
+    // =====================================================
+    private int JumlahHariIni => daftarPenerimaan.Count(p => p.TglPenerimaan == HariIni);
+
+    private IEnumerable<PenerimaanBahanBakuModels> Filtered => daftarPenerimaan
+        .Where(p => string.IsNullOrWhiteSpace(teksCari)
+            || (p.IdPenerimaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || NamaPemasok(p.IdPemasok).Contains(teksCari, StringComparison.OrdinalIgnoreCase))
+        .OrderByDescending(p => p.IdPenerimaan);
+
+    private static bool IsClose(PenerimaanBahanBakuModels p)
+        => string.Equals(p.Status, "Close", StringComparison.OrdinalIgnoreCase);
+
+    // =====================================================
+    // 5. MODAL FORM: BUKA / TUTUP / RESET
+    // =====================================================
+    // ID otomatis: PNM + 7 digit
+    private static string BuatIdBerikutnya(IEnumerable<PenerimaanBahanBakuModels> data)
+    {
+        const string prefix = "PNM";
+
+        var max = data
+            .Select(c => c.IdPenerimaan)
+            .Where(id => !string.IsNullOrEmpty(id)
+                         && id.StartsWith(prefix)
+                         && int.TryParse(id[prefix.Length..], out _))
+            .Select(id => int.Parse(id[prefix.Length..]))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return $"{prefix}{max + 1:D7}";
+    }
+
+    private async Task BukaModalTambah()
+    {
+        ResetForm();
+        isEditMode = false;
+        statusEdit = "";
+
+        try
+        {
+            // data terbaru supaya nomor urut tidak basi
+            var terbaru = await PenerimaanService.GetAllAsync();
+            daftarBahanBaku = await BahanBakuService.GetAllAsync();
+            kodePenerimaan = BuatIdBerikutnya(terbaru);
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal menyiapkan form: " + ex.Message;
+            return;
+        }
+
+        tglPenerimaanInput = Iso(HariIni);
+        modalTampil = true;
+    }
+
+    private void BukaModalEdit(PenerimaanBahanBakuModels item)
+    {
+
+    }
+
+    private void ResetForm()
+    {
+        pesanSukses = "";
+        pesanError = "";
+        modalError = "";
+        cariPembelian = false;
+        cariPemasokTampil = false;
+        pemasokDipilih = null;
+        items.Clear();
+        KosongkanInputDetail();
+    }
+
+    private void TutupModal()
+    {
+        cariPembelian = false;
+        cariPemasokTampil = false;
+        modalTampil = false;
+    }
+
+    // =====================================================
+    // 6. MODAL FORM: DETAIL
+    // =====================================================
+    private void KosongkanInputDetail()
+    {
+
+    }
+}
