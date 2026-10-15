@@ -474,18 +474,36 @@
 </div>
 
 @code {
+    // =====================================================
+    // 1. STATE & MODEL
+    // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
+    private record PemasokRow(string IdPemasok, string NamaPemasok);
+    private record BahanRow(string IdBahanBaku, string NamaBahanBaku);
+
+    private class ItemPembelian
+    {
+        public string IdBahanBaku { get; set; } = "";
+        public string NamaBahanBaku { get; set; } = "";
+        public string IdSatuan { get; set; } = "";
+        public decimal Jumlah { get; set; }
+        public decimal Harga { get; set; }
+    }
+
+    // --- data ---
     private List<PembelianModels> daftarPembelian = new();
     private List<PemasokModels> daftarPemasok = new();
     private List<BahanBakuModels> daftarBahanBaku = new();
     private List<SatuanBahanBakuModels> daftarSatuan = new();
+
+    // --- halaman utama ---
     private bool isLoading = true;
-    private string pesanError = "";
     private string pesanSukses = "";
+    private string pesanError = "";
     private string teksCari = "";
 
-    // --- modal form ---
+    // --- modal form: header ---
     private bool modalTampil = false;
     private bool isEditMode = false;
     private bool sedangSimpan = false;
@@ -495,7 +513,7 @@
     private string statusEdit = "";
     private PemasokRow? pemasokDipilih;
 
-    // --- input detail ---
+    // --- modal form: detail ---
     private readonly List<ItemPembelian> items = new();
     private int indeksEdit = -1;            // -1 = tambah item, >= 0 = ubah item
     private BahanRow? bahanDipilih;
@@ -512,100 +530,9 @@
     private bool cariBahanTampil = false;
     private string teksCariBahan = "";
 
-    private record PemasokRow(string IdPemasok, string NamaPemasok);
-    private record BahanRow(string IdBahanBaku, string NamaBahanBaku);
-
-    private class ItemPembelian
-    {
-        public string IdBahanBaku { get; set; } = "";
-        public string NamaBahanBaku { get; set; } = "";
-        public string IdSatuan { get; set; } = "";
-        public decimal Jumlah { get; set; }
-        public decimal Harga { get; set; }
-    }
-
-    // --- daftar pembelian ---
-    private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
-
-    private int JumlahHariIni => daftarPembelian.Count(p => p.TglPembelian == HariIni);
-
-    private IEnumerable<PembelianModels> Filtered => daftarPembelian
-        .Where(p => string.IsNullOrWhiteSpace(teksCari)
-            || (p.IdPembelian ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || NamaPemasok(p.IdPemasok).Contains(teksCari, StringComparison.OrdinalIgnoreCase))
-        .OrderByDescending(p => p.IdPembelian);
-
-    // --- daftar untuk dialog pencarian ---
-    private IEnumerable<PemasokRow> DaftarPemasokAktif => daftarPemasok
-        .Where(p => p.Status == true)
-        .Select(p => new PemasokRow(p.IdPemasok, p.NamaPemasok))
-        .Where(p => string.IsNullOrWhiteSpace(teksCariPemasok)
-            || p.IdPemasok.Contains(teksCariPemasok, StringComparison.OrdinalIgnoreCase)
-            || p.NamaPemasok.Contains(teksCariPemasok, StringComparison.OrdinalIgnoreCase))
-        .OrderBy(p => p.IdPemasok);
-
-    private IEnumerable<BahanRow> DaftarBahanAktif => daftarBahanBaku
-        .Where(b => b.Status)
-        .Select(b => new BahanRow(b.IdBahanBaku, b.NamaBahanBaku))
-        .Where(b => string.IsNullOrWhiteSpace(teksCariBahan)
-            || b.IdBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase)
-            || b.NamaBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase))
-        .OrderBy(b => b.IdBahanBaku);
-
-    // --- helper ---
-    private static bool IsClose(PembelianModels p)
-        => string.Equals(p.Status, "Close", StringComparison.OrdinalIgnoreCase);
-
-    // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
-    private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
-
-    private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
-
-    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-    private string NamaPemasok(string? id)
-        => daftarPemasok.FirstOrDefault(p => p.IdPemasok == id)?.NamaPemasok ?? (id ?? "-");
-
-    private string NamaSatuan(string? id)
-        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
-
-    private string NamaBahan(string? id)
-        => daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == id)?.NamaBahanBaku ?? (id ?? "-");
-
-    private static bool TryParseAngka(string? teks, out decimal hasil)
-    {
-        hasil = 0;
-        var t = (teks ?? "").Trim().Replace(',', '.');
-        return t.Length > 0
-               && decimal.TryParse(t, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out hasil)
-               && hasil > 0;
-    }
-
-    private string SubtotalInput
-        => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
-            ? FormatAngka(j * h)
-            : "";
-
-    private decimal TotalHarga => items.Sum(i => i.Jumlah * i.Harga);
-
-    // --- ID otomatis: PB + 7 digit ---
-    private static string BuatIdBerikutnya(IEnumerable<PembelianModels> data)
-    {
-        const string prefix = "PB";
-
-        var max = data
-            .Select(c => c.IdPembelian)
-            .Where(id => !string.IsNullOrEmpty(id)
-                         && id.StartsWith(prefix)
-                         && int.TryParse(id[prefix.Length..], out _))
-            .Select(id => int.Parse(id[prefix.Length..]))
-            .DefaultIfEmpty(0)
-            .Max();
-
-        return $"{prefix}{max + 1:D7}";
-    }
-
-    // --- muat data ---
+    // =====================================================
+    // 2. LIFECYCLE & MUAT DATA
+    // =====================================================
     protected override async Task OnInitializedAsync()
     {
         await MuatData();
@@ -648,51 +575,72 @@
         {
             pesanError += " Gagal memuat satuan: " + ex.Message;
         }
+
         isLoading = false;
     }
 
-    // --- modal cari pemasok ---
-    private void BukaPencarianPemasok()
+    // =====================================================
+    // 3. HELPER UMUM (format & lookup nama)
+    // =====================================================
+    private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
+
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
+
+    // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
+
+    private static bool TryParseAngka(string? teks, out decimal hasil)
     {
-        teksCariPemasok = "";
-        cariPemasokTampil = true;
+        hasil = 0;
+        var t = (teks ?? "").Trim().Replace(',', '.');
+        return t.Length > 0
+               && decimal.TryParse(t, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out hasil)
+               && hasil > 0;
     }
 
-    private void TutupPencarianPemasok() => cariPemasokTampil = false;
+    private string NamaPemasok(string? id)
+        => daftarPemasok.FirstOrDefault(p => p.IdPemasok == id)?.NamaPemasok ?? (id ?? "-");
 
-    private void PilihPemasok(PemasokRow r)
+    private string NamaSatuan(string? id)
+        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
+
+    private string NamaBahan(string? id)
+        => daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == id)?.NamaBahanBaku ?? (id ?? "-");
+
+    // =====================================================
+    // 4. HERO & DAFTAR PEMBELIAN
+    // =====================================================
+    private int JumlahHariIni => daftarPembelian.Count(p => p.TglPembelian == HariIni);
+
+    private IEnumerable<PembelianModels> Filtered => daftarPembelian
+        .Where(p => string.IsNullOrWhiteSpace(teksCari)
+            || (p.IdPembelian ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || NamaPemasok(p.IdPemasok).Contains(teksCari, StringComparison.OrdinalIgnoreCase))
+        .OrderByDescending(p => p.IdPembelian);
+
+    private static bool IsClose(PembelianModels p)
+        => string.Equals(p.Status, "Close", StringComparison.OrdinalIgnoreCase);
+
+    // =====================================================
+    // 5. MODAL FORM: BUKA / TUTUP / RESET
+    // =====================================================
+    // ID otomatis: PB + 7 digit
+    private static string BuatIdBerikutnya(IEnumerable<PembelianModels> data)
     {
-        pemasokDipilih = r;
-        cariPemasokTampil = false;
-    }
+        const string prefix = "PB";
 
-    // --- modal cari bahan baku ---
-    private void BukaPencarianBahan()
-    {
-        teksCariBahan = "";
-        cariBahanTampil = true;
-    }
+        var max = data
+            .Select(c => c.IdPembelian)
+            .Where(id => !string.IsNullOrEmpty(id)
+                         && id.StartsWith(prefix)
+                         && int.TryParse(id[prefix.Length..], out _))
+            .Select(id => int.Parse(id[prefix.Length..]))
+            .DefaultIfEmpty(0)
+            .Max();
 
-    private void TutupPencarianBahan() => cariBahanTampil = false;
-
-    private void PilihBahan(BahanRow r)
-    {
-        bahanDipilih = r;
-        detailError = "";
-        cariBahanTampil = false;
-    }
-
-    // --- modal form ---
-    private void ResetForm()
-    {
-        pesanSukses = "";
-        pesanError = "";
-        modalError = "";
-        cariPemasokTampil = false;
-        cariBahanTampil = false;
-        pemasokDipilih = null;
-        items.Clear();
-        KosongkanInputDetail();
+        return $"{prefix}{max + 1:D7}";
     }
 
     private async Task BukaModalTambah()
@@ -744,6 +692,18 @@
         modalTampil = true;
     }
 
+    private void ResetForm()
+    {
+        pesanSukses = "";
+        pesanError = "";
+        modalError = "";
+        cariPemasokTampil = false;
+        cariBahanTampil = false;
+        pemasokDipilih = null;
+        items.Clear();
+        KosongkanInputDetail();
+    }
+
     private void TutupModal()
     {
         cariPemasokTampil = false;
@@ -751,7 +711,64 @@
         modalTampil = false;
     }
 
-    // --- detail ---
+    // =====================================================
+    // 6. MODAL FORM: HEADER (PEMASOK)
+    // =====================================================
+    private IEnumerable<PemasokRow> DaftarPemasokAktif => daftarPemasok
+        .Where(p => p.Status == true)
+        .Select(p => new PemasokRow(p.IdPemasok, p.NamaPemasok))
+        .Where(p => string.IsNullOrWhiteSpace(teksCariPemasok)
+            || p.IdPemasok.Contains(teksCariPemasok, StringComparison.OrdinalIgnoreCase)
+            || p.NamaPemasok.Contains(teksCariPemasok, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(p => p.IdPemasok);
+
+    private void BukaPencarianPemasok()
+    {
+        teksCariPemasok = "";
+        cariPemasokTampil = true;
+    }
+
+    private void TutupPencarianPemasok() => cariPemasokTampil = false;
+
+    private void PilihPemasok(PemasokRow r)
+    {
+        pemasokDipilih = r;
+        cariPemasokTampil = false;
+    }
+
+    // =====================================================
+    // 7. MODAL FORM: DETAIL (BAHAN BAKU)
+    // =====================================================
+    private IEnumerable<BahanRow> DaftarBahanAktif => daftarBahanBaku
+        .Where(b => b.Status)
+        .Select(b => new BahanRow(b.IdBahanBaku, b.NamaBahanBaku))
+        .Where(b => string.IsNullOrWhiteSpace(teksCariBahan)
+            || b.IdBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase)
+            || b.NamaBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(b => b.IdBahanBaku);
+
+    private void BukaPencarianBahan()
+    {
+        teksCariBahan = "";
+        cariBahanTampil = true;
+    }
+
+    private void TutupPencarianBahan() => cariBahanTampil = false;
+
+    private void PilihBahan(BahanRow r)
+    {
+        bahanDipilih = r;
+        detailError = "";
+        cariBahanTampil = false;
+    }
+
+    private string SubtotalInput
+        => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
+            ? FormatAngka(j * h)
+            : "";
+
+    private decimal TotalHarga => items.Sum(i => i.Jumlah * i.Harga);
+
     private void KosongkanInputDetail()
     {
         indeksEdit = -1;
@@ -860,7 +877,9 @@
         else if (indeksEdit > index) indeksEdit--;
     }
 
-    // --- simpan ---
+    // =====================================================
+    // 8. MODAL FORM: SIMPAN
+    // =====================================================
     private async Task SimpanData()
     {
         modalError = "";
