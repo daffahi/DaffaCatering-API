@@ -1,4 +1,4 @@
-/* CSS for Pembelian component */
+/* ---------- 1. Root & variabel ---------- */
 .pembelian-page {
     --brand-950: #0c3b2e;
     --brand-800: #135846;
@@ -15,7 +15,7 @@
     padding-bottom: 2rem;
 }
 
-/* ---------- Hero ---------- */
+/* ---------- 2. Hero ---------- */
 .hero {
     position: relative;
     overflow: hidden;
@@ -53,6 +53,18 @@
         z-index: 1;
     }
 
+    .hero h1 {
+        margin: .2rem 0 .25rem;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -.02em;
+    }
+
+    .hero p {
+        margin: 0;
+        opacity: .8;
+    }
+
 .hero-top {
     display: flex;
     justify-content: space-between;
@@ -67,18 +79,6 @@
     text-transform: uppercase;
     opacity: .7;
     font-weight: 600;
-}
-
-.hero h1 {
-    margin: .2rem 0 .25rem;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -.02em;
-}
-
-.hero p {
-    margin: 0;
-    opacity: .8;
 }
 
 .btn-add {
@@ -133,7 +133,7 @@
     opacity: .8;
 }
 
-/* ---------- Banner ---------- */
+/* ---------- 3. Banner ---------- */
 .banner {
     display: flex;
     align-items: center;
@@ -149,6 +149,12 @@
 
     .banner span {
         flex: 1;
+    }
+
+    .banner.ok {
+        color: var(--brand-800);
+        background: var(--brand-100);
+        border-color: #bfe3d0;
     }
 
     .banner.in-dialog {
@@ -167,7 +173,7 @@
         opacity: 1;
     }
 
-/* ---------- Panel & toolbar ---------- */
+/* ---------- 4. Panel & toolbar ---------- */
 .panel {
     margin-top: 1.25rem;
     background: var(--surface);
@@ -185,13 +191,6 @@
     flex-wrap: wrap;
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--line);
-}
-
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    flex-wrap: wrap;
 }
 
 .search {
@@ -227,49 +226,12 @@
             box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
         }
 
-.segmented {
-    display: inline-flex;
-    padding: 4px;
-    gap: 2px;
-    border-radius: 12px;
-    background: #f3f0ea;
-}
-
-.seg {
-    display: inline-flex;
+.toolbar-right {
+    display: flex;
     align-items: center;
-    gap: .45rem;
-    border: 0;
-    background: transparent;
-    padding: .45rem .9rem;
-    border-radius: 9px;
-    font-size: .85rem;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .15s ease;
+    gap: .6rem;
+    flex-wrap: wrap;
 }
-
-    .seg span {
-        font-size: .72rem;
-        padding: .05rem .45rem;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, .06);
-    }
-
-    .seg:hover {
-        color: var(--ink);
-    }
-
-    .seg.active {
-        background: var(--brand-800);
-        color: #fff;
-        box-shadow: 0 4px 10px rgba(19, 88, 70, .35);
-    }
-
-        .seg.active span {
-            background: rgba(255, 255, 255, .22);
-        }
 
 .btn-refresh {
     width: 40px;
@@ -288,7 +250,62 @@
         background: var(--brand-50);
     }
 
-/* ---------- Table ---------- */
+/* ---------- 5. Skeleton (loading) ---------- */
+.skeleton {
+    padding: .5rem 1.25rem 1rem;
+}
+
+.sk-row {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: .8rem 0;
+    border-top: 1px solid var(--line);
+}
+
+    .sk-row:first-child {
+        border-top: 0;
+    }
+
+.sk-avatar, .sk-lines div {
+    background: linear-gradient(90deg, #f1eee8 25%, #e8e4dc 37%, #f1eee8 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.3s ease infinite;
+}
+
+.sk-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+}
+
+.sk-lines {
+    display: grid;
+    gap: .45rem;
+    flex: 1;
+}
+
+    .sk-lines div {
+        height: 10px;
+        border-radius: 6px;
+        width: 60%;
+    }
+
+        .sk-lines div:last-child {
+            width: 35%;
+        }
+
+@keyframes shimmer {
+    from {
+        background-position: 100% 0;
+    }
+
+    to {
+        background-position: 0 0;
+    }
+}
+
+/* ---------- 6. Tabel utama ---------- */
 .table-wrap {
     overflow-x: auto;
 }
@@ -344,30 +361,11 @@ tbody tr {
     }
 }
 
+/* kolom Pembelian */
 .who {
     display: flex;
     align-items: center;
     gap: .8rem;
-}
-
-.name {
-    font-weight: 600;
-}
-
-.sub {
-    font-size: .75rem;
-    color: var(--muted);
-    letter-spacing: .03em;
-}
-
-.muted {
-    color: var(--muted);
-    font-size: .9rem;
-}
-
-.mono {
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
 }
 
 .avatar {
@@ -406,6 +404,17 @@ tbody tr {
     color: #48602a;
 }
 
+.name {
+    font-weight: 600;
+}
+
+.sub {
+    font-size: .75rem;
+    color: var(--muted);
+    letter-spacing: .03em;
+}
+
+/* kolom Status */
 .pill {
     display: inline-flex;
     align-items: center;
@@ -424,15 +433,16 @@ tbody tr {
     }
 
     .pill.closed {
-        background-color: #FDECED;
-        color: #B91C1C;
+        background: #fdeced;
+        color: #b91c1c;
     }
 
     .pill.pending {
-        background-color: #FEF3C7;
-        color: #B45309;
+        background: #fef3c7;
+        color: #b45309;
     }
 
+/* kolom Aksi */
 .actions {
     text-align: right;
     white-space: nowrap;
@@ -449,11 +459,6 @@ tbody tr {
     opacity: 0;
     transition: all .15s ease;
 }
-    .icon-btn:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
 
     tbody tr:hover .icon-btn, .icon-btn:focus-visible {
         opacity: 1;
@@ -464,18 +469,19 @@ tbody tr {
         color: var(--brand-800);
     }
 
-    .icon-btn.warn:hover {
-        background: #fdf1d8;
-        color: #a86a05;
+    .icon-btn:disabled {
+        opacity: .3;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 
-    .icon-btn.ok:hover {
-        background: var(--brand-100);
-        color: var(--brand-800);
-    }
+/* angka rata */
+.mono {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
 
-
-/* ---------- Empty, footer, skeleton ---------- */
+/* ---------- 7. Empty state & footer panel ---------- */
 .empty {
     display: grid;
     justify-items: center;
@@ -501,61 +507,7 @@ tbody tr {
     background: #fcfbf8;
 }
 
-.skeleton {
-    padding: .5rem 1.25rem 1rem;
-}
-
-.sk-row {
-    display: flex;
-    align-items: center;
-    gap: .9rem;
-    padding: .8rem 0;
-    border-top: 1px solid var(--line);
-}
-
-    .sk-row:first-child {
-        border-top: 0;
-    }
-
-.sk-avatar, .sk-lines div {
-    background: linear-gradient(90deg, #f1eee8 25%, #e8e4dc 37%, #f1eee8 63%);
-    background-size: 400% 100%;
-    animation: shimmer 1.3s ease infinite;
-}
-
-.sk-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-}
-
-.sk-lines {
-    display: grid;
-    gap: .45rem;
-    flex: 1;
-}
-
-    .sk-lines div {
-        height: 10px;
-        border-radius: 6px;
-        width: 60%;
-    }
-
-        .sk-lines div:last-child {
-            width: 35%;
-        }
-
-@keyframes shimmer {
-    from {
-        background-position: 100% 0;
-    }
-
-    to {
-        background-position: 0 0;
-    }
-}
-
-/* ---------- Modal ---------- */
+/* ---------- 8. Modal form: kerangka ---------- */
 .overlay {
     position: fixed;
     inset: 0;
@@ -567,6 +519,10 @@ tbody tr {
     backdrop-filter: blur(4px);
     animation: fade .18s ease;
 }
+
+    .overlay.stacked {
+        z-index: 1060;
+    }
 
 .dialog {
     width: 100%;
@@ -581,11 +537,8 @@ tbody tr {
     animation: pop .22s cubic-bezier(.2, .9, .3, 1.2);
 }
 
-    .dialog ::deep form {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        min-height: 0;
+    .dialog.wide {
+        max-width: 780px;
     }
 
 @keyframes fade {
@@ -610,6 +563,7 @@ tbody tr {
     }
 }
 
+/* header dialog */
 .dialog-head {
     flex-shrink: 0;
     display: flex;
@@ -656,6 +610,7 @@ tbody tr {
         background: rgba(255, 255, 255, .25);
     }
 
+/* body dialog */
 .dialog-body {
     padding: 1.5rem;
     flex: 1;
@@ -663,6 +618,7 @@ tbody tr {
     overflow-y: auto;
 }
 
+/* ---------- 9. Modal form: field header ---------- */
 .row2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -682,6 +638,29 @@ tbody tr {
         font-weight: 600;
     }
 
+    .field input, .field select {
+        width: 100%;
+        padding: .65rem .85rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #faf8f4;
+        font: inherit;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+
+        .field input:focus, .field select:focus {
+            background: #fff;
+            border-color: var(--brand-500);
+            box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
+        }
+
+        .field input:disabled {
+            background: #f0ede6;
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
 .auto-tag {
     margin-left: .35rem;
     padding: .1rem .5rem;
@@ -694,100 +673,6 @@ tbody tr {
     background: var(--brand-100);
 }
 
-/* ---------- Penggunaan: pencarian batch ---------- */
-.overlay.stacked {
-    z-index: 1060;
-}
-
-.pick-row {
-    display: flex;
-    gap: .5rem;
-}
-
-    .pick-row input {
-        flex: 1;
-        min-width: 0;
-    }
-
-.batch-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-}
-
-.legend {
-    display: flex;
-    gap: .5rem;
-}
-
-.pill.exp {
-    background: #fdeced;
-    color: #9b2c33;
-}
-
-.pill.soon {
-    background: #fbecc9;
-    color: #8a5a06;
-}
-
-.batch-table tbody tr {
-    cursor: pointer;
-}
-
-    .batch-table tbody tr.row-exp {
-        background: #fdeced;
-        cursor: not-allowed;
-    }
-
-    .batch-table tbody tr.row-soon {
-        background: #fdf6dc;
-    }
-
-    .batch-table tbody tr:hover td:first-child {
-        box-shadow: inset 3px 0 0 var(--brand-500);
-    }
-
-    .batch-table tbody tr.row-exp:hover td:first-child {
-        box-shadow: inset 3px 0 0 var(--danger);
-    }
-
-.batch-table .pill {
-    margin-left: .4rem;
-}
-
-/* ---------- Bahan Baku: tambahan ---------- */
-.pill.jenis-a {
-    background: #fbecc9;
-    color: #8a5a06;
-}
-
-.pill.jenis-b {
-    background: #d9f0ef;
-    color: #15645f;
-}
-
-.banner.ok {
-    color: var(--brand-800);
-    background: var(--brand-100);
-    border-color: #bfe3d0;
-}
-
-.dialog.wide {
-    max-width: 780px;
-}
-
-.segmented.fit {
-    width: fit-content;
-}
-
-.seg:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
 .req {
     color: var(--danger);
 }
@@ -798,79 +683,16 @@ tbody tr {
     color: var(--muted);
 }
 
-/* select di dalam .field ikut gaya input */
-.field select {
-    width: 100%;
-    padding: .65rem .85rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #faf8f4;
-    font: inherit;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s, background .15s;
-}
-
-    .field select:focus {
-        background: #fff;
-        border-color: var(--brand-500);
-        box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
-    }
-
-.row4 {
-    display: grid;
-    grid-template-columns: 1.3fr 1.2fr 1fr 1fr;
-    gap: 1rem;
-}
-
-.section-head {
+/* input + tombol "Cari" */
+.pick-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: .6rem 0 .8rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--line);
-}
-
-    .section-head h6 {
-        margin: 0;
-        font-size: .8rem;
-        font-weight: 700;
-    }
-
-.count-tag {
-    padding: .1rem .6rem;
-    border-radius: 999px;
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--brand-800);
-    background: var(--brand-100);
-}
-
-.detail-form {
-    padding: 1rem 1rem .8rem;
-    margin-bottom: 1rem;
-    border: 1px dashed #d9d4c9;
-    border-radius: 14px;
-    background: #fcfbf8;
-    transition: border-color .15s, background .15s;
-}
-
-    .detail-form.editing {
-        border-style: solid;
-        border-color: var(--brand-500);
-        background: var(--brand-50);
-    }
-
-    .detail-form .field {
-        margin-bottom: .6rem;
-    }
-
-.detail-actions {
-    display: flex;
-    justify-content: flex-end;
     gap: .5rem;
-    margin-top: .6rem;
 }
+
+    .pick-row input {
+        flex: 1;
+        min-width: 0;
+    }
 
 .btn-mini {
     display: inline-flex;
@@ -902,6 +724,65 @@ tbody tr {
             transform: translateY(-1px);
         }
 
+/* ---------- 10. Modal form: data detail ---------- */
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: .6rem 0 .8rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+}
+
+    .section-head h6 {
+        margin: 0;
+        font-size: .8rem;
+        font-weight: 700;
+    }
+
+.count-tag {
+    padding: .1rem .6rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--brand-800);
+    background: var(--brand-100);
+}
+
+/* form input item */
+.detail-form {
+    padding: 1rem 1rem .8rem;
+    margin-bottom: 1rem;
+    border: 1px dashed #d9d4c9;
+    border-radius: 14px;
+    background: #fcfbf8;
+    transition: border-color .15s, background .15s;
+}
+
+    .detail-form.editing {
+        border-style: solid;
+        border-color: var(--brand-500);
+        background: var(--brand-50);
+    }
+
+    .detail-form .field {
+        margin-bottom: .6rem;
+    }
+
+.row4 {
+    display: grid;
+    grid-template-columns: 1.3fr 1.2fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .6rem;
+}
+
+/* tabel item */
 .detail-wrap {
     overflow-x: auto;
     border: 1px solid var(--line);
@@ -916,7 +797,7 @@ tbody tr {
     padding: .55rem .9rem;
 }
 
-/* matikan animasi & aksen hover khas tabel utama di tabel detail */
+/* matikan animasi & aksen hover khas tabel utama */
 .detail-table tbody tr {
     opacity: 1;
     animation: none;
@@ -947,117 +828,27 @@ tbody tr {
     color: var(--muted);
 }
 
-.header-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    grid-auto-flow: column;
-    column-gap: 1rem;
-}
-
-.switch-box {
+/* total harga */
+.total-row {
     display: flex;
-    align-items: center;
-    align-self: start;
-    height: 56px;
-    padding: 0;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: .8rem;
+    margin-top: 1rem;
 }
 
-@media (max-width: 720px) {
-    .row4 {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 520px) {
-    .row4 {
-        grid-template-columns: 1fr;
-    }
-}
-
-.field ::deep input, .field ::deep textarea {
-    width: 100%;
-    padding: .65rem .85rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #faf8f4;
-    font: inherit;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s, background .15s;
-}
-
-    .field ::deep input:focus, .field ::deep textarea:focus {
-        background: #fff;
-        border-color: var(--brand-500);
-        box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
-    }
-
-    .field ::deep input:disabled {
-        background: #f0ede6;
+    .total-row span {
+        font-size: .8rem;
+        font-weight: 600;
         color: var(--muted);
-        cursor: not-allowed;
     }
 
-.field ::deep .invalid {
-    border-color: var(--danger);
-}
-
-.field ::deep .validation-message {
-    color: var(--danger);
-    font-size: .78rem;
-}
-
-.switch {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: .7rem;
-    margin: 0;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-    .switch ::deep input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
+    .total-row strong {
+        font-size: 1.2rem;
+        color: var(--brand-800);
     }
 
-.sw-track {
-    position: relative;
-    width: 44px;
-    height: 26px;
-    border-radius: 999px;
-    background: #d9d4c9;
-    transition: background .2s;
-}
-
-    .sw-track::after {
-        content: "";
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, .25);
-        transition: transform .2s;
-    }
-
-.switch ::deep input:checked ~ .sw-track {
-    background: var(--brand-500);
-}
-
-    .switch ::deep input:checked ~ .sw-track::after {
-        transform: translateX(18px);
-    }
-
-.switch ::deep input:focus-visible ~ .sw-track {
-    box-shadow: 0 0 0 4px rgba(34, 160, 107, .2);
-}
-
+/* ---------- 11. Modal form: footer ---------- */
 .dialog-foot {
     flex-shrink: 0;
     display: flex;
@@ -1106,28 +897,32 @@ tbody tr {
         transform: none;
     }
 
-/* ---------- Responsive & a11y ---------- */
-@media (hover: none) {
-    .actions .icon-btn {
-        opacity: 1
+/* ---------- 12. Modal cari (pemasok & bahan baku) ---------- */
+.batch-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.batch-table tbody tr {
+    cursor: pointer;
+}
+
+    .batch-table tbody tr:hover td:first-child {
+        box-shadow: inset 3px 0 0 var(--brand-500);
     }
 
+/* ---------- 13. Responsive & aksesibilitas ---------- */
+@media (hover: none) {
     .icon-btn {
         opacity: 1;
     }
 }
 
-@media (max-width: 1000px) {
-    .col-addr {
-        display: none;
-    }
-}
-
 @media (max-width: 720px) {
-    .col-date {
-        display: none;
-    }
-
     .hero {
         padding: 1.25rem;
     }
@@ -1135,28 +930,15 @@ tbody tr {
         .hero h1 {
             font-size: 1.6rem;
         }
+
+    .row4 {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 @media (max-width: 520px) {
     .row4 {
         grid-template-columns: 1fr;
-    }
-
-    .header-grid {
-        grid-template-columns: 1fr;
-        grid-template-rows: none;
-        grid-auto-flow: row;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    tbody tr {
-        animation: none;
-        opacity: 1;
-    }
-
-    .overlay, .dialog {
-        animation: none;
     }
 }
 
@@ -1178,22 +960,13 @@ tbody tr {
     }
 }
 
-/* ---------- Pembelian: total harga ---------- */
-.total-row {
-    display: flex;
-    justify-content: flex-end;
-    align-items: baseline;
-    gap: .8rem;
-    margin-top: 1rem;
+@media (prefers-reduced-motion: reduce) {
+    tbody tr {
+        animation: none;
+        opacity: 1;
+    }
+
+    .overlay, .dialog {
+        animation: none;
+    }
 }
-
-    .total-row span {
-        font-size: .8rem;
-        font-weight: 600;
-        color: var(--muted);
-    }
-
-    .total-row strong {
-        font-size: 1.2rem;
-        color: var(--brand-800);
-    }
