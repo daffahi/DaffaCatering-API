@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace DaffaCatering.Blazor.Models.Pembelian
 {
@@ -12,7 +13,7 @@ namespace DaffaCatering.Blazor.Models.Pembelian
         [StringLength(10)]
         public string IdPemasok { get; set; } = "";
 
-        public string NamaPemasok{ get; set; } = "";
+        public string NamaPemasok { get; set; } = "";
 
         public DateOnly TglPembelian { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
@@ -21,6 +22,13 @@ namespace DaffaCatering.Blazor.Models.Pembelian
         public string Status { get; set; } = "";
 
         public List<DetailPembelian> Details { get; set; } = new();
+
+        [JsonPropertyName("detailPembelians")]
+        public List<DetailPembelian> DetailPembelians
+        {
+            get => Details;
+            set => Details = value;
+        }
     }
 
     public class DetailPembelian
