@@ -203,6 +203,17 @@
                         }
                     </div>
 
+                    <div class="row2">
+                        <div class="field">
+                            <label>Kode Pemasok</label>
+                            <input type="text" disabled placeholder="Otomatis dari pembelian" value="@(pembelianDipilih?.IdPemasok ?? "")" />
+                        </div>
+                        <div class="field">
+                            <label>Nama Pemasok</label>
+                            <input type="text" disabled placeholder="Otomatis dari pembelian" value="@(pembelianDipilih?.NamaPemasok ?? "")" />
+                        </div>
+                    </div>
+
                     @* ---------- DETAIL ---------- *@
                     <div class="section-head">
                         <h6>Data Detail</h6>
@@ -213,7 +224,7 @@
                         <div class="field">
                             <label>Bahan Baku <b class="req">*</b></label>
                             <div class="pick-row">
-                                
+                                <input type="text" readonly placeholder="Belum ada bahan baku dipilih"/>
                             </div>
                         </div>
                     </div>
@@ -477,7 +488,7 @@
         modalError = "";
         cariPembelianTampil = false;
         cariPemasokTampil = false;
-        pemasokDipilih = null;
+        pembelianDipilih = null;
         items.Clear();
         KosongkanInputDetail();
     }
@@ -509,7 +520,8 @@
     private void PilihPembelian(PembelianRow pr)
     {
         pembelianDipilih = pr;
-        cariPembelianTampil = false;
+    pemasokDipilih = new PemasokRow(pr.IdPemasok, pr.NamaPemasok);
+    cariPembelianTampil = false;
     }
     private void TutupPencarianPembelian() => cariPembelianTampil = false;
 
