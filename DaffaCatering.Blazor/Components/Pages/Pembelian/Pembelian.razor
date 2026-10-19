@@ -192,7 +192,7 @@
                         <label>Nama Pemasok <b class="req">*</b></label>
                         <div class="pick-row">
                             <input type="text" readonly placeholder="Belum ada pemasok dipilih"
-                                   value="@(pemasokDipilih is null ? "" : $"{pemasokDipilih.NamaPemasok} ({pemasokDipilih.IdPemasok})")" />
+                                   value="@(pemasokDipilih?.NamaPemasok ?? "")" />
                             <button type="button" class="btn-mini solid"
                                     disabled="@(items.Count > 0)" @onclick="BukaPencarianPemasok">
                                 <i class="fa-solid fa-magnifying-glass"></i> Cari
@@ -215,7 +215,7 @@
                             <label>Bahan Baku <b class="req">*</b></label>
                             <div class="pick-row">
                                 <input type="text" readonly placeholder="Belum ada bahan baku dipilih"
-                                       value="@(bahanDipilih is null ? "" : $"{bahanDipilih.NamaBahanBaku} ({bahanDipilih.IdBahanBaku})")" />
+                                       value="@(bahanDipilih?.NamaBahanBaku ?? "")" />
                                 <button type="button" class="btn-mini solid" @onclick="BukaPencarianBahan">
                                     <i class="fa-solid fa-magnifying-glass"></i> Cari
                                 </button>
