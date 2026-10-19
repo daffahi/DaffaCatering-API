@@ -247,7 +247,7 @@
                             <label>Bahan Baku <b class="req">*</b></label>
                             <div class="pick-row">
                                 <input type="text" readonly placeholder="Belum ada bahan baku dipilih"
-                                       value="@(batchDipilih is null ? "" : $"{batchDipilih.NamaBahanBaku} ({batchDipilih.IdBahanBaku})")" />
+                                       value="@(batchDipilih?.NamaBahanBaku ?? "")" />
                                 <button type="button" class="btn-mini solid" @onclick="BukaPencarian">
                                     <i class="fa-solid fa-magnifying-glass"></i> Cari
                                 </button>
