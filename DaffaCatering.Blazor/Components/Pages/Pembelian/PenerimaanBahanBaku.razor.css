@@ -624,7 +624,7 @@ tbody tr {
         font-weight: 600;
     }
 
-    .field input {
+    .field input, .field select {
         width: 100%;
         padding: .65rem .85rem;
         border: 1px solid var(--line);
@@ -635,7 +635,7 @@ tbody tr {
         transition: border-color .15s, box-shadow .15s, background .15s;
     }
 
-        .field input:focus {
+        .field input:focus, .field select:focus {
             background: #fff;
             border-color: var(--brand-500);
             box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
@@ -669,7 +669,239 @@ tbody tr {
     color: var(--muted);
 }
 
-/* ---------- 10. Responsive & aksesibilitas ---------- */
+/* input + tombol "Cari" */
+.pick-row {
+    display: flex;
+    gap: .5rem;
+}
+
+    .pick-row input {
+        flex: 1;
+        min-width: 0;
+    }
+
+.btn-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem .95rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--brand-800);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+    .btn-mini:hover {
+        background: var(--brand-50);
+        border-color: var(--brand-500);
+    }
+
+    .btn-mini.solid {
+        border-color: transparent;
+        color: #fff;
+        background: linear-gradient(135deg, var(--brand-500), var(--brand-800));
+    }
+
+        .btn-mini.solid:hover {
+            transform: translateY(-1px);
+        }
+
+/* ---------- 10. Modal form: data detail ---------- */
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: .6rem 0 .8rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+}
+
+    .section-head h6 {
+        margin: 0;
+        font-size: .8rem;
+        font-weight: 700;
+    }
+
+.count-tag {
+    padding: .1rem .6rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--brand-800);
+    background: var(--brand-100);
+}
+
+/* form input item */
+.detail-form {
+    padding: 1rem 1rem .8rem;
+    margin-bottom: 1rem;
+    border: 1px dashed #d9d4c9;
+    border-radius: 14px;
+    background: #fcfbf8;
+    transition: border-color .15s, background .15s;
+}
+
+    .detail-form.editing {
+        border-style: solid;
+        border-color: var(--brand-500);
+        background: var(--brand-50);
+    }
+
+    .detail-form .field {
+        margin-bottom: .6rem;
+    }
+
+.row4 {
+    display: grid;
+    grid-template-columns: 1.3fr 1.2fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .6rem;
+}
+
+/* tabel item */
+.detail-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.detail-table thead th {
+    padding: .6rem .9rem;
+}
+
+.detail-table tbody td {
+    padding: .55rem .9rem;
+}
+
+/* matikan animasi & aksen hover khas tabel utama */
+.detail-table tbody tr {
+    opacity: 1;
+    animation: none;
+}
+
+    .detail-table tbody tr:hover td:first-child {
+        box-shadow: none;
+    }
+
+    .detail-table tbody tr.row-edit {
+        background: var(--brand-50);
+    }
+
+.detail-table .icon-btn {
+    opacity: 1;
+}
+
+    .detail-table .icon-btn.danger:hover {
+        background: #fdeced;
+        color: var(--danger);
+    }
+
+.detail-empty {
+    padding: 1.1rem;
+    text-align: center;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+/* total harga */
+.total-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: .8rem;
+    margin-top: 1rem;
+}
+
+    .total-row span {
+        font-size: .8rem;
+        font-weight: 600;
+        color: var(--muted);
+    }
+
+    .total-row strong {
+        font-size: 1.2rem;
+        color: var(--brand-800);
+    }
+
+/* ---------- 11. Modal form: footer ---------- */
+.dialog-foot {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: .6rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--line);
+    background: #fcfbf8;
+}
+
+.btn-ghost, .btn-solid {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .6rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+.btn-ghost {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+}
+
+    .btn-ghost:hover {
+        background: #f6f3ec;
+    }
+
+.btn-solid {
+    border: 0;
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-800));
+    box-shadow: 0 8px 16px -6px rgba(19, 88, 70, .6);
+}
+
+    .btn-solid:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-solid:disabled {
+        opacity: .7;
+        cursor: progress;
+        transform: none;
+    }
+
+/* ---------- 12. Modal cari (pembelian) ---------- */
+.batch-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.batch-table tbody tr {
+    cursor: pointer;
+}
+
+    .batch-table tbody tr:hover td:first-child {
+        box-shadow: inset 3px 0 0 var(--brand-500);
+    }
+
+/* ---------- 13. Responsive & aksesibilitas ---------- */
 @media (hover: none) {
     .icon-btn {
         opacity: 1;

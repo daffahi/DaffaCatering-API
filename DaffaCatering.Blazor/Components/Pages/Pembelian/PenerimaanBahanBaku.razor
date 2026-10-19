@@ -63,8 +63,7 @@
         <div class="toolbar">
             <label class="search">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari nomor penerimaan atau nama pemasok..."
-                       @bind="teksCari" @bind:event="oninput" />
+                <input type="text" placeholder="Cari nomor penerimaan atau nama pemasok..." @bind="teksCari" @bind:event="oninput" />
             </label>
 
             <div class="toolbar-right">
@@ -179,7 +178,7 @@
                             <input type="text" value="@kodePenerimaan" disabled />
                         </div>
                         <div class="field">
-                            <label>Tanggal Pembelian <b class="req">*</b></label>
+                            <label>Tanggal Penerimaan <b class="req">*</b></label>
                             <input type="date" value="@tglPenerimaanInput" max="@Iso(HariIni)"
                                    disabled="@(items.Count > 0)"
                                    @onchange="e => tglPenerimaanInput = e.Value?.ToString() ?? string.Empty" />
@@ -190,6 +189,84 @@
                         </div>
                     </div>
 
+                    <div class="field">
+                        <label>No. Pembelian <b class="req">*</b></label>
+                        <div class="pick-row">
+                            <input type="text" readonly placeholder="Belum ada pembelian dipilih" value="@(pembelianDipilih?.idPembelian ?? "")" />
+                            <button type="button" class="btn-mini solid" disabled="@(items.Count > 0)" @onclick="BukaPencarianPembelian">
+                                <i class="fa-solid fa-magnifying-glass"></i> Cari
+                            </button>
+                        </div>
+                        @if (items.Count > 0)
+                        {
+                            <span class="hint">Terkunci selama masih ada item</span>
+                        }
+                    </div>
+
+                    @* ---------- DETAIL ---------- *@
+                    <div class="section-head">
+                        <h6>Data Detail</h6>
+                        <span class="count-tag">@items.Count item</span>
+                    </div>
+
+                    <div class="detail-form @(indeksEdit >= 0 ? "editing" : "")">
+                        <div class="field">
+                            <label>Bahan Baku</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ================= MODAL CARI PEMBELIAN ================= *@
+    @if (cariPembelianTampil)
+    {
+        var pembelianView = DaftarPembelianAktif.ToList();
+
+        <div class="overlay stacked" @onclick="TutupPencarianPembelian">
+            <div class="dialog wide" @onclick:stopPropagation>
+                <header class="dialog-head">
+                    <div class="dialog-icon"><i class="fa-solid fa-truck-field"></i></div>
+                    <div>
+                        <h5>Pilih Pembelian</h5>
+                        <p>Cari dan pilih pembelian untuk penerimaan bahan baku</p>
+                    </div>
+                    <button type="button" class="dialog-close" @onclick="TutupPencarianPembelian">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </header>
+
+                <div class="dialog-body">
+                    <div class="batch-toolbar">
+                        <label class="search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" placeholder="Cari nomor pembelian atau nama pemasok..." @bind="teksCariPembelian" @bind:event="oninput"/>
+                        </label>
+                    </div>
+
+                    <div class="detail-wrap">
+                        <table class="detail-table batch-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">No. Pembelian</th>
+                                    <th style="width: 160px;">Tanggal</th>
+                                    <th>Nama Pemasok</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var pr in pembelianView)
+                                {
+                                    var row = pr;
+                                    <tr @onclick="() => PilihPembelian(row)">
+                                        <td class="mono">@row.idPembelian</td>
+                                        <td>@row.TglPembelian.ToString("dd MMMM yyyy", IdCulture)</td>
+                                        <td><div class="name">@row.NamaPemasok</div></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -203,7 +280,9 @@
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
+    private record PembelianRow(string idPembelian, string IdPemasok, string NamaPemasok, DateOnly TglPembelian);
     private record PemasokRow(string IdPemasok, string NamaPemasok);
+    private record BahanRow(string IdBahanBaku, string NamaBahanBaku);
 
     private class ItemPenerimaan
     {
@@ -236,13 +315,20 @@
     private string kodePenerimaan = "";
     private string tglPenerimaanInput = "";
     private string statusEdit = "";
+    private PembelianRow? pembelianDipilih;
     private PemasokRow? pemasokDipilih;
 
     // --- modal form: detail ---
     private readonly List<ItemPenerimaan> items = new();
+    private int indeksEdit = -1;            // -1 = tambah item, >= 0 = ubah item
+    private BahanRow? bahanDipilih;
+    private string jumlahInput = "";
+    private string idSatuanInput = "";
+    private string hargaInput = "";
+    private string detailError = "";
 
     // --- modal cari pembelian ---
-    private bool cariPembelian = false;
+    private bool cariPembelianTampil = false;
     private string teksCariPembelian = "";
 
     // --- modal cari pemasok ---
@@ -386,7 +472,7 @@
         pesanSukses = "";
         pesanError = "";
         modalError = "";
-        cariPembelian = false;
+        cariPembelianTampil = false;
         cariPemasokTampil = false;
         pemasokDipilih = null;
         items.Clear();
@@ -395,13 +481,37 @@
 
     private void TutupModal()
     {
-        cariPembelian = false;
+        cariPembelianTampil = false;
         cariPemasokTampil = false;
         modalTampil = false;
     }
 
     // =====================================================
-    // 6. MODAL FORM: DETAIL
+    // 6. MODAL FORM: HEADER (PEMBELIAN)
+    // =====================================================
+    private IEnumerable<PembelianRow> DaftarPembelianAktif => daftarPembelian
+        .Where(p => p.Status == "Pending")
+        .Select(p => new PembelianRow(p.IdPembelian, p.IdPemasok, NamaPemasok(p.IdPemasok), p.TglPembelian))
+        .Where(p => string.IsNullOrWhiteSpace(teksCariPembelian)
+            || p.idPembelian.Contains(teksCariPembelian, StringComparison.OrdinalIgnoreCase)
+            || p.NamaPemasok.Contains(teksCariPembelian, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(p => p.idPembelian);
+
+    private void BukaPencarianPembelian()
+    {
+        teksCariPembelian = "";
+        cariPembelianTampil = true;
+    }
+
+    private void PilihPembelian(PembelianRow pr)
+    {
+        pembelianDipilih = pr;
+        cariPembelianTampil = false;
+    }
+    private void TutupPencarianPembelian() => cariPembelianTampil = false;
+
+    // =====================================================
+    // 7. MODAL FORM: DETAIL
     // =====================================================
     private void KosongkanInputDetail()
     {
