@@ -1,0 +1,17 @@
+/* CSS for PesananPenjualan component */
+/* ---------- 1. Root & variabel ---------- */
+.pesanan-page {
+    --brand-950: #0c3b2e;
+    --brand-800: #135846;
+    --brand-600: #1c7c5a;
+    --brand-500: #22a06b;
+    --brand-100: #e2f3ea;
+    --brand-50: #f2f9f5;
+    --surface: #ffffff;
+    --ink: #1d2b25;
+    --muted: #71827a;
+    --line: #ece8e0;
+    --danger: #d64550;
+    color: var(--ink);
+    padding-bottom: 2rem;
+}
