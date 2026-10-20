@@ -96,7 +96,6 @@
                             <th>Tanggal</th>
                             <th>Nama Pemasok</th>
                             <th>Status</th>
-                            <th></th>
                         </tr>
                     </thead>
 
@@ -121,14 +120,6 @@
                                     <span class="pill @(tutup ? "closed" : "pending")">
                                         <i></i>@(string.IsNullOrWhiteSpace(item.Status) ? "-" : item.Status)
                                     </span>
-                                </td>
-                                <td class="actions">
-                                    <button class="icon-btn"
-                                            title="@(tutup ? "Penerimaan sudah ditutup" : "Ubah")"
-                                            disabled="@tutup"
-                                            @onclick="() => BukaModalEdit(item)">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
                                 </td>
                             </tr>
                         }
@@ -155,17 +146,18 @@
     @if (modalTampil)
     {
         var detailPembelianView = DaftarDetailPembelian.ToList();
+        var statusForm = StatusForm;
 
         <div class="overlay" @onclick="TutupModal">
             <div class="dialog wide" @onclick:stopPropagation>
 
                 <header class="dialog-head">
                     <div class="dialog-icon">
-                        <i class="fa-solid @(isEditMode ? "fa-pen" : "fa-plus")"></i>
+                        <i class="fa-solid fa-plus"></i>
                     </div>
                     <div>
-                        <h5>@(isEditMode ? "Ubah" : "Tambah") Penerimaan Bahan Baku</h5>
-                        <p>@(isEditMode ? "Perbarui data penerimaan" : "Isi data penerimaan baru")</p>
+                        <h5>Tambah Penerimaan Bahan Baku</h5>
+                        <p>Isi data penerimaan baru</p>
                     </div>
                     <button type="button" class="dialog-close" @onclick="TutupModal">
                         <i class="fa-solid fa-xmark"></i>
@@ -210,14 +202,23 @@
 
                     <div class="row2">
                         <div class="field">
-                            <label>Kode Pemasok</label>
+                            <label>Kode Pemasok <span class="auto-tag">Auto</span></label>
                             <input type="text" disabled placeholder="Otomatis dari pembelian"
                                    value="@(pembelianDipilih?.IdPemasok ?? "")" />
                         </div>
                         <div class="field">
-                            <label>Nama Pemasok</label>
+                            <label>Nama Pemasok <span class="auto-tag">Auto</span></label>
                             <input type="text" disabled placeholder="Otomatis dari pembelian"
                                    value="@(pembelianDipilih?.NamaPemasok ?? "")" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Status <span class="auto-tag">Auto</span></label>
+                        <div>
+                            <span class="pill @(statusForm == "Close" ? "closed" : "pending")">
+                                <i></i>@statusForm
+                            </span>
                         </div>
                     </div>
 
@@ -304,7 +305,9 @@
                             <div class="field">
                                 <label>Tutup Bahan Baku</label>
                                 <label class="switch">
-                                    <input type="checkbox" checked="@tutupInput" disabled="@(bahanDipilih is null)" @onchange="e => tutupInput = (bool)(e.Value ?? false)" />
+                                    <input type="checkbox" checked="@tutupInput"
+                                           disabled="@(bahanDipilih is null)"
+                                           @onchange="e => tutupInput = (bool)(e.Value ?? false)" />
                                     <span class="switch-track"></span>
                                     <span>@(tutupInput ? "Ya" : "Tidak")</span>
                                 </label>
@@ -385,7 +388,29 @@
                             </div>
                         }
                     </div>
+
+                    @if (!string.IsNullOrEmpty(modalError))
+                    {
+                        <div class="banner in-dialog">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>@modalError</span>
+                        </div>
+                    }
                 </div>
+
+                <footer class="dialog-foot">
+                    <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
+                    <button type="button" class="btn-solid" disabled="@sedangSimpan" @onclick="SimpanData">
+                        @if (sedangSimpan)
+                        {
+                            <i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>
+                        }
+                        else
+                        {
+                            <span>Simpan</span>
+                        }
+                    </button>
+                </footer>
             </div>
         </div>
     }
@@ -462,7 +487,6 @@
     private static readonly CultureInfo IdCulture = new("id-ID");
 
     private record PembelianRow(string idPembelian, string IdPemasok, string NamaPemasok, DateOnly TglPembelian);
-    private record PemasokRow(string IdPemasok, string NamaPemasok);
     private record BahanRow(string IdBahanBaku, string NamaBahanBaku);
 
     private record PembelianDetailRow(string IdBahanBaku, string NamaBahanBaku, string IdSatuan, decimal JumlahBeli, decimal JumlahTerima)
@@ -495,14 +519,11 @@
 
     // --- modal form: header ---
     private bool modalTampil = false;
-    private bool isEditMode = false;
     private bool sedangSimpan = false;
     private string modalError = "";
     private string kodePenerimaan = "";
     private string tglPenerimaanInput = "";
-    private string statusEdit = "";
     private PembelianRow? pembelianDipilih;
-    private PemasokRow? pemasokDipilih;
 
     // --- modal form: detail ---
     private readonly List<ItemPenerimaan> items = new();
@@ -517,10 +538,6 @@
     // --- modal cari pembelian ---
     private bool cariPembelianTampil = false;
     private string teksCariPembelian = "";
-
-    // --- modal cari pemasok ---
-    private bool cariPemasokTampil = false;
-    private string teksCariPemasok = "";
 
     // =====================================================
     // 2. LIFECYCLE & MUAT DATA
@@ -626,7 +643,7 @@
     // =====================================================
     // 5. MODAL FORM: BUKA / TUTUP / RESET
     // =====================================================
-    // ID otomatis: PNM + 7 digit
+    // ID otomatis: PNM + 7 digit (kodeAuto() di WinForms)
     private static string BuatIdBerikutnya(IEnumerable<PenerimaanBahanBakuModels> data)
     {
         const string prefix = "PNM";
@@ -646,15 +663,15 @@
     private async Task BukaModalTambah()
     {
         ResetForm();
-        isEditMode = false;
-        statusEdit = "";
 
         try
         {
-            // data terbaru supaya nomor urut tidak basi
-            var terbaru = await PenerimaanService.GetAllAsync();
+            // Data terbaru dari server. daftarPenerimaan wajib ikut diperbarui
+            // karena dipakai menghitung "Jumlah Terima" (SudahDiterima).
+            daftarPenerimaan = await PenerimaanService.GetAllAsync();
+            daftarPembelian = await PembelianService.GetAllAsync();
             daftarBahanBaku = await BahanBakuService.GetAllAsync();
-            kodePenerimaan = BuatIdBerikutnya(terbaru);
+            kodePenerimaan = BuatIdBerikutnya(daftarPenerimaan);
         }
         catch (Exception ex)
         {
@@ -666,20 +683,13 @@
         modalTampil = true;
     }
 
-    private void BukaModalEdit(PenerimaanBahanBakuModels item)
-    {
-
-    }
-
     private void ResetForm()
     {
         pesanSukses = "";
         pesanError = "";
         modalError = "";
         cariPembelianTampil = false;
-        cariPemasokTampil = false;
         pembelianDipilih = null;
-        pemasokDipilih = null;
         items.Clear();
         KosongkanInputDetail();
     }
@@ -687,7 +697,6 @@
     private void TutupModal()
     {
         cariPembelianTampil = false;
-        cariPemasokTampil = false;
         modalTampil = false;
     }
 
@@ -713,7 +722,6 @@
     private void PilihPembelian(PembelianRow pr)
     {
         pembelianDipilih = pr;
-        pemasokDipilih = new PemasokRow(pr.IdPemasok, pr.NamaPemasok);
         KosongkanInputDetail();
         cariPembelianTampil = false;
     }
@@ -721,6 +729,7 @@
     // =====================================================
     // 7. MODAL FORM: DETAIL (PENERIMAAN BAHAN BAKU)
     // =====================================================
+    // jumlahTerima di WinForms: total yang sudah diterima untuk pembelian + bahan baku ini
     private decimal SudahDiterima(string idPembelian, string idBahanBaku)
         => daftarPenerimaan
             .Where(p => p.IdPembelian == idPembelian)
@@ -894,5 +903,105 @@
 
         if (indeksEdit == index) KosongkanInputDetail();
         else if (indeksEdit > index) indeksEdit--;
+    }
+
+    // =====================================================
+    // 8. MODAL FORM: STATUS & SIMPAN
+    // =====================================================
+    // Sama seperti updateStatus() di WinForms:
+    // Pending kalau masih ada bahan baku yang belum terpenuhi dan belum ditutup
+    private string HitungStatus()
+    {
+        foreach (var d in DaftarDetailPembelian)
+        {
+            var item = items.FirstOrDefault(i => i.IdBahanBaku == d.IdBahanBaku);
+            var totalTerima = d.JumlahTerima + (item?.Jumlah ?? 0);
+            var ditutup = item?.Ditutup ?? false;
+
+            if (totalTerima < d.JumlahBeli && !ditutup) return "Pending";
+        }
+
+        return "Close";
+    }
+
+    // Status yang ditampilkan di form (grup Status di WinForms)
+    private string StatusForm => pembelianDipilih is null ? "Pending" : HitungStatus();
+
+    private async Task SimpanData()
+    {
+        modalError = "";
+
+        if (string.IsNullOrWhiteSpace(kodePenerimaan))
+        {
+            modalError = "No. Penerimaan belum ter-generate, coba buka form kembali.";
+            return;
+        }
+
+        if (pembelianDipilih is null)
+        {
+            modalError = "Harap pilih No. Pembelian terlebih dahulu.";
+            return;
+        }
+
+        if (!DateOnly.TryParseExact(tglPenerimaanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                                    DateTimeStyles.None, out var tgl))
+        {
+            modalError = "Harap isi tanggal penerimaan.";
+            return;
+        }
+
+        if (tgl > HariIni)
+        {
+            modalError = "Tanggal penerimaan tidak boleh lebih dari hari ini.";
+            return;
+        }
+
+        if (items.Count == 0)
+        {
+            modalError = $"Harap tambahkan minimal satu bahan baku untuk penerimaan {kodePenerimaan}.";
+            return;
+        }
+
+        sedangSimpan = true;
+        try
+        {
+            var model = new PenerimaanBahanBakuModels
+            {
+                IdPenerimaan = kodePenerimaan,
+                IdPemasok = pembelianDipilih.IdPemasok,
+                IdPembelian = pembelianDipilih.idPembelian,
+                TglPenerimaan = tgl,
+                Status = HitungStatus(),
+                Details = items.Select(i => new DetailPenerimaan
+                {
+                    IdBahanBaku = i.IdBahanBaku,
+                    IdSatuan = i.IdSatuan,
+                    Jumlah = i.Jumlah,
+                    TglKadaluwarsa = i.TglKadaluwarsa,
+                    StatusBahanBaku = i.Ditutup ? "Ditutup" : "Diterima"
+                }).ToList()
+            };
+
+            var (success, error) = await PenerimaanService.CreateAsync(model);
+
+            if (success)
+            {
+                pesanSukses = $"No. Penerimaan {kodePenerimaan} untuk No. Pembelian {pembelianDipilih.idPembelian} berhasil ditambahkan.";
+                modalTampil = false;
+                await MuatData();
+            }
+            else
+            {
+                modalError = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            modalError = "Gagal menyimpan: " + ex.Message;
+        }
+        finally
+        {
+            sedangSimpan = false;
+        }
     }
 }
