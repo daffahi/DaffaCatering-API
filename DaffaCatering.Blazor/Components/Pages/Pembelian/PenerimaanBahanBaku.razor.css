@@ -157,6 +157,10 @@
         border-color: #bfe3d0;
     }
 
+    .banner.in-dialog {
+        margin-top: 1rem;
+    }
+
 .banner-close {
     border: 0;
     background: transparent;
@@ -438,6 +442,11 @@ tbody tr {
         color: #b45309;
     }
 
+    .pill.ok {
+        background: var(--brand-100);
+        color: var(--brand-800);
+    }
+
 /* kolom Aksi */
 .actions {
     text-align: right;
@@ -470,6 +479,12 @@ tbody tr {
         cursor: not-allowed;
         pointer-events: none;
     }
+
+/* angka rata */
+.mono {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
 
 /* ---------- 7. Empty state & footer panel ---------- */
 .empty {
@@ -509,6 +524,10 @@ tbody tr {
     backdrop-filter: blur(4px);
     animation: fade .18s ease;
 }
+
+    .overlay.stacked {
+        z-index: 1060;
+    }
 
 .dialog {
     width: 100%;
@@ -738,7 +757,7 @@ tbody tr {
 /* form input item */
 .detail-form {
     padding: 1rem 1rem .8rem;
-    margin-bottom: 1rem;
+    margin: 1rem 0;
     border: 1px dashed #d9d4c9;
     border-radius: 14px;
     background: #fcfbf8;
@@ -755,6 +774,11 @@ tbody tr {
         margin-bottom: .6rem;
     }
 
+    .detail-form > .hint {
+        display: block;
+        margin-bottom: .2rem;
+    }
+
 .row4 {
     display: grid;
     grid-template-columns: 1.3fr 1.2fr 1fr 1fr;
@@ -766,6 +790,65 @@ tbody tr {
     justify-content: flex-end;
     gap: .5rem;
     margin-top: .6rem;
+}
+
+/* toggle Tutup Bahan Baku */
+.field .switch {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .35rem 0;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+    .field .switch input {
+        position: absolute;
+        width: 0;
+        height: 0;
+        padding: 0;
+        border: 0;
+        opacity: 0;
+    }
+
+.switch-track {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #d9d4c9;
+    transition: background .15s;
+}
+
+    .switch-track::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+        transition: transform .15s;
+    }
+
+.switch input:checked + .switch-track {
+    background: var(--brand-500);
+}
+
+    .switch input:checked + .switch-track::after {
+        transform: translateX(18px);
+    }
+
+.switch input:focus-visible + .switch-track {
+    box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
+}
+
+.switch input:disabled + .switch-track {
+    opacity: .5;
+    cursor: not-allowed;
 }
 
 /* tabel item */
@@ -813,26 +896,6 @@ tbody tr {
     line-height: 1.5;
     color: var(--muted);
 }
-
-/* total harga */
-.total-row {
-    display: flex;
-    justify-content: flex-end;
-    align-items: baseline;
-    gap: .8rem;
-    margin-top: 1rem;
-}
-
-    .total-row span {
-        font-size: .8rem;
-        font-weight: 600;
-        color: var(--muted);
-    }
-
-    .total-row strong {
-        font-size: 1.2rem;
-        color: var(--brand-800);
-    }
 
 /* ---------- 11. Modal form: footer ---------- */
 .dialog-foot {
@@ -883,7 +946,7 @@ tbody tr {
         transform: none;
     }
 
-/* ---------- 12. Modal cari (pembelian) ---------- */
+/* ---------- 12. Modal cari (pembelian) & tabel pilih ---------- */
 .batch-toolbar {
     display: flex;
     align-items: center;
@@ -901,6 +964,19 @@ tbody tr {
         box-shadow: inset 3px 0 0 var(--brand-500);
     }
 
+    .batch-table tbody tr.row-disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+        .batch-table tbody tr.row-disabled:hover {
+            background: transparent;
+        }
+
+            .batch-table tbody tr.row-disabled:hover td:first-child {
+                box-shadow: none;
+            }
+
 /* ---------- 13. Responsive & aksesibilitas ---------- */
 @media (hover: none) {
     .icon-btn {
@@ -916,6 +992,16 @@ tbody tr {
         .hero h1 {
             font-size: 1.6rem;
         }
+
+    .row4 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .row4 {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-height: 800px) {
@@ -925,6 +1011,10 @@ tbody tr {
 
     .dialog-body {
         padding: 1rem 1.25rem;
+    }
+
+    .dialog-foot {
+        padding: .75rem 1.25rem;
     }
 
     .field {
