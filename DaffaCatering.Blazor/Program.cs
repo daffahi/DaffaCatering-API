@@ -6,6 +6,7 @@ using DaffaCatering.Blazor.Services.MasterPelanggan;
 using DaffaCatering.Blazor.Services.MasterPemasok;
 using DaffaCatering.Blazor.Services.MasterSatuanBahanBaku;
 using DaffaCatering.Blazor.Services.Pembelian;
+using DaffaCatering.Blazor.Services.Penjualan;
 using DaffaCatering.Blazor.Services.Persediaan;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Globalization;
@@ -36,6 +37,7 @@ builder.Services.AddScoped<MenuMakananService>();
 builder.Services.AddScoped<ResepService>();
 
 // PENJUALAN //
+builder.Services.AddScoped<PesananPenjualanService>();
 
 // PEMBELIAN //
 builder.Services.AddScoped<PembelianService>();
