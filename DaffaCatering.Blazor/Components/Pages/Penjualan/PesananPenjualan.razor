@@ -1,5 +1,88 @@
-﻿<h3>PesananPenjualan</h3>
+﻿@page "/pesanan-penjualan"
+
+@using System.Globalization
+@inject PesananPenjualanService PesananPenjualanService
+@inject PelangganService PelangganService
+@inject MenuMakananService MenuMakananService
+@inject SatuanBahanBakuService SatuanBahanBakuService
+
+<div class="pesanan-page">
+	
+	<section class="hero">
+		<div class="hero-top">
+			<div>
+				<span class="eyebrow">Penjualan</span>
+				<h1>Pesanan Penjualan</h1>
+				<p>Catat transaksi pesanan penjualan dari pelanggan</p>
+			</div>
+			<button class="btn-add" @onclick="">
+				<i class="fa-solid fa-plus"></i> Tambah Pesanan
+			</button>
+		</div>
+
+		<div class="hero-stats">
+			<div class="chip">
+				<span class="chip-value">@daftarPesananPenjualan.Count</span>
+				<span class="chip-label">Total</span>
+			</div>
+			<div class="chip">
+				<span class="chip-value">@daftarPesananPenjualan.Count</span>
+				<span class="chip-label">Hari Ini</span>
+			</div>
+		</div>
+	</section>
+
+	@if (!string.IsNullOrEmpty(pesanSukses))
+    {
+        <div class="banner ok">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@pesanSukses</span>
+            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+</div>
+
 
 @code {
+	// =====================================================
+	// 1. STATE & MODEL
+	// =====================================================
+	private static readonly CultureInfo IdCulture = new("id-ID");
 
+	private record PelangganRow(string IdPelanggan, string NamaPelanggan);
+	private record MenuMakananRow(string IdMenuMakanan, string NamaMenuMakanan);
+
+	private class ItemDetailPesananPenjualan
+	{
+		public string IdMenu { get; set; } = "";
+		public string NamaMenu { get; set; } = "";
+		public string IdSatuan { get; set; } = "";
+		public decimal Jumlah { get; set; }
+		public decimal Harga { get; set; }
+	}
+
+	// --- data ---
+	private List<PesananPenjualanModels> daftarPesananPenjualan = new();
+	private List<PelangganModels> daftarPelanggan = new();
+	private List<MenuMakananModels> daftarMenuMakanan = new();
+	private List<SatuanBahanBakuModels> daftarSatuan = new();
+
+	// --- halaman utama ---
+	private bool isLoading = true;
+	private string pesanSukses = "";
+	private string pesanError = "";
+	private string teksCari = "";
 }
