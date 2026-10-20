@@ -20,10 +20,13 @@ namespace DaffaCatering.API.Controllers.Pembelian
             _context = context;
         }
 
+        // PERUBAHAN: detail ikut dimuat. Tanpa ini "Jumlah Terima" di form selalu 0.
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var data = await _context.HeaderPenerimaans.ToListAsync();
+            var data = await _context.HeaderPenerimaans
+                .Include(h => h.DetailPenerimaans)
+                .ToListAsync();
             return Ok(data);
         }
 
@@ -47,7 +50,9 @@ namespace DaffaCatering.API.Controllers.Pembelian
                 if (!await _context.Pemasoks.AnyAsync(p => p.IdPemasok == input.IdPemasok))
                     return BadRequest($"Pemasok '{input.IdPemasok}' tidak ditemukan");
 
-                if (!await _context.HeaderPembelians.AnyAsync(p => p.IdPembelian == input.IdPembelian))
+                var pembelian = await _context.HeaderPembelians
+                    .FirstOrDefaultAsync(p => p.IdPembelian == input.IdPembelian);
+                if (pembelian == null)
                     return BadRequest($"Pembelian '{input.IdPembelian}' tidak ditemukan");
 
                 var entity = new Models.HeaderPenerimaan
@@ -72,30 +77,44 @@ namespace DaffaCatering.API.Controllers.Pembelian
                         StatusBahanBaku = detailInput.StatusBahanBaku
                     });
 
-                    // 2. AUTO-UPDATE stok: cek apakah batch (bahan baku + tgl kadaluwarsa) ini sudah ada
+                    // 2. Stok (tambahBB() di WinForms)
+                    // WinForms: bahan baku yang ditutup TIDAK menambah stok.
+                    // Hapus 2 baris di bawah ini jika perilaku itu ternyata tidak diinginkan.
+                    if (detailInput.StatusBahanBaku == "Ditutup")
+                        continue;
+
                     var existingStok = await _context.DetailBahanBakus.FirstOrDefaultAsync(
                         d => d.IdBahanBaku == detailInput.IdBahanBaku
                           && d.TglKadaluwarsa == detailInput.TglKadaluwarsa);
 
                     if (existingStok != null)
                     {
-                        // Batch dengan tanggal kadaluwarsa yang sama sudah ada -> tambah stoknya
-                        existingStok.StokAwal += detailInput.Jumlah;
+                        // Batch (bahan baku + tgl kadaluwarsa) sudah ada -> hanya SisaStok yang bertambah
                         existingStok.SisaStok += detailInput.Jumlah;
                     }
                     else
                     {
-                        // Batch baru -> buat entry DetailBahanBaku baru
+                        // Batch baru -> WinForms mengisi StokAwal = 0, SisaStok = jumlah
                         _context.DetailBahanBakus.Add(new Models.DetailBahanBaku
                         {
                             IdBahanBaku = detailInput.IdBahanBaku,
                             TglKadaluwarsa = detailInput.TglKadaluwarsa,
                             IdSatuan = detailInput.IdSatuan,
-                            StokAwal = detailInput.Jumlah,
+                            StokAwal = 0,
                             SisaStok = detailInput.Jumlah
                         });
                     }
                 }
+
+                // 3. Update status HeaderPembelian (sama seperti WinForms)
+                pembelian.Status = input.Status;
+
+                // 4. Update status SEMUA penerimaan dengan No. Pembelian yang sama (sama seperti WinForms)
+                var penerimaanTerkait = await _context.HeaderPenerimaans
+                    .Where(h => h.IdPembelian == input.IdPembelian)
+                    .ToListAsync();
+                foreach (var h in penerimaanTerkait)
+                    h.Status = input.Status;
 
                 _context.HeaderPenerimaans.Add(entity);
                 await _context.SaveChangesAsync();
