@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Penjualan\" />
     <Folder Include="Services\Penjualan\" />
   </ItemGroup>
 
