@@ -22,6 +22,7 @@ namespace DaffaCatering.Blazor.Models.Pembelian
         public string Status { get; set; } = "";
 
         public List<DetailPenerimaan> Details { get; set; } = new();
+
         [JsonPropertyName("detailPenerimaans")]
         public List<DetailPenerimaan> DetailPenerimaans
         {
@@ -38,7 +39,7 @@ namespace DaffaCatering.Blazor.Models.Pembelian
 
         public decimal Jumlah { get; set; }
 
-        public DateOnly TglPenerimaan { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public DateOnly TglKadaluwarsa { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
         public string StatusBahanBaku { get; set; } = "";
     }
