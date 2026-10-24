@@ -8,26 +8,18 @@
 
 <div class="satuan-bahan-baku-page">
 
-    <section class="hero">
-        <div class="hero-top">
-            <div>
-                <span class="eyebrow">Master Data</span>
-                <h1>Satuan Bahan Baku</h1>
-                <p>Kelola data satuan bahan baku dalam satu tempat</p>
-            </div>
-            <button class="btn-add" @onclick="BukaModalTambah">
-                <i class="fa-solid fa-plus"></i> Tambah Satuan Bahan Baku
-            </button>
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Satuan Bahan Baku</h1>
+            <p>Kelola data satuan bahan baku dalam satu tempat</p>
         </div>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Satuan Bahan Baku
+        </button>
+    </header>
 
-        <div class="hero-stats">
-            <div class="chip">
-                <span class="chip-value">@daftarSatuan.Count</span>
-                <span class="chip-label">Total</span>
-            </div>
-        </div>
-    </section>
-
+    @* ================= 2. BANNER ERROR ================= *@
     @if (!string.IsNullOrEmpty(pesanError))
     {
         <div class="banner">
@@ -39,20 +31,17 @@
         </div>
     }
 
-    <section class="panel">
-        <div class="toolbar">
-            <label class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari ID atau nama satuan..."
-                       @bind="teksCari" @bind:event="oninput" />
-            </label>
+    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari ID atau nama satuan..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+    </section>
 
-            <div class="toolbar-right">
-                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
-                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
-                </button>
-            </div>
-        </div>
+    @* ================= 4. TABEL SATUAN BAHAN BAKU ================= *@
+    <section class="panel">
 
         @if (isLoading)
         {
@@ -73,7 +62,7 @@
                     <thead>
                         <tr>
                             <th>Satuan Bahan Baku</th>
-                            <th></th>
+                            <th class="actions">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -90,7 +79,7 @@
                                     </div>
                                 </td>
                                 <td class="actions">
-                                    <button class="icon-btn" title="Ubah" @onclick="() => BukaModalEdit(item)">
+                                    <button class="icon-btn" title="Edit" @onclick="() => BukaModalEdit(item)">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
                                 </td>
@@ -113,9 +102,9 @@
                 Menampilkan <b>@view.Count</b> dari <b>@daftarSatuan.Count</b> satuan bahan baku
             </div>
         }
-
     </section>
 
+    @* ================= 5. MODAL FORM SATUAN BAHAN BAKU ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -123,22 +112,21 @@
                 <EditForm Model="formModel" OnValidSubmit="SimpanData">
                     <DataAnnotationsValidator />
 
+                    @* ---------- Header modal ---------- *@
                     <header class="dialog-head">
-                        <div class="dialog-icon">
-                            <i class="fa-solid @(isEditMode ? "fa-pen" : "fa-plus")"></i>
-                        </div>
                         <div>
                             <h5>@(isEditMode ? "Ubah" : "Tambah") Satuan Bahan Baku</h5>
                             <p>@(isEditMode ? "Perbarui data satuan bahan baku" : "Isi data satuan bahan baku baru")</p>
                         </div>
-                        <button type="button" class="dialog-close" @onclick="TutupModal">
+                        <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </header>
 
+                    @* ---------- Isi form ---------- *@
                     <div class="dialog-body">
                         <div class="field">
-                            <label>ID Satuan <span class="auto-tag">Auto</span></label>
+                            <label>ID Satuan <small>(otomatis)</small></label>
                             <InputText @bind-Value="formModel.IdSatuan" disabled="true" />
                         </div>
 
@@ -157,6 +145,7 @@
                         }
                     </div>
 
+                    @* ---------- Footer modal ---------- *@
                     <footer class="dialog-foot">
                         <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                         <button type="submit" class="btn-solid" disabled="@sedangSimpan">
@@ -178,24 +167,50 @@
 </div>
 
 @code {
+    // =====================================================
+    // 1. STATE
+    // =====================================================
+    // --- data & halaman utama ---
     private List<SatuanBahanBakuModels> daftarSatuan = new();
     private bool isLoading = true;
     private string pesanError = "";
+    private string teksCari = "";
 
+    // --- modal form ---
     private bool modalTampil = false;
     private bool isEditMode = false;
     private bool sedangSimpan = false;
     private string modalError = "";
     private SatuanBahanBakuModels formModel = new();
 
-    // --- pencarian ---
-    private string teksCari = "";
+    // =====================================================
+    // 2. LIFECYCLE & MUAT DATA
+    // =====================================================
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
 
-    private IEnumerable<SatuanBahanBakuModels> Filtered => daftarSatuan
-        .Where(c => string.IsNullOrWhiteSpace(teksCari)
-            || (c.IdSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || (c.NamaSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+    private async Task MuatData()
+    {
+        isLoading = true;
+        pesanError = "";
 
+        try
+        {
+            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat data: " + ex.Message;
+        }
+
+        isLoading = false;
+    }
+
+    // =====================================================
+    // 3. HELPER TAMPILAN
+    // =====================================================
     private static string Inisial(string? nama)
     {
         var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -207,7 +222,18 @@
     // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
 
-    // --- ID otomatis: SBB + 7 digit ---
+    // =====================================================
+    // 4. DAFTAR: PENCARIAN
+    // =====================================================
+    private IEnumerable<SatuanBahanBakuModels> Filtered => daftarSatuan
+        .Where(c => string.IsNullOrWhiteSpace(teksCari)
+            || (c.IdSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NamaSatuan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+
+    // =====================================================
+    // 5. MODAL FORM: BUKA / TUTUP
+    // =====================================================
+    // ID otomatis: SBB + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<SatuanBahanBakuModels> data)
     {
         const string prefix = "SBB";
@@ -224,26 +250,6 @@
         return $"{prefix}{max + 1:D7}";
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await MuatData();
-    }
-
-    private async Task MuatData()
-    {
-        isLoading = true;
-        pesanError = "";
-        try
-        {
-            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError = "Gagal memuat data: " + ex.Message;
-        }
-        isLoading = false;
-    }
-
     private async Task BukaModalTambah()
     {
         formModel = new SatuanBahanBakuModels();
@@ -252,7 +258,7 @@
 
         try
         {
-            // ambil data terbaru supaya nomor urut tidak basi
+            // data terbaru supaya nomor urut tidak basi
             var terbaru = await SatuanBahanBakuService.GetAllAsync();
             formModel.IdSatuan = BuatIdBerikutnya(terbaru);
         }
@@ -282,6 +288,9 @@
         modalTampil = false;
     }
 
+    // =====================================================
+    // 6. MODAL FORM: SIMPAN
+    // =====================================================
     private async Task SimpanData()
     {
         sedangSimpan = true;
