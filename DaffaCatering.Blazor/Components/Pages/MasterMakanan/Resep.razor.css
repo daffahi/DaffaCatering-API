@@ -1,4 +1,6 @@
-/* CSS for Resep component */
+/* =====================================================
+   1. VARIABEL & WRAPPER HALAMAN
+   ===================================================== */
 .resep-page {
     --brand-950: #0c3b2e;
     --brand-800: #135846;
@@ -11,49 +13,22 @@
     --muted: #71827a;
     --line: #ece8e0;
     --danger: #d64550;
+    font-family: 'Roboto', sans-serif;
     color: var(--ink);
     padding-bottom: 2rem;
 }
 
-/* ---------- Hero ---------- */
-.hero {
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px;
-    padding: 1.75rem 2rem;
-    color: #fff;
-    background: linear-gradient(120deg, var(--brand-950), var(--brand-800) 55%, var(--brand-600));
-    box-shadow: 0 18px 34px -14px rgba(12, 59, 46, .55);
-}
-
-    .hero::before, .hero::after {
-        content: "";
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, .07);
-        pointer-events: none;
+    .resep-page button,
+    .resep-page input,
+    .resep-page select,
+    .resep-page textarea {
+        font-family: inherit;
     }
 
-    .hero::before {
-        width: 300px;
-        height: 300px;
-        right: -70px;
-        top: -130px;
-    }
-
-    .hero::after {
-        width: 190px;
-        height: 190px;
-        right: 210px;
-        bottom: -120px;
-    }
-
-    .hero > * {
-        position: relative;
-        z-index: 1;
-    }
-
-.hero-top {
+/* =====================================================
+   2. HEADER HALAMAN (judul + tombol tambah)
+   ===================================================== */
+.page-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -61,25 +36,20 @@
     flex-wrap: wrap;
 }
 
-.eyebrow {
-    font-size: .72rem;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    opacity: .7;
-    font-weight: 600;
-}
+    .page-head h1 {
+        margin: 0;
+        font-family: 'Merriweather Sans', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
 
-.hero h1 {
-    margin: .2rem 0 .25rem;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -.02em;
-}
-
-.hero p {
-    margin: 0;
-    opacity: .8;
-}
+    .page-head p {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        margin: .64rem 0 0;
+        color: var(--muted);
+    }
 
 .btn-add {
     display: inline-flex;
@@ -87,53 +57,27 @@
     gap: .55rem;
     border: 0;
     cursor: pointer;
-    padding: .7rem 1.2rem;
+    padding: .7rem 1.3rem;
     border-radius: 12px;
     font-weight: 600;
-    color: var(--brand-800);
-    background: #fff;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
-    transition: transform .15s ease, box-shadow .15s ease;
+    color: #fff;
+    background: var(--brand-800);
+    box-shadow: 0 8px 16px -8px rgba(19, 88, 70, .6);
+    transition: background .15s ease, transform .15s ease;
 }
 
     .btn-add:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 22px rgba(0, 0, 0, .25);
+        background: var(--brand-950);
+        transform: translateY(-1px);
     }
 
     .btn-add:active {
         transform: translateY(0);
     }
 
-.hero-stats {
-    display: flex;
-    gap: .75rem;
-    margin-top: 1.4rem;
-    flex-wrap: wrap;
-}
-
-.chip {
-    display: flex;
-    align-items: baseline;
-    gap: .55rem;
-    padding: .55rem 1rem;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, .12);
-    border: 1px solid rgba(255, 255, 255, .18);
-    backdrop-filter: blur(6px);
-}
-
-.chip-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-
-.chip-label {
-    font-size: .8rem;
-    opacity: .8;
-}
-
-/* ---------- Banner ---------- */
+/* =====================================================
+   3. BANNER ERROR
+   ===================================================== */
 .banner {
     display: flex;
     align-items: center;
@@ -167,24 +111,20 @@
         opacity: 1;
     }
 
-/* ---------- Panel & toolbar ---------- */
-.panel {
+/* =====================================================
+   4. TOOLBAR: SEARCH + FILTER STATUS
+   ===================================================== */
+.toolbar-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
     margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 18px;
     box-shadow: 0 10px 30px -18px rgba(29, 43, 37, .35);
-    overflow: hidden;
-}
-
-.toolbar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--line);
 }
 
 .toolbar-right {
@@ -194,40 +134,42 @@
     flex-wrap: wrap;
 }
 
+/* ---------- Search ---------- */
 .search {
+    font-size: 16px;
     position: relative;
     flex: 1;
     min-width: 240px;
-    max-width: 420px;
     margin: 0;
 }
 
     .search i {
         position: absolute;
-        left: .95rem;
+        left: 1rem;
         top: 50%;
         transform: translateY(-50%);
         color: var(--muted);
-        font-size: .9rem;
     }
 
     .search input {
         width: 100%;
-        padding: .65rem 1rem .65rem 2.6rem;
+        padding: .75rem 1rem .75rem 2.8rem;
         border: 1px solid var(--line);
         border-radius: 12px;
-        background: #faf8f4;
+        background: #fff;
         outline: none;
-        transition: border-color .15s, box-shadow .15s, background .15s;
+        transition: border-color .15s, box-shadow .15s;
     }
 
         .search input:focus {
-            background: #fff;
             border-color: var(--brand-500);
             box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
         }
 
+/* ---------- Filter status (Semua / Aktif / Tidak Aktif) ---------- */
 .segmented {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
     display: inline-flex;
     padding: 4px;
     gap: 2px;
@@ -241,7 +183,7 @@
     gap: .45rem;
     border: 0;
     background: transparent;
-    padding: .45rem .9rem;
+    padding: .5rem .9rem;
     border-radius: 9px;
     font-size: .85rem;
     font-weight: 600;
@@ -271,24 +213,18 @@
             background: rgba(255, 255, 255, .22);
         }
 
-.btn-refresh {
-    width: 40px;
-    height: 40px;
+/* =====================================================
+   5. PANEL TABEL
+   ===================================================== */
+.panel {
+    margin-top: 1.25rem;
+    background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #fff;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .15s ease;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px -18px rgba(29, 43, 37, .35);
+    overflow: hidden;
 }
 
-    .btn-refresh:hover {
-        color: var(--brand-800);
-        border-color: var(--brand-500);
-        background: var(--brand-50);
-    }
-
-/* ---------- Table ---------- */
 .table-wrap {
     overflow-x: auto;
 }
@@ -298,6 +234,7 @@ table {
     border-collapse: collapse;
 }
 
+/* ---------- Header tabel ---------- */
 thead th {
     text-align: left;
     padding: .8rem 1.25rem;
@@ -310,6 +247,7 @@ thead th {
     white-space: nowrap;
 }
 
+/* ---------- Baris tabel ---------- */
 tbody td {
     padding: .85rem 1.25rem;
     border-top: 1px solid var(--line);
@@ -344,6 +282,7 @@ tbody tr {
     }
 }
 
+/* ---------- Kolom resep (avatar + ID) ---------- */
 .who {
     display: flex;
     align-items: center;
@@ -358,11 +297,6 @@ tbody tr {
     font-size: .75rem;
     color: var(--muted);
     letter-spacing: .03em;
-}
-
-.muted {
-    color: var(--muted);
-    font-size: .9rem;
 }
 
 .mono {
@@ -406,6 +340,7 @@ tbody tr {
     color: #48602a;
 }
 
+/* ---------- Pill status ---------- */
 .pill {
     display: inline-flex;
     align-items: center;
@@ -433,6 +368,7 @@ tbody tr {
         color: #857f72;
     }
 
+/* ---------- Kolom aksi ---------- */
 .actions {
     text-align: right;
     white-space: nowrap;
@@ -444,32 +380,26 @@ tbody tr {
     border: 0;
     border-radius: 10px;
     background: transparent;
-    color: var(--muted);
+    color: var(--brand-600);
     cursor: pointer;
-    opacity: 0;
-    transition: all .15s ease;
+    transition: background .15s ease;
 }
-
-    tbody tr:hover .icon-btn, .icon-btn:focus-visible {
-        opacity: 1;
-    }
 
     .icon-btn:hover {
         background: var(--brand-100);
-        color: var(--brand-800);
     }
 
-    .icon-btn.warn:hover {
-        background: #fdf1d8;
-        color: #a86a05;
+    .icon-btn.danger {
+        color: var(--danger);
     }
 
-    .icon-btn.ok:hover {
-        background: var(--brand-100);
-        color: var(--brand-800);
-    }
+        .icon-btn.danger:hover {
+            background: #fdeced;
+        }
 
-/* ---------- Empty, footer, skeleton ---------- */
+/* =====================================================
+   6. EMPTY STATE, FOOTER PANEL, SKELETON
+   ===================================================== */
 .empty {
     display: grid;
     justify-items: center;
@@ -549,7 +479,9 @@ tbody tr {
     }
 }
 
-/* ---------- Modal ---------- */
+/* =====================================================
+   7. MODAL: OVERLAY & DIALOG
+   ===================================================== */
 .overlay {
     position: fixed;
     inset: 0;
@@ -557,23 +489,26 @@ tbody tr {
     display: grid;
     place-items: center;
     padding: 1rem;
-    background: rgba(12, 59, 46, .45);
-    backdrop-filter: blur(4px);
-    animation: fade .18s ease;
+    background: rgba(12, 30, 24, .5);
+    animation: fade .15s ease;
 }
 
 .dialog {
     width: 100%;
-    max-width: 540px;
+    max-width: 520px;
     max-height: 92vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .45);
-    animation: pop .22s cubic-bezier(.2, .9, .3, 1.2);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, .35);
+    animation: pop .18s ease;
 }
+
+    .dialog.wide {
+        max-width: 680px;
+    }
 
     .dialog ::deep form {
         display: flex;
@@ -595,7 +530,7 @@ tbody tr {
 @keyframes pop {
     from {
         opacity: 0;
-        transform: translateY(12px) scale(.97);
+        transform: translateY(8px);
     }
 
     to {
@@ -604,59 +539,58 @@ tbody tr {
     }
 }
 
+/* ---------- Header modal ---------- */
 .dialog-head {
+    font-family: 'Merriweather Sans', sans-serif;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
-    gap: .9rem;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(120deg, var(--brand-950), var(--brand-800));
-    color: #fff;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--line);
 }
 
     .dialog-head h5 {
         margin: 0;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--ink);
     }
 
     .dialog-head p {
-        margin: 0;
-        font-size: .8rem;
-        opacity: .75;
+        margin: .15rem 0 0;
+        font-size: 14px;
+        color: var(--muted);
     }
 
-.dialog-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background: rgba(255, 255, 255, .15);
-}
-
 .dialog-close {
-    margin-left: auto;
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border: 0;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, .12);
-    color: #fff;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
     cursor: pointer;
-    transition: background .15s;
+    transition: background .15s, color .15s;
 }
 
     .dialog-close:hover {
-        background: rgba(255, 255, 255, .25);
+        background: #f3f0ea;
+        color: var(--ink);
     }
 
+/* ---------- Isi modal ---------- */
 .dialog-body {
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem 1.5rem;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
 }
 
+/* =====================================================
+   8. MODAL: FIELD FORM & STATUS
+   ===================================================== */
 .row2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -665,69 +599,83 @@ tbody tr {
 
 .field {
     display: grid;
-    gap: .4rem;
+    gap: .35rem;
     margin-bottom: 1rem;
     align-content: start;
 }
 
     .field label {
         margin: 0;
-        font-size: .8rem;
+        font-size: 16px;
         font-weight: 600;
+        color: var(--ink);
     }
 
-.auto-tag {
-    margin-left: .35rem;
-    padding: .1rem .5rem;
-    border-radius: 999px;
-    font-size: .65rem;
-    font-weight: 700;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    color: var(--brand-800);
-    background: var(--brand-100);
-}
+        .field label small {
+            font-weight: 400;
+            color: var(--muted);
+        }
 
-.field ::deep input, .field ::deep textarea {
-    width: 100%;
-    padding: .65rem .85rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #faf8f4;
-    font: inherit;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s, background .15s;
-}
-
-    .field ::deep input:focus, .field ::deep textarea:focus {
+    .field ::deep input, .field ::deep select, .field select {
+        width: 100%;
+        padding: .6rem .8rem;
+        border: 1px solid #d9d5cb;
+        border-radius: 8px;
         background: #fff;
-        border-color: var(--brand-500);
-        box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
+        font: inherit;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
     }
 
-    .field ::deep input:disabled {
-        background: #f0ede6;
-        color: var(--muted);
-        cursor: not-allowed;
+        .field ::deep input:focus, .field ::deep select:focus, .field select:focus {
+            border-color: var(--brand-600);
+            box-shadow: 0 0 0 3px rgba(34, 160, 107, .18);
+        }
+
+        .field ::deep input:disabled {
+            background: #f3f0ea;
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+    .field ::deep .invalid {
+        border-color: var(--danger);
     }
 
-.field ::deep .invalid {
-    border-color: var(--danger);
+    .field ::deep .validation-message {
+        color: var(--danger);
+        font-size: .78rem;
+    }
+
+/* ---------- Baris status (label kiri, switch kanan) ---------- */
+.status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .7rem .9rem;
+    border: 1px solid #d9d5cb;
+    border-radius: 8px;
 }
 
-.field ::deep .validation-message {
-    color: var(--danger);
-    font-size: .78rem;
+.status-label {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.status-value {
+    font-size: .85rem;
+    color: var(--muted);
 }
 
 .switch {
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: .7rem;
+    gap: .65rem;
     margin: 0;
     cursor: pointer;
-    font-weight: 600;
 }
 
     .switch ::deep input {
@@ -739,10 +687,10 @@ tbody tr {
 
 .sw-track {
     position: relative;
-    width: 44px;
-    height: 26px;
+    width: 40px;
+    height: 22px;
     border-radius: 999px;
-    background: #d9d4c9;
+    background: #cfcabd;
     transition: background .2s;
 }
 
@@ -751,16 +699,15 @@ tbody tr {
         position: absolute;
         top: 3px;
         left: 3px;
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
         background: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, .25);
         transition: transform .2s;
     }
 
 .switch ::deep input:checked ~ .sw-track {
-    background: var(--brand-500);
+    background: var(--brand-600);
 }
 
     .switch ::deep input:checked ~ .sw-track::after {
@@ -768,32 +715,164 @@ tbody tr {
     }
 
 .switch ::deep input:focus-visible ~ .sw-track {
-    box-shadow: 0 0 0 4px rgba(34, 160, 107, .2);
+    box-shadow: 0 0 0 3px rgba(34, 160, 107, .25);
 }
 
+/* =====================================================
+   9. MODAL: KOMPOSISI BAHAN BAKU
+   ===================================================== */
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1.25rem 0 .8rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+}
+
+    .section-head h6 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+.count-tag {
+    padding: .1rem .6rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--brand-800);
+    background: var(--brand-100);
+}
+
+/* ---------- Form input komposisi ---------- */
+.detail-form {
+    padding: 1rem 1rem .8rem;
+    margin-bottom: 1rem;
+    border: 1px dashed #d9d5cb;
+    border-radius: 8px;
+    background: #fcfbf8;
+    transition: border-color .15s, background .15s;
+}
+
+    .detail-form.editing {
+        border-style: solid;
+        border-color: var(--brand-600);
+        background: var(--brand-50);
+    }
+
+    .detail-form .field {
+        margin-bottom: .6rem;
+    }
+
+.add-item-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr .8fr;
+    gap: 1rem;
+}
+
+    .add-item-grid > * {
+        min-width: 0;
+    }
+
+.detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .6rem;
+}
+
+.btn-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem .95rem;
+    border: 1px solid #d9d5cb;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+    .btn-mini:hover {
+        background: #f6f3ec;
+    }
+
+    .btn-mini.solid {
+        border-color: transparent;
+        color: #fff;
+        background: var(--brand-800);
+    }
+
+        .btn-mini.solid:hover {
+            background: var(--brand-950);
+        }
+
+/* ---------- Tabel komposisi ---------- */
+.detail-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.detail-table thead th {
+    padding: .6rem .9rem;
+}
+
+.detail-table tbody td {
+    padding: .55rem .9rem;
+}
+
+/* matikan animasi & aksen hover khas tabel utama */
+.detail-table tbody tr {
+    opacity: 1;
+    animation: none;
+}
+
+    .detail-table tbody tr:hover td:first-child {
+        box-shadow: none;
+    }
+
+    .detail-table tbody tr.row-edit {
+        background: var(--brand-50);
+    }
+
+.detail-empty {
+    padding: 1.1rem;
+    text-align: center;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+/* =====================================================
+   10. MODAL: FOOTER & TOMBOL
+   ===================================================== */
 .dialog-foot {
     flex-shrink: 0;
     display: flex;
     justify-content: flex-end;
     gap: .6rem;
-    padding: 1rem 1.5rem;
+    padding: .9rem 1.5rem;
     border-top: 1px solid var(--line);
-    background: #fcfbf8;
 }
 
 .btn-ghost, .btn-solid {
     display: inline-flex;
     align-items: center;
     gap: .5rem;
-    padding: .6rem 1.2rem;
-    border-radius: 12px;
+    padding: .55rem 1.2rem;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: all .15s ease;
+    transition: background .15s ease;
 }
 
 .btn-ghost {
-    border: 1px solid var(--line);
+    border: 1px solid #d9d5cb;
     background: #fff;
     color: var(--ink);
 }
@@ -805,53 +884,29 @@ tbody tr {
 .btn-solid {
     border: 0;
     color: #fff;
-    background: linear-gradient(135deg, var(--brand-500), var(--brand-800));
-    box-shadow: 0 8px 16px -6px rgba(19, 88, 70, .6);
+    background: var(--brand-800);
 }
 
     .btn-solid:hover {
-        transform: translateY(-1px);
+        background: var(--brand-950);
     }
 
     .btn-solid:disabled {
         opacity: .7;
         cursor: progress;
-        transform: none;
     }
 
-/* ---------- Responsive & a11y ---------- */
-@media (hover: none) {
-    .actions .icon-btn {
-        opacity: 1
-    }
-
-    .icon-btn {
-        opacity: 1;
-    }
-}
-
-@media (max-width: 1000px) {
-    .col-addr {
-        display: none;
-    }
-}
-
+/* =====================================================
+   11. RESPONSIVE & ACCESSIBILITY
+   ===================================================== */
 @media (max-width: 720px) {
-    .col-date {
-        display: none;
+    .page-head h1 {
+        font-size: 1.5rem;
     }
-
-    .hero {
-        padding: 1.25rem;
-    }
-
-        .hero h1 {
-            font-size: 1.6rem;
-        }
 }
 
-@media (max-width: 520px) {
-    .row2 {
+@media (max-width: 560px) {
+    .row2, .add-item-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -882,124 +937,5 @@ tbody tr {
 
     .field {
         margin-bottom: .75rem;
-    }
-}
-
-.dialog-wide {
-    max-width: 640px;
-}
-
-.section-divider {
-    margin: 1.5rem 0 .75rem;
-    font-size: .8rem;
-    font-weight: 700;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    color: var(--brand-800);
-    border-bottom: 1px solid var(--line);
-    padding-bottom: .5rem;
-}
-
-.add-item-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr .8fr auto;
-    gap: .6rem;
-    align-items: center;
-}
-
-    .add-item-grid > * {
-        min-width: 0;
-        width: 100%;
-    }
-
-    .add-item-grid > .ai-add-btn {
-        width: auto;
-    }
-
-.ai-select, .ai-input {
-    padding: .55rem .7rem;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: #faf8f4;
-    font: inherit;
-    outline: none;
-}
-
-    .ai-select:focus, .ai-input:focus {
-        background: #fff;
-        border-color: var(--brand-500);
-        box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
-    }
-
-.ai-add-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    border: 0;
-    border-radius: 10px;
-    padding: .55rem .9rem;
-    font-weight: 600;
-    font-size: .85rem;
-    color: #fff;
-    background: var(--brand-600);
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-    .ai-add-btn:hover {
-        background: var(--brand-800);
-    }
-
-.item-error {
-    color: var(--danger);
-    font-size: .8rem;
-    margin-top: .4rem;
-}
-
-.mini-table {
-    width: 100%;
-    margin-top: 1rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    overflow: hidden;
-    border-collapse: collapse;
-}
-
-    .mini-table thead th {
-        text-align: left;
-        padding: .55rem .8rem;
-        font-size: .7rem;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-        color: var(--muted);
-        background: #fcfbf8;
-    }
-
-    .mini-table tbody td {
-        padding: .55rem .8rem;
-        font-size: .85rem;
-        border-top: 1px solid var(--line);
-    }
-
-.mini-actions {
-    display: flex;
-    gap: .3rem;
-    justify-content: flex-end;
-}
-
-.mini-empty {
-    margin-top: .75rem;
-    padding: 1rem;
-    text-align: center;
-    font-size: .85rem;
-    color: var(--muted);
-    background: #fcfbf8;
-    border-radius: 10px;
-    border: 1px dashed var(--line);
-}
-
-@media (max-width: 560px) {
-    .add-item-grid {
-        grid-template-columns: 1fr;
     }
 }
