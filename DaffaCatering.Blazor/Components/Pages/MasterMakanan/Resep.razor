@@ -157,7 +157,7 @@
                                 <input value="@formModel.IdResep" disabled />
                             </div>
                             <div class="field">
-                                <label>Menu</label>
+                                <label>Menu <b class="req">*</b></label>
                                 <InputSelect @bind-Value="formModel.IdMenu">
                                     <option value="">Pilih menu</option>
                                     @foreach (var m in daftarMenu)
@@ -187,7 +187,7 @@
                         <div class="detail-form @(editingIndex >= 0 ? "editing" : "")">
                             <div class="add-item-grid">
                                 <div class="field">
-                                    <label>Bahan Baku</label>
+                                    <label>Bahan Baku <b class="req">*</b></label>
                                     <select @bind="pilihBahanBaku">
                                         <option value="">Pilih bahan baku</option>
                                         @foreach (var b in daftarBahanBaku)
@@ -197,7 +197,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Satuan</label>
+                                    <label>Satuan <b class="req">*</b></label>
                                     <select @bind="pilihSatuan">
                                         <option value="">Pilih satuan</option>
                                         @foreach (var s in daftarSatuan)
@@ -207,7 +207,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Jumlah</label>
+                                    <label>Jumlah <b class="req">*</b></label>
                                     <input type="number" step="0.01" min="0" placeholder="0" @bind="inputJumlah" />
                                 </div>
                             </div>
