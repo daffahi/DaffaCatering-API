@@ -7,35 +7,19 @@
 }
 
 <div class="pemasok-page">
-    
-    <section class="hero">
-        <div class="hero-top">
-            <div>
-                <span class="eyebrow">Master Data</span>
-				<h1>Pemasok</h1>
-				<p>Kelola data pemasok dalam satu tempat</p>
-            </div>
-            <button class="btn-add" @onclick="BukaModalTambah">
-                <i class="fa-solid fa-plus"></i> Tambah Pemasok
-            </button>
-        </div>
 
-        <div class="hero-stats">
-            <div class="chip">
-                <span class="chip-value">@daftarPemasok.Count</span>
-                <span class="chip-label">Total</span>
-            </div>
-            <div class="chip">
-                <span class="chip-value">@JumlahAktif</span>
-                <span class="chip-label">Aktif</span>
-            </div>
-            <div class="chip">
-                <span class="chip-value">@(daftarPemasok.Count - JumlahAktif)</span>
-                <span class="chip-label">Tidak Aktif</span>
-            </div>
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Pemasok</h1>
+            <p>Kelola data pemasok dalam satu tempat</p>
         </div>
-    </section>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Pemasok
+        </button>
+    </header>
 
+    @* ================= 2. BANNER ERROR ================= *@
     @if (!string.IsNullOrEmpty(pesanError))
     {
         <div class="banner">
@@ -47,31 +31,31 @@
         </div>
     }
 
-    <section class="panel">
-        <div class="toolbar">
-            <label class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari ID, Nama, kontak, atau alamat..."
-                       @bind="teksCari" @bind:event="oninput" />
-            </label>
+    @* ================= 3. TOOLBAR: SEARCH + FILTER ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari ID, Nama, kontak, atau alamat..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
 
-            <div class="toolbar-right">
-                <div class="segmented">
-                    <button class="@Seg(FilterStatus.Semua)" @onclick="() => filterStatus = FilterStatus.Semua">
-                        Semua <span>@daftarPemasok.Count</span>
-                    </button>
-                    <button class="@Seg(FilterStatus.Aktif)" @onclick="() => filterStatus = FilterStatus.Aktif">
-                        Aktif <span>@JumlahAktif</span>
-                    </button>
-                    <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => filterStatus = FilterStatus.NonAktif">
-                        Tidak Aktif <span>@(daftarPemasok.Count - JumlahAktif)</span>
-                    </button>
-                </div>
-                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
-                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
+        <div class="toolbar-right">
+            <div class="segmented">
+                <button class="@Seg(FilterStatus.Semua)" @onclick="() => filterStatus = FilterStatus.Semua">
+                    Semua <span>@daftarPemasok.Count</span>
+                </button>
+                <button class="@Seg(FilterStatus.Aktif)" @onclick="() => filterStatus = FilterStatus.Aktif">
+                    Aktif <span>@JumlahAktif</span>
+                </button>
+                <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => filterStatus = FilterStatus.NonAktif">
+                    Tidak Aktif <span>@(daftarPemasok.Count - JumlahAktif)</span>
                 </button>
             </div>
         </div>
+    </section>
+
+    @* ================= 4. TABEL PEMASOK ================= *@
+    <section class="panel">
 
         @if (isLoading)
         {
@@ -96,7 +80,7 @@
                             <th class="col-addr">Alamat</th>
                             <th class="col-date">Bergabung</th>
                             <th>Status</th>
-                            <th></th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,13 +105,8 @@
                                     </span>
                                 </td>
                                 <td class="actions">
-                                    <button class="icon-btn" title="Ubah" @onclick="() => BukaModalEdit(item)">
+                                    <button class="icon-btn" title="Edit" @onclick="() => BukaModalEdit(item)">
                                         <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                    <button class="icon-btn @(item.Status ? "warn" : "ok")"
-                                            title="@(item.Status ? "Nonaktifkan" : "Aktifkan")"
-                                            @onclick="() => UbahStatus(item)">
-                                        <i class="fa-solid @(item.Status ? "fa-user-slash" : "fa-user-check")"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -146,12 +125,12 @@
             </div>
 
             <div class="panel-foot">
-                Menampilkan <b>@view.Count</b> dari <b>@daftarPemasok.Count</b> pelanggan
+                Menampilkan <b>@view.Count</b> dari <b>@daftarPemasok.Count</b> pemasok
             </div>
         }
-
     </section>
 
+    @* ================= 5. MODAL FORM PEMASOK ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -159,23 +138,22 @@
                 <EditForm Model="formModel" OnValidSubmit="SimpanData">
                     <DataAnnotationsValidator />
 
+                    @* ---------- Header modal ---------- *@
                     <header class="dialog-head">
-                        <div class="dialog-icon">
-                            <i class="fa-solid @(isEditMode ? "fa-user-pen" : "fa-user-plus")"></i>
-                        </div>
                         <div>
                             <h5>@(isEditMode ? "Ubah" : "Tambah") Pemasok</h5>
                             <p>@(isEditMode ? "Perbarui data pemasok" : "Isi data pemasok baru")</p>
                         </div>
-                        <button type="button" class="dialog-close" @onclick="TutupModal">
+                        <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </header>
 
+                    @* ---------- Isi form ---------- *@
                     <div class="dialog-body">
                         <div class="row2">
                             <div class="field">
-                                <label>ID Pemasok <span class="auto-tag">Auto</span></label>
+                                <label>ID Pemasok <small>(otomatis)</small></label>
                                 <InputText @bind-Value="formModel.IdPemasok" disabled="true" />
                             </div>
                             <div class="field">
@@ -200,11 +178,14 @@
                             <InputTextArea rows="3" @bind-Value="formModel.Alamat" />
                         </div>
 
-                        <label class="switch">
-                            <InputCheckbox @bind-Value="formModel.Status" />
-                            <span class="sw-track"></span>
-                            <span>@(formModel.Status ? "Aktif" : "Tidak Aktif")</span>
-                        </label>
+                        <div class="status-row">
+                            <span class="status-label">Status</span>
+                            <label class="switch">
+                                <span class="status-value">@(formModel.Status ? "Aktif" : "Tidak Aktif")</span>
+                                <InputCheckbox @bind-Value="formModel.Status" />
+                                <span class="sw-track"></span>
+                            </label>
+                        </div>
 
                         @if (!string.IsNullOrEmpty(modalError))
                         {
@@ -215,6 +196,7 @@
                         }
                     </div>
 
+                    @* ---------- Footer modal ---------- *@
                     <footer class="dialog-foot">
                         <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                         <button type="submit" class="btn-solid" disabled="@sedangSimpan">
@@ -232,7 +214,7 @@
             </div>
         </div>
     }
-    
+
 </div>
 
 @code {
