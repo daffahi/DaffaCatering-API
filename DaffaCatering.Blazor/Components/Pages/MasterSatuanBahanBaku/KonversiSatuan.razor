@@ -6,31 +6,22 @@
 
 @{
     var view = Filtered.ToList();
-    var preview = PreviewTeks;
 }
 
 <div class="konversi-page">
 
-    <section class="hero">
-        <div class="hero-top">
-            <div>
-                <span class="eyebrow">Master Data</span>
-                <h1>Konversi Satuan</h1>
-                <p>Kelola aturan konversi satuan besar ke satuan kecil dalam satu tempat</p>
-            </div>
-            <button class="btn-add" @onclick="BukaModalTambah">
-                <i class="fa-solid fa-plus"></i> Tambah Konversi
-            </button>
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Konversi Satuan</h1>
+            <p>Kelola aturan konversi satuan besar ke satuan kecil dalam satu tempat</p>
         </div>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Konversi
+        </button>
+    </header>
 
-        <div class="hero-stats">
-            <div class="chip">
-                <span class="chip-value">@daftarKonversi.Count</span>
-                <span class="chip-label">Total</span>
-            </div>
-        </div>
-    </section>
-
+    @* ================= 2. BANNER SUKSES & ERROR ================= *@
     @if (!string.IsNullOrEmpty(pesanSukses))
     {
         <div class="banner ok">
@@ -53,20 +44,17 @@
         </div>
     }
 
-    <section class="panel">
-        <div class="toolbar">
-            <label class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari kode atau nama satuan..."
-                       @bind="teksCari" @bind:event="oninput" />
-            </label>
+    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari kode atau nama satuan..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+    </section>
 
-            <div class="toolbar-right">
-                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
-                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
-                </button>
-            </div>
-        </div>
+    @* ================= 4. TABEL KONVERSI SATUAN ================= *@
+    <section class="panel">
 
         @if (isLoading)
         {
@@ -89,31 +77,32 @@
                             <th>Satuan Besar</th>
                             <th>Satuan Kecil</th>
                             <th>Nilai Konversi</th>
-                            <th></th>
+                            <th class="actions">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var (item, i) in view.Select((item, i) => (item, i)))
                         {
+                            var namaBesar = NamaSatuan(item.IdSatuanBesar);
+                            var namaKecil = NamaSatuan(item.IdSatuanKecil);
+
                             <tr @key="item.IdKonversi" style="--i:@Math.Min(i, 12)">
                                 <td>
                                     <div class="who">
-                                        <div class="avatar tone-@Warna(NamaSatuan(item.IdSatuanBesar))">@Inisial(NamaSatuan(item.IdSatuanBesar))</div>
+                                        <div class="avatar tone-@Warna(namaBesar)">@Inisial(namaBesar)</div>
                                         <div>
-                                            <div class="name">@NamaSatuan(item.IdSatuanBesar)</div>
+                                            <div class="name">@namaBesar</div>
                                             <div class="sub">@item.IdKonversi</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td>@NamaSatuan(item.IdSatuanKecil)</td>
+                                <td>@namaKecil</td>
                                 <td>
                                     <div class="name mono">@FormatAngka(item.NilaiKonversi)</div>
-                                    <div class="sub">
-                                        1 @NamaSatuan(item.IdSatuanBesar) = @FormatAngka(item.NilaiKonversi) @NamaSatuan(item.IdSatuanKecil)
-                                    </div>
+                                    <div class="sub">1 @namaBesar = @FormatAngka(item.NilaiKonversi) @namaKecil</div>
                                 </td>
                                 <td class="actions">
-                                    <button class="icon-btn" title="Ubah" @onclick="() => BukaModalEdit(item)">
+                                    <button class="icon-btn" title="Edit" @onclick="() => BukaModalEdit(item)">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
                                 </td>
@@ -127,7 +116,7 @@
                     <div class="empty">
                         <i class="fa-regular fa-face-frown-open"></i>
                         <strong>Konversi satuan tidak ditemukan</strong>
-                        <span>Coba ubah kata kunci pencarian.</span>
+                        <span>Coba ubah kata kunci pencarian</span>
                     </div>
                 }
             </div>
@@ -136,31 +125,30 @@
                 Menampilkan <b>@view.Count</b> dari <b>@daftarKonversi.Count</b> konversi satuan
             </div>
         }
-
     </section>
 
+    @* ================= 5. MODAL FORM KONVERSI SATUAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
             <div class="dialog" @onclick:stopPropagation>
                 <EditForm Model="formModel" OnValidSubmit="SimpanData">
 
+                    @* ---------- Header modal ---------- *@
                     <header class="dialog-head">
-                        <div class="dialog-icon">
-                            <i class="fa-solid @(isEditMode ? "fa-pen" : "fa-plus")"></i>
-                        </div>
                         <div>
                             <h5>@(isEditMode ? "Ubah" : "Tambah") Konversi Satuan</h5>
                             <p>@(isEditMode ? "Perbarui aturan konversi satuan" : "Isi aturan konversi satuan baru")</p>
                         </div>
-                        <button type="button" class="dialog-close" @onclick="TutupModal">
+                        <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </header>
 
+                    @* ---------- Isi form ---------- *@
                     <div class="dialog-body">
                         <div class="field">
-                            <label>Kode Konversi <span class="auto-tag">Auto</span></label>
+                            <label>Kode Konversi <small>(otomatis)</small></label>
                             <InputText @bind-Value="formModel.IdKonversi" disabled="true" />
                         </div>
 
@@ -194,16 +182,8 @@
                             <label>Nilai Konversi <b class="req">*</b></label>
                             <input type="number" step="any" min="0" placeholder="Contoh: 1000"
                                    @bind="nilaiInput" @bind:event="oninput" />
-                            <span class="hint">Berapa satuan kecil dalam 1 satuan besar.</span>
+                            <span class="hint">Berapa satuan kecil dalam 1 satuan besar</span>
                         </div>
-
-                        @if (preview != null)
-                        {
-                            <div class="konv-preview">
-                                <i class="fa-solid fa-scale-balanced"></i>
-                                <span>@preview</span>
-                            </div>
-                        }
 
                         @if (!string.IsNullOrEmpty(modalError))
                         {
@@ -214,6 +194,7 @@
                         }
                     </div>
 
+                    @* ---------- Footer modal ---------- *@
                     <footer class="dialog-foot">
                         <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                         <button type="submit" class="btn-solid" disabled="@sedangSimpan">
@@ -235,14 +216,22 @@
 </div>
 
 @code {
+    // =====================================================
+    // 1. STATE
+    // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
+    // --- data ---
     private List<KonversiSatuanModels> daftarKonversi = new();
     private List<SatuanBahanBakuModels> daftarSatuan = new();
-    private bool isLoading = true;
-    private string pesanError = "";
-    private string pesanSukses = "";
 
+    // --- halaman utama ---
+    private bool isLoading = true;
+    private string pesanSukses = "";
+    private string pesanError = "";
+    private string teksCari = "";
+
+    // --- modal form ---
     private bool modalTampil = false;
     private bool isEditMode = false;
     private bool sedangSimpan = false;
@@ -250,16 +239,32 @@
     private KonversiSatuanModels formModel = new();
     private string nilaiInput = "";
 
-    // --- pencarian ---
-    private string teksCari = "";
+    // =====================================================
+    // 2. LIFECYCLE & MUAT DATA
+    // =====================================================
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
 
-    private IEnumerable<KonversiSatuanModels> Filtered => daftarKonversi
-        .Where(c => string.IsNullOrWhiteSpace(teksCari)
-            || (c.IdKonversi ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || NamaSatuan(c.IdSatuanBesar).Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || NamaSatuan(c.IdSatuanKecil).Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+    private async Task MuatData()
+    {
+        isLoading = true;
+        var galat = new List<string>();
 
-    // --- helper tampilan ---
+        try { daftarKonversi = await KonversiSatuanService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat konversi satuan: " + ex.Message); }
+
+        try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+
+        pesanError = string.Join(" ", galat);
+        isLoading = false;
+    }
+
+    // =====================================================
+    // 3. HELPER UMUM (format & lookup)
+    // =====================================================
     private static string Inisial(string? nama)
     {
         var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -273,31 +278,28 @@
 
     private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
 
-    private string NamaSatuan(string? id)
-        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
-
     private static bool TryParseNilai(string? teks, out decimal hasil)
     {
         var t = (teks ?? "").Trim().Replace(',', '.');
         return decimal.TryParse(t, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out hasil);
     }
 
-    // Pratinjau: "1 Kilogram = 1.000 Gram"
-    private string? PreviewTeks
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(formModel.IdSatuanBesar)
-                || string.IsNullOrEmpty(formModel.IdSatuanKecil)
-                || !TryParseNilai(nilaiInput, out var nilai)
-                || nilai <= 0)
-                return null;
+    private string NamaSatuan(string? id)
+        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
 
-            return $"1 {NamaSatuan(formModel.IdSatuanBesar)} = {FormatAngka(nilai)} {NamaSatuan(formModel.IdSatuanKecil)}";
-        }
-    }
+    // =====================================================
+    // 4. DAFTAR: PENCARIAN
+    // =====================================================
+    private IEnumerable<KonversiSatuanModels> Filtered => daftarKonversi
+        .Where(c => string.IsNullOrWhiteSpace(teksCari)
+            || (c.IdKonversi ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || NamaSatuan(c.IdSatuanBesar).Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || NamaSatuan(c.IdSatuanKecil).Contains(teksCari, StringComparison.OrdinalIgnoreCase));
 
-    // --- ID otomatis: KNV + 7 digit ---
+    // =====================================================
+    // 5. MODAL FORM: BUKA / TUTUP
+    // =====================================================
+    // ID otomatis: KNV + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<KonversiSatuanModels> data)
     {
         const string prefix = "KNV";
@@ -314,39 +316,6 @@
         return $"{prefix}{max + 1:D7}";
     }
 
-    // --- muat data ---
-    protected override async Task OnInitializedAsync()
-    {
-        await MuatData();
-    }
-
-    private async Task MuatData()
-    {
-        isLoading = true;
-        pesanError = "";
-
-        try
-        {
-            daftarKonversi = await KonversiSatuanService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError = "Gagal memuat konversi satuan: " + ex.Message;
-        }
-
-        try
-        {
-            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat satuan: " + ex.Message;
-        }
-
-        isLoading = false;
-    }
-
-    // --- modal ---
     private async Task BukaModalTambah()
     {
         pesanSukses = "";
@@ -357,7 +326,7 @@
 
         try
         {
-            // ambil data terbaru supaya nomor urut tidak basi
+            // data terbaru supaya nomor urut tidak basi
             var terbaru = await KonversiSatuanService.GetAllAsync();
             formModel.IdKonversi = BuatIdBerikutnya(terbaru);
         }
@@ -391,6 +360,9 @@
         modalTampil = false;
     }
 
+    // =====================================================
+    // 6. MODAL FORM: SIMPAN
+    // =====================================================
     private async Task SimpanData()
     {
         modalError = "";
