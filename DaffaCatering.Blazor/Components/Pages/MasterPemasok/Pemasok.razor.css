@@ -660,6 +660,10 @@ tbody tr {
         font-size: .78rem;
     }
 
+.req {
+    color: var(--danger);
+}
+
 /* ---------- Baris status (label kiri, switch kanan) ---------- */
 .status-row {
     display: flex;

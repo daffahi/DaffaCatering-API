@@ -157,13 +157,13 @@
                                 <InputText @bind-Value="formModel.IdPemasok" disabled="true" />
                             </div>
                             <div class="field">
-                                <label>Tanggal Bergabung</label>
+                                <label>Tanggal Bergabung <b class="req">*</b></label>
                                 <InputDate @bind-Value="formModel.TglBergabung" />
                             </div>
                         </div>
 
                         <div class="field">
-                            <label>Nama Pemasok</label>
+                            <label>Nama Pemasok <b class="req">*</b></label>
                             <InputText @bind-Value="formModel.NamaPemasok" />
                             <ValidationMessage For="() => formModel.NamaPemasok" />
                         </div>
