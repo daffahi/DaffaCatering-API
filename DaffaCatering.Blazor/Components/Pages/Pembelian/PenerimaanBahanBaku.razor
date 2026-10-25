@@ -13,30 +13,18 @@
 
 <div class="penerimaan-page">
 
-    <section class="hero">
-        <div class="hero-top">
-            <div>
-                <span class="eyebrow">Pembelian</span>
-                <h1>Penerimaan Bahan Baku</h1>
-                <p>Catat transaksi penerimaan bahan baku dari pembelian</p>
-            </div>
-            <button class="btn-add" @onclick="BukaModalTambah">
-                <i class="fa-solid fa-plus"></i> Tambah Penerimaan
-            </button>
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Penerimaan Bahan Baku</h1>
+            <p>Catat transaksi penerimaan bahan baku dari pembelian</p>
         </div>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Penerimaan
+        </button>
+    </header>
 
-        <div class="hero-stats">
-            <div class="chip">
-                <span class="chip-value">@daftarPenerimaan.Count</span>
-                <span class="chip-label">Total</span>
-            </div>
-            <div class="chip">
-                <span class="chip-value">@JumlahHariIni</span>
-                <span class="chip-label">Hari ini</span>
-            </div>
-        </div>
-    </section>
-
+    @* ================= 2. BANNER SUKSES & ERROR ================= *@
     @if (!string.IsNullOrEmpty(pesanSukses))
     {
         <div class="banner ok">
@@ -59,20 +47,17 @@
         </div>
     }
 
-    <section class="panel">
-        <div class="toolbar">
-            <label class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari nomor penerimaan atau nama pemasok..."
-                       @bind="teksCari" @bind:event="oninput" />
-            </label>
+    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari nomor penerimaan atau nama pemasok..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+    </section>
 
-            <div class="toolbar-right">
-                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
-                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
-                </button>
-            </div>
-        </div>
+    @* ================= 4. TABEL PENERIMAAN ================= *@
+    <section class="panel">
 
         @if (isLoading)
         {
@@ -98,12 +83,9 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach (var (item, i) in view.Select((item, i) => (item, i)))
                         {
-                            var tutup = IsClose(item);
-
                             <tr @key="item.IdPenerimaan" style="--i:@Math.Min(i, 12)">
                                 <td>
                                     <div class="who">
@@ -117,7 +99,7 @@
                                 <td>@item.TglPenerimaan.ToString("dd MMMM yyyy", IdCulture)</td>
                                 <td>@NamaPemasok(item.IdPemasok)</td>
                                 <td>
-                                    <span class="pill @(tutup ? "closed" : "pending")">
+                                    <span class="pill @(IsClose(item) ? "closed" : "pending")">
                                         <i></i>@(string.IsNullOrWhiteSpace(item.Status) ? "-" : item.Status)
                                     </span>
                                 </td>
@@ -142,7 +124,7 @@
         }
     </section>
 
-    @* ================= MODAL FORM PENERIMAAN ================= *@
+    @* ================= 5. MODAL FORM PENERIMAAN ================= *@
     @if (modalTampil)
     {
         var detailPembelianView = DaftarDetailPembelian.ToList();
@@ -151,25 +133,23 @@
         <div class="overlay" @onclick="TutupModal">
             <div class="dialog wide" @onclick:stopPropagation>
 
+                @* ---------- Header modal ---------- *@
                 <header class="dialog-head">
-                    <div class="dialog-icon">
-                        <i class="fa-solid fa-plus"></i>
-                    </div>
                     <div>
                         <h5>Tambah Penerimaan Bahan Baku</h5>
                         <p>Isi data penerimaan baru</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupModal">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
 
                 <div class="dialog-body">
 
-                    @* ---------- HEADER ---------- *@
+                    @* ---------- Data utama ---------- *@
                     <div class="row2">
                         <div class="field">
-                            <label>No. Penerimaan <span class="auto-tag">Auto</span></label>
+                            <label>No. Penerimaan <small>(otomatis)</small></label>
                             <input type="text" value="@kodePenerimaan" disabled />
                         </div>
                         <div class="field">
@@ -188,7 +168,7 @@
                         <label>No. Pembelian <b class="req">*</b></label>
                         <div class="pick-row">
                             <input type="text" readonly placeholder="Belum ada pembelian dipilih"
-                                   value="@(pembelianDipilih?.idPembelian ?? "")" />
+                                   value="@(pembelianDipilih?.IdPembelian ?? "")" />
                             <button type="button" class="btn-mini solid"
                                     disabled="@(items.Count > 0)" @onclick="BukaPencarianPembelian">
                                 <i class="fa-solid fa-magnifying-glass"></i> Cari
@@ -202,19 +182,19 @@
 
                     <div class="row2">
                         <div class="field">
-                            <label>Kode Pemasok <span class="auto-tag">Auto</span></label>
+                            <label>Kode Pemasok <small>(otomatis)</small></label>
                             <input type="text" disabled placeholder="Otomatis dari pembelian"
                                    value="@(pembelianDipilih?.IdPemasok ?? "")" />
                         </div>
                         <div class="field">
-                            <label>Nama Pemasok <span class="auto-tag">Auto</span></label>
+                            <label>Nama Pemasok <small>(otomatis)</small></label>
                             <input type="text" disabled placeholder="Otomatis dari pembelian"
                                    value="@(pembelianDipilih?.NamaPemasok ?? "")" />
                         </div>
                     </div>
 
                     <div class="field">
-                        <label>Status <span class="auto-tag">Auto</span></label>
+                        <label>Status <small>(otomatis)</small></label>
                         <div>
                             <span class="pill @(statusForm == "Close" ? "closed" : "pending")">
                                 <i></i>@statusForm
@@ -222,7 +202,7 @@
                         </div>
                     </div>
 
-                    @* ---------- DETAIL: DATA PEMBELIAN ---------- *@
+                    @* ---------- Data pembelian ---------- *@
                     <div class="section-head">
                         <h6>Data Pembelian</h6>
                         <span class="count-tag">@detailPembelianView.Count bahan baku</span>
@@ -261,13 +241,13 @@
                         {
                             <div class="detail-empty">
                                 @(pembelianDipilih is null
-                                    ? "Pilih No. Pembelian terlebih dahulu untuk menampilkan bahan baku yang dibeli."
-                                    : "Pembelian ini tidak memiliki bahan baku.")
+                                    ? "Pilih No. Pembelian terlebih dahulu untuk menampilkan bahan baku yang dibeli"
+                                    : "Pembelian ini tidak memiliki bahan baku")
                             </div>
                         }
                     </div>
 
-                    @* ---------- DETAIL: DATA PENERIMAAN ---------- *@
+                    @* ---------- Data penerimaan ---------- *@
                     <div class="section-head">
                         <h6>Data Penerimaan</h6>
                         <span class="count-tag">@items.Count item</span>
@@ -309,7 +289,7 @@
                                            disabled="@(bahanDipilih is null)"
                                            @onchange="e => tutupInput = (bool)(e.Value ?? false)" />
                                     <span class="switch-track"></span>
-                                    <span>@(tutupInput ? "Ya" : "Tidak")</span>
+                                    <span class="switch-text">@(tutupInput ? "Ya" : "Tidak")</span>
                                 </label>
                             </div>
                         </div>
@@ -345,7 +325,7 @@
                                     <th>Satuan</th>
                                     <th>Tgl Kadaluwarsa</th>
                                     <th>Status</th>
-                                    <th></th>
+                                    <th class="actions">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -398,6 +378,7 @@
                     }
                 </div>
 
+                @* ---------- Footer modal ---------- *@
                 <footer class="dialog-foot">
                     <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                     <button type="button" class="btn-solid" disabled="@sedangSimpan" @onclick="SimpanData">
@@ -415,20 +396,20 @@
         </div>
     }
 
-    @* ================= MODAL CARI PEMBELIAN ================= *@
+    @* ================= 6. MODAL CARI PEMBELIAN ================= *@
     @if (cariPembelianTampil)
     {
         var pembelianView = DaftarPembelianAktif.ToList();
 
         <div class="overlay stacked" @onclick="TutupPencarianPembelian">
             <div class="dialog wide" @onclick:stopPropagation>
+
                 <header class="dialog-head">
-                    <div class="dialog-icon"><i class="fa-solid fa-truck-field"></i></div>
                     <div>
                         <h5>Pilih Pembelian</h5>
                         <p>Cari dan pilih pembelian untuk penerimaan bahan baku</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupPencarianPembelian">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupPencarianPembelian">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
@@ -446,8 +427,8 @@
                         <table class="detail-table batch-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 180px;">No. Pembelian</th>
-                                    <th style="width: 160px;">Tanggal</th>
+                                    <th class="col-kode">No. Pembelian</th>
+                                    <th class="col-tgl">Tanggal</th>
                                     <th>Nama Pemasok</th>
                                 </tr>
                             </thead>
@@ -456,7 +437,7 @@
                                 {
                                     var row = pr;
                                     <tr @onclick="() => PilihPembelian(row)">
-                                        <td class="mono">@row.idPembelian</td>
+                                        <td class="mono">@row.IdPembelian</td>
                                         <td>@row.TglPembelian.ToString("dd MMMM yyyy", IdCulture)</td>
                                         <td><div class="name">@row.NamaPemasok</div></td>
                                     </tr>
@@ -466,13 +447,13 @@
 
                         @if (pembelianView.Count == 0)
                         {
-                            <div class="detail-empty">Pembelian dengan status Pending tidak ditemukan.</div>
+                            <div class="detail-empty">Pembelian dengan status Pending tidak ditemukan</div>
                         }
                     </div>
                 </div>
 
                 <footer class="dialog-foot">
-                    <button type="button" class="btn-ghost" @onclick="TutupPencarianPembelian">Batal</button>
+                    <button type="button" class="btn-ghost" @onclick="TutupPencarianPembelian">Batalkan</button>
                 </footer>
             </div>
         </div>
@@ -486,7 +467,7 @@
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
-    private record PembelianRow(string idPembelian, string IdPemasok, string NamaPemasok, DateOnly TglPembelian);
+    private record PembelianRow(string IdPembelian, string IdPemasok, string NamaPemasok, DateOnly TglPembelian);
     private record BahanRow(string IdBahanBaku, string NamaBahanBaku);
 
     private record PembelianDetailRow(string IdBahanBaku, string NamaBahanBaku, string IdSatuan, decimal JumlahBeli, decimal JumlahTerima)
@@ -550,49 +531,24 @@
     private async Task MuatData()
     {
         isLoading = true;
-        pesanError = "";
+        var galat = new List<string>();
 
-        try
-        {
-            daftarPenerimaan = await PenerimaanService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError = "Gagal memuat penerimaan: " + ex.Message;
-        }
-        try
-        {
-            daftarPembelian = await PembelianService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat pembelian: " + ex.Message;
-        }
-        try
-        {
-            daftarPemasok = await PemasokService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat pemasok: " + ex.Message;
-        }
-        try
-        {
-            daftarBahanBaku = await BahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat bahan baku: " + ex.Message;
-        }
-        try
-        {
-            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat satuan: " + ex.Message;
-        }
+        try { daftarPenerimaan = await PenerimaanService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat penerimaan: " + ex.Message); }
 
+        try { daftarPembelian = await PembelianService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat pembelian: " + ex.Message); }
+
+        try { daftarPemasok = await PemasokService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat pemasok: " + ex.Message); }
+
+        try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+
+        try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+
+        pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
@@ -627,10 +583,8 @@
         => daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == id)?.NamaBahanBaku ?? (id ?? "-");
 
     // =====================================================
-    // 4. HERO & DAFTAR PENERIMAAN
+    // 4. DAFTAR PENERIMAAN: PENCARIAN
     // =====================================================
-    private int JumlahHariIni => daftarPenerimaan.Count(p => p.TglPenerimaan == HariIni);
-
     private IEnumerable<PenerimaanBahanBakuModels> Filtered => daftarPenerimaan
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
             || (p.IdPenerimaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
@@ -643,7 +597,7 @@
     // =====================================================
     // 5. MODAL FORM: BUKA / TUTUP / RESET
     // =====================================================
-    // ID otomatis: PNM + 7 digit (kodeAuto() di WinForms)
+    // ID otomatis: PNM + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<PenerimaanBahanBakuModels> data)
     {
         const string prefix = "PNM";
@@ -701,15 +655,15 @@
     }
 
     // =====================================================
-    // 6. MODAL FORM: HEADER (PEMBELIAN)
+    // 6. MODAL CARI: PEMBELIAN
     // =====================================================
     private IEnumerable<PembelianRow> DaftarPembelianAktif => daftarPembelian
         .Where(p => p.Status == "Pending")
         .Select(p => new PembelianRow(p.IdPembelian, p.IdPemasok, NamaPemasok(p.IdPemasok), p.TglPembelian))
         .Where(p => string.IsNullOrWhiteSpace(teksCariPembelian)
-            || p.idPembelian.Contains(teksCariPembelian, StringComparison.OrdinalIgnoreCase)
+            || p.IdPembelian.Contains(teksCariPembelian, StringComparison.OrdinalIgnoreCase)
             || p.NamaPemasok.Contains(teksCariPembelian, StringComparison.OrdinalIgnoreCase))
-        .OrderBy(p => p.idPembelian);
+        .OrderBy(p => p.IdPembelian);
 
     private void BukaPencarianPembelian()
     {
@@ -727,9 +681,9 @@
     }
 
     // =====================================================
-    // 7. MODAL FORM: DETAIL (PENERIMAAN BAHAN BAKU)
+    // 7. MODAL FORM: DATA PEMBELIAN
     // =====================================================
-    // jumlahTerima di WinForms: total yang sudah diterima untuk pembelian + bahan baku ini
+    // Total yang sudah diterima untuk pembelian + bahan baku ini
     private decimal SudahDiterima(string idPembelian, string idBahanBaku)
         => daftarPenerimaan
             .Where(p => p.IdPembelian == idPembelian)
@@ -741,7 +695,7 @@
     {
         get
         {
-            var pembelian = daftarPembelian.FirstOrDefault(p => p.IdPembelian == pembelianDipilih?.idPembelian);
+            var pembelian = daftarPembelian.FirstOrDefault(p => p.IdPembelian == pembelianDipilih?.IdPembelian);
             if (pembelian is null) return Enumerable.Empty<PembelianDetailRow>();
 
             return pembelian.Details
@@ -790,6 +744,9 @@
         tutupInput = false;
     }
 
+    // =====================================================
+    // 8. MODAL FORM: DETAIL (ITEM PENERIMAAN)
+    // =====================================================
     private void KosongkanInputDetail()
     {
         indeksEdit = -1;
@@ -906,9 +863,8 @@
     }
 
     // =====================================================
-    // 8. MODAL FORM: STATUS & SIMPAN
+    // 9. MODAL FORM: STATUS & SIMPAN
     // =====================================================
-    // Sama seperti updateStatus() di WinForms:
     // Pending kalau masih ada bahan baku yang belum terpenuhi dan belum ditutup
     private string HitungStatus()
     {
@@ -924,7 +880,7 @@
         return "Close";
     }
 
-    // Status yang ditampilkan di form (grup Status di WinForms)
+    // Status yang ditampilkan di form
     private string StatusForm => pembelianDipilih is null ? "Pending" : HitungStatus();
 
     private async Task SimpanData()
@@ -969,7 +925,7 @@
             {
                 IdPenerimaan = kodePenerimaan,
                 IdPemasok = pembelianDipilih.IdPemasok,
-                IdPembelian = pembelianDipilih.idPembelian,
+                IdPembelian = pembelianDipilih.IdPembelian,
                 TglPenerimaan = tgl,
                 Status = HitungStatus(),
                 Details = items.Select(i => new DetailPenerimaan
@@ -986,7 +942,7 @@
 
             if (success)
             {
-                pesanSukses = $"No. Penerimaan {kodePenerimaan} untuk No. Pembelian {pembelianDipilih.idPembelian} berhasil ditambahkan.";
+                pesanSukses = $"No. Penerimaan {kodePenerimaan} untuk No. Pembelian {pembelianDipilih.IdPembelian} berhasil ditambahkan.";
                 modalTampil = false;
                 await MuatData();
             }
