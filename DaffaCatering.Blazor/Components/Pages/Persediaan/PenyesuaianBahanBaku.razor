@@ -13,30 +13,18 @@
 
 <div class="penyesuaian-bahan-baku-page">
 
-    <section class="hero">
-        <div class="hero-top">
-            <div>
-                <span class="eyebrow">Persediaan</span>
-                <h1>Penyesuaian Bahan Baku</h1>
-                <p>Samakan stok sistem dengan hasil hitung fisik, selisihnya tercatat otomatis</p>
-            </div>
-            <button class="btn-add" @onclick="BukaModalTambah">
-                <i class="fa-solid fa-plus"></i> Tambah Penyesuaian
-            </button>
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Penyesuaian Bahan Baku</h1>
+            <p>Samakan stok sistem dengan hasil hitung fisik, selisihnya tercatat otomatis</p>
         </div>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Penyesuaian
+        </button>
+    </header>
 
-        <div class="hero-stats">
-            <div class="chip">
-                <span class="chip-value">@daftarPenyesuaian.Count</span>
-                <span class="chip-label">Total</span>
-            </div>
-            <div class="chip">
-                <span class="chip-value">@JumlahHariIni</span>
-                <span class="chip-label">Hari Ini</span>
-            </div>
-        </div>
-    </section>
-
+    @* ================= 2. BANNER SUKSES & ERROR ================= *@
     @if (!string.IsNullOrEmpty(pesanSukses))
     {
         <div class="banner ok">
@@ -59,20 +47,17 @@
         </div>
     }
 
-    <section class="panel">
-        <div class="toolbar">
-            <label class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari nomor penyesuaian atau nama bahan baku..."
-                       @bind="teksCari" @bind:event="oninput" />
-            </label>
+    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari nomor penyesuaian atau nama bahan baku..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+    </section>
 
-            <div class="toolbar-right">
-                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
-                    <i class="@KelasRefresh()"></i>
-                </button>
-            </div>
-        </div>
+    @* ================= 4. TABEL PENYESUAIAN ================= *@
+    <section class="panel">
 
         @if (isLoading)
         {
@@ -94,69 +79,47 @@
                         <tr>
                             <th>Penyesuaian</th>
                             <th>Tanggal</th>
-                            <th>Jumlah Detail</th>
+                            <th class="col-detail">Jumlah Detail</th>
                             <th>Ringkasan Selisih</th>
-                            <th></th>
+                            <th class="actions">Detail</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach (var (item, i) in view.Select((item, i) => (item, i)))
                         {
-                            var jumlahDetail = item.Details.Count;
                             var naik = item.Details.Count(x => x.SelisihStok > 0);
                             var turun = item.Details.Count(x => x.SelisihStok < 0);
                             var isOpen = expandedId == item.IdPenyesuaian;
 
-                            <tr class="adj-row"
-                                @key="item.IdPenyesuaian"
-                                style="--i:@Math.Min(i, 12)"
+                            <tr class="adj-row" @key="item.IdPenyesuaian" style="--i:@Math.Min(i, 12)"
                                 @onclick="() => ToggleDetail(item.IdPenyesuaian)">
-
                                 <td>
                                     <div class="who">
-                                        <div class="avatar tone-@Warna(item.IdPenyesuaian)">
-                                            PS
-                                        </div>
-
+                                        <div class="avatar tone-@Warna(item.IdPenyesuaian)">PS</div>
                                         <div>
                                             <div class="name">@item.IdPenyesuaian</div>
                                             <div class="sub">Penyesuaian bahan baku</div>
                                         </div>
                                     </div>
                                 </td>
-
-                                <td>
-                                    @item.TglPenyesuaian.ToString("dd MMMM yyyy", IdCulture)
-                                </td>
-
-                                <td>
-                                    @jumlahDetail item
-                                </td>
-
+                                <td>@item.TglPenyesuaian.ToString("dd MMMM yyyy", IdCulture)</td>
+                                <td class="col-detail">@item.Details.Count item</td>
                                 <td>
                                     @if (naik == 0 && turun == 0)
                                     {
                                         <span class="pill same"><i></i>Item disesuaikan</span>
                                     }
-                                    else
+                                    @if (naik > 0)
                                     {
-                                        if (naik > 0)
-                                        {
-                                            <span class="pill up"><i></i>@naik item lebih</span>
-                                        }
-                                        if (turun > 0)
-                                        {
-                                            <span class="pill down"><i></i>@turun item kurang</span>
-                                        }
+                                        <span class="pill up"><i></i>@naik item lebih</span>
+                                    }
+                                    @if (turun > 0)
+                                    {
+                                        <span class="pill down"><i></i>@turun item kurang</span>
                                     }
                                 </td>
-
-                                <td>
-                                    <button type="button"
-                                            class="@KelasChevron(isOpen)"
-                                            @onclick:stopPropagation="true"
-                                            @onclick="() => ToggleDetail(item.IdPenyesuaian)">
+                                <td class="actions">
+                                    <button type="button" class="adj-chevron @(isOpen ? "open" : "")" title="Lihat detail">
                                         <i class="fa-solid fa-chevron-down"></i>
                                     </button>
                                 </td>
@@ -178,7 +141,6 @@
                                                         <th>Keterangan</th>
                                                     </tr>
                                                 </thead>
-
                                                 <tbody>
                                                     @foreach (var detail in item.Details)
                                                     {
@@ -222,36 +184,36 @@
         }
     </section>
 
-    @* ================= MODAL FORM PENYESUAIAN ================= *@
+    @* ================= 5. MODAL FORM PENYESUAIAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
             <div class="dialog wide" @onclick:stopPropagation>
 
+                @* ---------- Header modal ---------- *@
                 <header class="dialog-head">
-                    <div class="dialog-icon"><i class="fa-solid fa-plus"></i></div>
                     <div>
                         <h5>Tambah Penyesuaian Bahan Baku</h5>
                         <p>Masukkan stok fisik hasil hitung untuk setiap bahan baku dan tanggal kadaluwarsanya</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupModal">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
 
                 <div class="dialog-body">
 
-                    @* ---------- HEADER ---------- *@
+                    @* ---------- Data utama ---------- *@
                     <div class="row2">
                         <div class="field">
-                            <label>No. Penyesuaian <span class="auto-tag">Auto</span></label>
+                            <label>No. Penyesuaian <small>(otomatis)</small></label>
                             <input type="text" value="@kodePenyesuaian" disabled />
                         </div>
                         <div class="field">
                             <label>Tanggal Penyesuaian <b class="req">*</b></label>
                             <input type="date" value="@tglPenyesuaianInput" max="@Iso(HariIni)"
                                    disabled="@(items.Count > 0)"
-                                   @onchange="OnTglPenyesuaianChanged" />
+                                   @onchange="e => tglPenyesuaianInput = e.Value?.ToString() ?? string.Empty" />
                             @if (items.Count > 0)
                             {
                                 <span class="hint">Terkunci selama masih ada item.</span>
@@ -259,18 +221,18 @@
                         </div>
                     </div>
 
-                    @* ---------- DETAIL ---------- *@
+                    @* ---------- Data detail ---------- *@
                     <div class="section-head">
                         <h6>Data Detail</h6>
                         <span class="count-tag">@items.Count item</span>
                     </div>
 
-                    <div class="@KelasForm()">
+                    <div class="detail-form @(indeksEdit >= 0 ? "editing" : "")">
                         <div class="field">
                             <label>Bahan Baku <b class="req">*</b></label>
                             <div class="pick-row">
                                 <input type="text" readonly placeholder="Belum ada bahan baku dipilih"
-                                       value="@TeksBahanDipilih()" />
+                                       value="@(adaBahan ? bahanDipilih.NamaBahanBaku : "")" />
                                 <button type="button" class="btn-mini solid" @onclick="BukaPencarian">
                                     <i class="fa-solid fa-magnifying-glass"></i> Cari
                                 </button>
@@ -284,7 +246,8 @@
                                 @foreach (var b in DetailBahan(bahanDipilih).OrderBy(x => x.TglKadaluwarsa))
                                 {
                                     var batch = b;
-                                    <button type="button" class="@KelasChip(batch.TglKadaluwarsa)"
+                                    <button type="button"
+                                            class="batch-chip @(tglKadaluwarsaInput == Iso(batch.TglKadaluwarsa) ? "active" : "")"
                                             @onclick="() => PilihTanggalBatch(batch.TglKadaluwarsa)">
                                         @FormatTgl(batch.TglKadaluwarsa) <b>stok @FormatAngka(batch.SisaStok)</b>
                                     </button>
@@ -303,7 +266,7 @@
                                 <label>Satuan <b class="req">*</b></label>
                                 <select @bind="satuanInput" disabled="@(!adaBahan)">
                                     <option value="">Pilih satuan</option>
-                                    @foreach (var s in OpsiSatuan())
+                                    @foreach (var s in OpsiSatuan)
                                     {
                                         <option value="@s.IdSatuan">@s.NamaSatuan</option>
                                     }
@@ -311,7 +274,7 @@
                             </div>
                             <div class="field">
                                 <label>Stok Sistem</label>
-                                <input type="text" disabled value="@TeksStokSistem()" />
+                                <input type="text" disabled value="@(adaBahan ? FormatAngka(StokSistemSaatIni) : "")" />
                             </div>
                             <div class="field">
                                 <label>Stok Fisik <b class="req">*</b></label>
@@ -322,9 +285,9 @@
 
                         @if (adaBahan)
                         {
-                            <div class="@KelasSelisihNote()">
+                            <div class="selisih-note @KelasSelisihNote">
                                 <i class="fa-solid fa-scale-balanced"></i>
-                                <span>@PesanSelisih()</span>
+                                <span>@PesanSelisih</span>
                             </div>
                         }
 
@@ -348,8 +311,8 @@
                                 <button type="button" class="btn-mini" @onclick="KosongkanInputDetail">Batal Ubah</button>
                             }
                             <button type="button" class="btn-mini solid" @onclick="TambahAtauUbahDetail">
-                                <i class="@IkonSimpanDetail()"></i>
-                                @LabelSimpanDetail()
+                                <i class="fa-solid @(indeksEdit >= 0 ? "fa-check" : "fa-plus")"></i>
+                                @(indeksEdit >= 0 ? "Perbarui Item" : "Tambah Item")
                             </button>
                         </div>
                     </div>
@@ -365,7 +328,7 @@
                                     <th>Selisih</th>
                                     <th>Satuan</th>
                                     <th>Keterangan</th>
-                                    <th></th>
+                                    <th class="actions">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -373,7 +336,7 @@
                                 {
                                     var index = i;
                                     var it = items[index];
-                                    <tr class="@KelasBaris(index)">
+                                    <tr class="@(index == indeksEdit ? "row-edit" : "")">
                                         <td>
                                             <div class="name">@it.NamaBahanBaku</div>
                                             <div class="sub">@it.IdBahanBaku</div>
@@ -404,7 +367,7 @@
                         @if (items.Count == 0)
                         {
                             <div class="detail-empty">
-                                Belum ada item. Klik "Cari" untuk memilih bahan baku, isi stok fisik dan keterangan, lalu klik "Tambah Item".
+                                Belum ada item. Klik "Cari" untuk memilih bahan baku, isi stok fisik dan keterangan, lalu klik "Tambah Item"
                             </div>
                         }
                     </div>
@@ -418,6 +381,7 @@
                     }
                 </div>
 
+                @* ---------- Footer modal ---------- *@
                 <footer class="dialog-foot">
                     <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                     <button type="button" class="btn-solid" disabled="@sedangSimpan" @onclick="SimpanData">
@@ -435,7 +399,7 @@
         </div>
     }
 
-    @* ================= MODAL CARI BAHAN BAKU (padanan frmCariBahanBaku) ================= *@
+    @* ================= 6. MODAL CARI BAHAN BAKU ================= *@
     @if (cariTampil)
     {
         var bahanView = DaftarBahanCari.ToList();
@@ -444,12 +408,11 @@
             <div class="dialog wide" @onclick:stopPropagation>
 
                 <header class="dialog-head">
-                    <div class="dialog-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
                     <div>
                         <h5>Cari Bahan Baku</h5>
                         <p>Klik baris untuk memilih bahan baku yang akan disesuaikan</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupPencarian">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupPencarian">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
@@ -482,7 +445,7 @@
                                         <td class="mono">@row.IdBahanBaku</td>
                                         <td><div class="name">@row.NamaBahanBaku</div></td>
                                         <td class="mono">@DetailBahan(row).Count</td>
-                                        <td class="mono">@FormatAngka(TotalStok(row))</td>
+                                        <td class="mono">@FormatAngka(DetailBahan(row).Sum(d => d.SisaStok))</td>
                                         <td>@SatuanBahan(row)</td>
                                     </tr>
                                 }
@@ -491,7 +454,7 @@
 
                         @if (bahanView.Count == 0)
                         {
-                            <div class="detail-empty">Bahan baku tidak ditemukan.</div>
+                            <div class="detail-empty">Bahan baku tidak ditemukan</div>
                         }
                     </div>
                 </div>
@@ -506,26 +469,43 @@
 </div>
 
 @code {
-    private string expandedId = "";
-
+    // =====================================================
+    // 1. STATE & MODEL
+    // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
+    private class ItemPenyesuaian
+    {
+        public string IdBahanBaku { get; set; } = "";
+        public string NamaBahanBaku { get; set; } = "";
+        public string IdSatuan { get; set; } = "";
+        public DateOnly Tgl { get; set; }
+        public decimal StokFisik { get; set; }
+        public decimal StokSistem { get; set; }
+        public decimal Selisih { get; set; }
+        public string Keterangan { get; set; } = "";
+    }
+
+    // --- data ---
     private List<PenyesuaianBahanBakuModels> daftarPenyesuaian = new();
     private List<BahanBakuModels> daftarBahanBaku = new();
     private List<SatuanBahanBakuModels> daftarSatuan = new();
-    private bool isLoading = true;
-    private string pesanError = "";
-    private string pesanSukses = "";
-    private string teksCari = "";
 
-    // --- modal form ---
+    // --- halaman utama ---
+    private bool isLoading = true;
+    private string pesanSukses = "";
+    private string pesanError = "";
+    private string teksCari = "";
+    private string? expandedId;
+
+    // --- modal form: header ---
     private bool modalTampil = false;
     private bool sedangSimpan = false;
     private string modalError = "";
     private string kodePenyesuaian = "";
     private string tglPenyesuaianInput = "";
 
-    // --- input detail ---
+    // --- modal form: detail ---
     private readonly List<ItemPenyesuaian> items = new();
     private int indeksEdit = -1;            // -1 = tambah item, >= 0 = ubah item
     private bool adaBahan = false;
@@ -540,296 +520,51 @@
     private bool cariTampil = false;
     private string teksCariBahan = "";
 
-    private class ItemPenyesuaian
+    // =====================================================
+    // 2. LIFECYCLE & MUAT DATA
+    // =====================================================
+    protected override async Task OnInitializedAsync()
     {
-        public string IdBahanBaku { get; set; } = "";
-        public string NamaBahanBaku { get; set; } = "";
-        public string IdSatuan { get; set; } = "";
-        public DateOnly Tgl { get; set; }
-        public decimal StokFisik { get; set; }
-        public decimal StokSistem { get; set; }
-        public decimal Selisih { get; set; }
-        public string Keterangan { get; set; } = "";
+        await MuatData();
     }
 
-    // --- daftar penyesuaian ---
+    private async Task MuatData()
+    {
+        isLoading = true;
+        var galat = new List<string>();
+
+        try { daftarPenyesuaian = await PenyesuaianService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat penyesuaian: " + ex.Message); }
+
+        try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+
+        try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+
+        pesanError = string.Join(" ", galat);
+        isLoading = false;
+    }
+
+    // =====================================================
+    // 3. HELPER UMUM (format & lookup)
+    // =====================================================
     private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
 
-    private int JumlahHariIni => daftarPenyesuaian.Count(p => p.TglPenyesuaian == HariIni);
+    // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
 
-    private IEnumerable<PenyesuaianBahanBakuModels> Filtered => daftarPenyesuaian
-        .Where(p => string.IsNullOrWhiteSpace(teksCari)
-            || p.IdPenyesuaian.Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || p.Details.Any(d => NamaBahan(d.IdBahanBaku).Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
-        .OrderByDescending(p => p.IdPenyesuaian);
+    private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
 
-    private void ToggleDetail(string id)
-    {
-        if (expandedId == id)
-        {
-            expandedId = "";
-        }
-        else
-        {
-            expandedId = id;
-        }
-    }
+    private static string FormatSelisih(decimal v) => v > 0 ? "+" + FormatAngka(v) : FormatAngka(v);
 
-    // --- daftar bahan baku untuk dialog pencarian ---
-    private IEnumerable<BahanBakuModels> DaftarBahanCari => daftarBahanBaku
-        .Where(b => b.Status)
-        .Where(b => string.IsNullOrWhiteSpace(teksCariBahan)
-            || b.IdBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase)
-            || b.NamaBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase))
-        .OrderBy(b => b.NamaBahanBaku);
+    private static string FormatTgl(DateOnly d) => d.ToString("dd MMM yyyy", IdCulture);
 
-    // --- helper tampilan ---
-    private static string FormatAngka(decimal v)
-    {
-        return v.ToString("#,##0.##", IdCulture);
-    }
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    private static string FormatSelisih(decimal v)
-    {
-        if (v > 0)
-        {
-            return "+" + FormatAngka(v);
-        }
-        return FormatAngka(v);
-    }
+    private static string KelasSelisih(decimal v) => v > 0 ? "up" : v < 0 ? "down" : "same";
 
-    private static string FormatTgl(DateOnly d)
-    {
-        return d.ToString("dd MMM yyyy", IdCulture);
-    }
-
-    private static string Iso(DateOnly d)
-    {
-        return d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-    }
-
-    private static int Warna(string teks)
-    {
-        if (string.IsNullOrEmpty(teks))
-        {
-            return 0;
-        }
-        return teks.Sum(ch => ch) % 5;
-    }
-
-    private static string KelasSelisih(decimal v)
-    {
-        if (v > 0)
-        {
-            return "up";
-        }
-        if (v < 0)
-        {
-            return "down";
-        }
-        return "same";
-    }
-
-    private string KelasRefresh()
-    {
-        if (isLoading)
-        {
-            return "fa-solid fa-rotate fa-spin";
-        }
-        return "fa-solid fa-rotate";
-    }
-
-    private static string KelasChevron(bool isOpen)
-    {
-        if (isOpen)
-        {
-            return "adj-chevron open";
-        }
-        return "adj-chevron";
-    }
-
-    private string KelasForm()
-    {
-        if (indeksEdit >= 0)
-        {
-            return "detail-form editing";
-        }
-        return "detail-form";
-    }
-
-    private string KelasBaris(int index)
-    {
-        if (index == indeksEdit)
-        {
-            return "row-edit";
-        }
-        return "";
-    }
-
-    private string KelasChip(DateOnly tgl)
-    {
-        if (tglKadaluwarsaInput == Iso(tgl))
-        {
-            return "batch-chip active";
-        }
-        return "batch-chip";
-    }
-
-    private string IkonSimpanDetail()
-    {
-        if (indeksEdit >= 0)
-        {
-            return "fa-solid fa-check";
-        }
-        return "fa-solid fa-plus";
-    }
-
-    private string LabelSimpanDetail()
-    {
-        if (indeksEdit >= 0)
-        {
-            return "Perbarui Item";
-        }
-        return "Tambah Item";
-    }
-
-    private string NamaSatuan(string id)
-    {
-        foreach (var s in daftarSatuan)
-        {
-            if (s.IdSatuan == id)
-            {
-                return s.NamaSatuan;
-            }
-        }
-        if (string.IsNullOrEmpty(id))
-        {
-            return "-";
-        }
-        return id;
-    }
-
-    private string NamaBahan(string id)
-    {
-        foreach (var b in daftarBahanBaku)
-        {
-            if (b.IdBahanBaku == id)
-            {
-                return b.NamaBahanBaku;
-            }
-        }
-        return id;
-    }
-
-    // --- helper data bahan baku ---
-    private static List<DetailBahanBakuModel> DetailBahan(BahanBakuModels b)
-    {
-        if (b.Details == null)
-        {
-            return new List<DetailBahanBakuModel>();
-        }
-        return b.Details;
-    }
-
-    private static decimal TotalStok(BahanBakuModels b)
-    {
-        return DetailBahan(b).Sum(d => d.SisaStok);
-    }
-
-    private string SatuanBahan(BahanBakuModels b)
-    {
-        var detail = DetailBahan(b);
-        if (detail.Count == 0)
-        {
-            return "-";
-        }
-        return NamaSatuan(detail[0].IdSatuan);
-    }
-
-    private string TeksBahanDipilih()
-    {
-        if (!adaBahan)
-        {
-            return "";
-        }
-        return $"{bahanDipilih.NamaBahanBaku}";
-    }
-
-    private List<SatuanBahanBakuModels> OpsiSatuan()
-    {
-        var hasil = new List<SatuanBahanBakuModels>();
-        if (!adaBahan)
-        {
-            return hasil;
-        }
-
-        var idDipakai = DetailBahan(bahanDipilih).Select(d => d.IdSatuan).Distinct().ToList();
-        hasil = daftarSatuan.Where(s => idDipakai.Contains(s.IdSatuan)).ToList();
-
-        if (hasil.Count == 0)
-        {
-            hasil = daftarSatuan.ToList();
-        }
-        return hasil;
-    }
-
-    // --- helper batch & selisih ---
-    private bool TryTglKadaluwarsa(out DateOnly tgl)
-    {
-        return DateOnly.TryParseExact(tglKadaluwarsaInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                                      DateTimeStyles.None, out tgl);
-    }
-
-    // true jika bahan baku dengan tanggal kadaluwarsa yang dipilih sudah punya batch
-    private bool CariBatch(out DetailBahanBakuModel batch)
-    {
-        batch = new DetailBahanBakuModel();
-
-        if (!adaBahan)
-        {
-            return false;
-        }
-
-        if (!TryTglKadaluwarsa(out var tgl))
-        {
-            return false;
-        }
-
-        foreach (var d in DetailBahan(bahanDipilih))
-        {
-            if (d.TglKadaluwarsa == tgl)
-            {
-                batch = d;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private bool IsBatchBaru()
-    {
-        return adaBahan && TryTglKadaluwarsa(out _) && !CariBatch(out _);
-    }
-
-    private decimal StokSistemSaatIni()
-    {
-        if (CariBatch(out var batch))
-        {
-            return batch.SisaStok;
-        }
-        return 0;
-    }
-
-    private string TeksStokSistem()
-    {
-        if (!adaBahan)
-        {
-            return "";
-        }
-        return FormatAngka(StokSistemSaatIni());
-    }
-
-    private static bool TryParseStok(string teks, out decimal hasil)
+    private static bool TryParseStok(string? teks, out decimal hasil)
     {
         hasil = 0;
         var t = (teks ?? "").Trim().Replace(',', '.');
@@ -838,52 +573,39 @@
                && hasil >= 0;
     }
 
-    // Batch baru: selisih 0 karena stoknya dipindahkan dari batch lain (sama seperti WinForms)
-    private static decimal HitungSelisih(bool batchBaru, decimal stokFisik, decimal stokSistem)
+    private string NamaSatuan(string? id)
+        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (string.IsNullOrEmpty(id) ? "-" : id);
+
+    private string NamaBahan(string? id)
+        => daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == id)?.NamaBahanBaku ?? (id ?? "-");
+
+    private static List<DetailBahanBakuModel> DetailBahan(BahanBakuModels b)
+        => b.Details ?? new List<DetailBahanBakuModel>();
+
+    private string SatuanBahan(BahanBakuModels b)
     {
-        if (batchBaru)
-        {
-            return 0;
-        }
-        return stokFisik - stokSistem;
+        var detail = DetailBahan(b);
+        return detail.Count == 0 ? "-" : NamaSatuan(detail[0].IdSatuan);
     }
 
-    private string PesanSelisih()
+    // =====================================================
+    // 4. DAFTAR PENYESUAIAN: PENCARIAN & ACCORDION
+    // =====================================================
+    private IEnumerable<PenyesuaianBahanBakuModels> Filtered => daftarPenyesuaian
+        .Where(p => string.IsNullOrWhiteSpace(teksCari)
+            || p.IdPenyesuaian.Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || p.Details.Any(d => NamaBahan(d.IdBahanBaku).Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
+        .OrderByDescending(p => p.IdPenyesuaian);
+
+    private void ToggleDetail(string id)
     {
-        if (!TryTglKadaluwarsa(out _))
-        {
-            return "Pilih tanggal kadaluwarsa.";
-        }
-
-        if (IsBatchBaru())
-        {
-            return "Tanggal kadaluwarsa baru. Batch baru akan dibuat dan stoknya dikurangi dari batch dengan tanggal kadaluwarsa terdekat (FEFO).";
-        }
-
-        if (!TryParseStok(stokFisikInput, out var fisik))
-        {
-            return "Isi stok fisik untuk melihat selisih.";
-        }
-
-        var selisih = fisik - StokSistemSaatIni();
-        return $"Selisih stok {FormatSelisih(selisih)} {NamaSatuan(satuanInput)}";
+        expandedId = expandedId == id ? null : id;
     }
 
-    private string KelasSelisihNote()
-    {
-        if (IsBatchBaru())
-        {
-            return "selisih-note info";
-        }
-
-        if (TryTglKadaluwarsa(out _) && TryParseStok(stokFisikInput, out var fisik))
-        {
-            return "selisih-note " + KelasSelisih(fisik - StokSistemSaatIni());
-        }
-        return "selisih-note";
-    }
-
-    // ID otomatis: PSY + 7 digit (sama seperti WinForms)
+    // =====================================================
+    // 5. MODAL FORM: BUKA / TUTUP
+    // =====================================================
+    // ID otomatis: PSY + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<PenyesuaianBahanBakuModels> data)
     {
         const string prefix = "PSY";
@@ -900,48 +622,6 @@
         return $"{prefix}{max + 1:D7}";
     }
 
-    // --- muat data ---
-    protected override async Task OnInitializedAsync()
-    {
-        await MuatData();
-    }
-
-    private async Task MuatData()
-    {
-        isLoading = true;
-        pesanError = "";
-
-        try
-        {
-            daftarPenyesuaian = await PenyesuaianService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError = "Gagal memuat penyesuaian: " + ex.Message;
-        }
-
-        try
-        {
-            daftarBahanBaku = await BahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat bahan baku: " + ex.Message;
-        }
-
-        try
-        {
-            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat satuan: " + ex.Message;
-        }
-
-        isLoading = false;
-    }
-
-    // --- modal form ---
     private async Task BukaModalTambah()
     {
         pesanSukses = "";
@@ -974,12 +654,16 @@
         modalTampil = false;
     }
 
-    private void OnTglPenyesuaianChanged(ChangeEventArgs e)
-    {
-        tglPenyesuaianInput = Convert.ToString(e.Value);
-    }
+    // =====================================================
+    // 6. MODAL CARI: PILIH BAHAN BAKU
+    // =====================================================
+    private IEnumerable<BahanBakuModels> DaftarBahanCari => daftarBahanBaku
+        .Where(b => b.Status)
+        .Where(b => string.IsNullOrWhiteSpace(teksCariBahan)
+            || b.IdBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase)
+            || b.NamaBahanBaku.Contains(teksCariBahan, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(b => b.NamaBahanBaku);
 
-    // --- modal cari ---
     private void BukaPencarian()
     {
         teksCariBahan = "";
@@ -999,36 +683,101 @@
         cariTampil = false;
         stokFisikInput = "";
 
-        // Default: batch dengan tanggal kadaluwarsa terdekat yang masih ada stok
-        tglKadaluwarsaInput = Iso(HariIni);
-        satuanInput = "";
-
+        // Default: batch terdekat yang masih ada stok, kalau tidak ada pakai batch pertama
         var daftarBatch = DetailBahan(b).OrderBy(d => d.TglKadaluwarsa).ToList();
-        if (daftarBatch.Count > 0)
+        var tujuan = daftarBatch.FirstOrDefault(d => d.SisaStok > 0) ?? daftarBatch.FirstOrDefault();
+
+        if (tujuan != null)
         {
-            var tujuan = daftarBatch[0];
-            foreach (var d in daftarBatch)
-            {
-                if (d.SisaStok > 0)
-                {
-                    tujuan = d;
-                    break;
-                }
-            }
             tglKadaluwarsaInput = Iso(tujuan.TglKadaluwarsa);
             satuanInput = tujuan.IdSatuan;
+            return;
         }
-        else
+
+        tglKadaluwarsaInput = Iso(HariIni);
+        satuanInput = OpsiSatuan.Count == 1 ? OpsiSatuan[0].IdSatuan : "";
+    }
+
+    // =====================================================
+    // 7. MODAL FORM: BATCH & SELISIH
+    // =====================================================
+    private bool TryTglKadaluwarsa(out DateOnly tgl)
+        => DateOnly.TryParseExact(tglKadaluwarsaInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                                  DateTimeStyles.None, out tgl);
+
+    // Batch yang cocok dengan tanggal kadaluwarsa terpilih, null jika belum ada
+    private DetailBahanBakuModel? BatchSaatIni => adaBahan && TryTglKadaluwarsa(out var tgl)
+        ? DetailBahan(bahanDipilih).FirstOrDefault(d => d.TglKadaluwarsa == tgl)
+        : null;
+
+    private bool IsBatchBaru => adaBahan && TryTglKadaluwarsa(out _) && BatchSaatIni is null;
+
+    private decimal StokSistemSaatIni => BatchSaatIni?.SisaStok ?? 0;
+
+    // Satuan yang dipakai batch bahan baku ini, atau semua satuan jika belum ada batch
+    private List<SatuanBahanBakuModels> OpsiSatuan
+    {
+        get
         {
-            var opsi = OpsiSatuan();
-            if (opsi.Count == 1)
-            {
-                satuanInput = opsi[0].IdSatuan;
-            }
+            if (!adaBahan) return new List<SatuanBahanBakuModels>();
+
+            var idDipakai = DetailBahan(bahanDipilih).Select(d => d.IdSatuan).Distinct().ToList();
+            var hasil = daftarSatuan.Where(s => idDipakai.Contains(s.IdSatuan)).ToList();
+
+            return hasil.Count > 0 ? hasil : daftarSatuan.ToList();
         }
     }
 
-    // --- detail ---
+    // Batch baru: selisih 0 karena stoknya dipindahkan dari batch lain
+    private static decimal HitungSelisih(bool batchBaru, decimal stokFisik, decimal stokSistem)
+        => batchBaru ? 0 : stokFisik - stokSistem;
+
+    private string PesanSelisih
+    {
+        get
+        {
+            if (!TryTglKadaluwarsa(out _))
+                return "Pilih tanggal kadaluwarsa.";
+
+            if (IsBatchBaru)
+                return "Tanggal kadaluwarsa baru. Batch baru akan dibuat dan stoknya dikurangi dari batch dengan tanggal kadaluwarsa terdekat (FEFO).";
+
+            if (!TryParseStok(stokFisikInput, out var fisik))
+                return "Isi stok fisik untuk melihat selisih.";
+
+            return $"Selisih stok {FormatSelisih(fisik - StokSistemSaatIni)} {NamaSatuan(satuanInput)}";
+        }
+    }
+
+    private string KelasSelisihNote
+    {
+        get
+        {
+            if (IsBatchBaru) return "info";
+
+            return TryTglKadaluwarsa(out _) && TryParseStok(stokFisikInput, out var fisik)
+                ? KelasSelisih(fisik - StokSistemSaatIni)
+                : "";
+        }
+    }
+
+    private void OnTglKadaluwarsaChanged(ChangeEventArgs e)
+    {
+        tglKadaluwarsaInput = e.Value?.ToString() ?? "";
+
+        if (BatchSaatIni is { } batch) satuanInput = batch.IdSatuan;
+    }
+
+    private void PilihTanggalBatch(DateOnly tgl)
+    {
+        tglKadaluwarsaInput = Iso(tgl);
+
+        if (BatchSaatIni is { } batch) satuanInput = batch.IdSatuan;
+    }
+
+    // =====================================================
+    // 8. MODAL FORM: DETAIL (ITEM PENYESUAIAN)
+    // =====================================================
     private void KosongkanInputDetail()
     {
         indeksEdit = -1;
@@ -1041,47 +790,18 @@
         detailError = "";
     }
 
-    private void OnTglKadaluwarsaChanged(ChangeEventArgs e)
-    {
-        tglKadaluwarsaInput = Convert.ToString(e.Value);
-
-        if (CariBatch(out var batch))
-        {
-            satuanInput = batch.IdSatuan;
-        }
-    }
-
-    private void PilihTanggalBatch(DateOnly tgl)
-    {
-        tglKadaluwarsaInput = Iso(tgl);
-
-        if (CariBatch(out var batch))
-        {
-            satuanInput = batch.IdSatuan;
-        }
-    }
-
     private void MulaiUbahDetail(int index)
     {
         var it = items[index];
+        var bahan = daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == it.IdBahanBaku);
 
-        var ketemu = false;
-        foreach (var b in daftarBahanBaku)
-        {
-            if (b.IdBahanBaku == it.IdBahanBaku)
-            {
-                bahanDipilih = b;
-                ketemu = true;
-                break;
-            }
-        }
-
-        if (!ketemu)
+        if (bahan is null)
         {
             detailError = "Data bahan baku tidak ditemukan, muat ulang halaman.";
             return;
         }
 
+        bahanDipilih = bahan;
         adaBahan = true;
         indeksEdit = index;
         detailError = "";
@@ -1131,7 +851,7 @@
             return;
         }
 
-        var batchBaru = IsBatchBaru();
+        var batchBaru = IsBatchBaru;
 
         if (batchBaru && stokFisik <= 0)
         {
@@ -1140,21 +860,17 @@
         }
 
         // Duplikat = bahan baku yang sama dengan tanggal kadaluwarsa yang sama
-        for (int i = 0; i < items.Count; i++)
-        {
-            if (i == indeksEdit)
-            {
-                continue;
-            }
+        var kembar = items
+            .Where((it, i) => i != indeksEdit)
+            .Any(it => it.IdBahanBaku == bahanDipilih.IdBahanBaku && it.Tgl == tgl);
 
-            if (items[i].IdBahanBaku == bahanDipilih.IdBahanBaku && items[i].Tgl == tgl)
-            {
-                detailError = $"Bahan baku {bahanDipilih.NamaBahanBaku} dengan tanggal kadaluwarsa {FormatTgl(tgl)} sudah ada dalam daftar penyesuaian.";
-                return;
-            }
+        if (kembar)
+        {
+            detailError = $"Bahan baku {bahanDipilih.NamaBahanBaku} dengan tanggal kadaluwarsa {FormatTgl(tgl)} sudah ada dalam daftar penyesuaian.";
+            return;
         }
 
-        var stokSistem = StokSistemSaatIni();
+        var stokSistem = StokSistemSaatIni;
 
         var item = new ItemPenyesuaian
         {
@@ -1168,14 +884,8 @@
             Keterangan = keteranganInput.Trim()
         };
 
-        if (indeksEdit == -1)
-        {
-            items.Add(item);            // TAMBAH ITEM
-        }
-        else
-        {
-            items[indeksEdit] = item;   // UBAH ITEM
-        }
+        if (indeksEdit == -1) items.Add(item);   // TAMBAH ITEM
+        else items[indeksEdit] = item;           // UBAH ITEM
 
         KosongkanInputDetail();
     }
@@ -1184,17 +894,13 @@
     {
         items.RemoveAt(index);
 
-        if (indeksEdit == index)
-        {
-            KosongkanInputDetail();
-        }
-        else if (indeksEdit > index)
-        {
-            indeksEdit--;
-        }
+        if (indeksEdit == index) KosongkanInputDetail();
+        else if (indeksEdit > index) indeksEdit--;
     }
 
-    // --- simpan ---
+    // =====================================================
+    // 9. MODAL FORM: SIMPAN
+    // =====================================================
     private async Task SimpanData()
     {
         modalError = "";
