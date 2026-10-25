@@ -12,30 +12,18 @@
 
 <div class="pembelian-page">
 
-    <section class="hero">
-        <div class="hero-top">
-            <div>
-                <span class="eyebrow">Pembelian</span>
-                <h1>Pembelian</h1>
-                <p>Catat transaksi pembelian dari pemasok</p>
-            </div>
-            <button class="btn-add" @onclick="BukaModalTambah">
-                <i class="fa-solid fa-plus"></i> Tambah Pembelian
-            </button>
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Pembelian</h1>
+            <p>Catat transaksi pembelian dari pemasok</p>
         </div>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Pembelian
+        </button>
+    </header>
 
-        <div class="hero-stats">
-            <div class="chip">
-                <span class="chip-value">@daftarPembelian.Count</span>
-                <span class="chip-label">Total</span>
-            </div>
-            <div class="chip">
-                <span class="chip-value">@JumlahHariIni</span>
-                <span class="chip-label">Hari Ini</span>
-            </div>
-        </div>
-    </section>
-
+    @* ================= 2. BANNER SUKSES & ERROR ================= *@
     @if (!string.IsNullOrEmpty(pesanSukses))
     {
         <div class="banner ok">
@@ -58,20 +46,17 @@
         </div>
     }
 
-    <section class="panel">
-        <div class="toolbar">
-            <label class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari nomor pembelian atau nama pemasok..."
-                       @bind="teksCari" @bind:event="oninput" />
-            </label>
+    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari nomor pembelian atau nama pemasok..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+    </section>
 
-            <div class="toolbar-right">
-                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
-                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
-                </button>
-            </div>
-        </div>
+    @* ================= 4. TABEL PEMBELIAN ================= *@
+    <section class="panel">
 
         @if (isLoading)
         {
@@ -95,10 +80,9 @@
                             <th>Tanggal</th>
                             <th>Nama Pemasok</th>
                             <th>Status</th>
-                            <th></th>
+                            <th class="actions">Aksi</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach (var (item, i) in view.Select((item, i) => (item, i)))
                         {
@@ -123,7 +107,7 @@
                                 </td>
                                 <td class="actions">
                                     <button class="icon-btn"
-                                            title="@(tutup ? "Pembelian sudah ditutup" : "Ubah")"
+                                            title="@(tutup ? "Pembelian sudah ditutup" : "Edit")"
                                             disabled="@tutup"
                                             @onclick="() => BukaModalEdit(item)">
                                         <i class="fa-solid fa-pen"></i>
@@ -143,37 +127,36 @@
                     </div>
                 }
             </div>
+
             <div class="panel-foot">
                 Menampilkan <b>@view.Count</b> dari <b>@daftarPembelian.Count</b> pembelian
             </div>
         }
     </section>
 
-    @* ================= MODAL FORM PEMBELIAN ================= *@
+    @* ================= 5. MODAL FORM PEMBELIAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
             <div class="dialog wide" @onclick:stopPropagation>
 
+                @* ---------- Header modal ---------- *@
                 <header class="dialog-head">
-                    <div class="dialog-icon">
-                        <i class="fa-solid @(isEditMode ? "fa-pen" : "fa-plus")"></i>
-                    </div>
                     <div>
                         <h5>@(isEditMode ? "Ubah" : "Tambah") Pembelian</h5>
                         <p>@(isEditMode ? "Perbarui data pembelian" : "Isi data pembelian baru")</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupModal">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
 
                 <div class="dialog-body">
 
-                    @* ---------- HEADER ---------- *@
+                    @* ---------- Data utama ---------- *@
                     <div class="row2">
                         <div class="field">
-                            <label>No. Pembelian <span class="auto-tag">Auto</span></label>
+                            <label>No. Pembelian <small>(otomatis)</small></label>
                             <input type="text" value="@kodePembelian" disabled />
                         </div>
                         <div class="field">
@@ -204,7 +187,7 @@
                         }
                     </div>
 
-                    @* ---------- DETAIL ---------- *@
+                    @* ---------- Data detail ---------- *@
                     <div class="section-head">
                         <h6>Data Detail</h6>
                         <span class="count-tag">@items.Count item</span>
@@ -278,7 +261,7 @@
                                     <th>Satuan</th>
                                     <th>Harga</th>
                                     <th>Subtotal</th>
-                                    <th></th>
+                                    <th class="actions">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -313,7 +296,7 @@
                         @if (items.Count == 0)
                         {
                             <div class="detail-empty">
-                                Belum ada item. Klik "Cari" untuk memilih bahan baku, isi jumlah, satuan, dan harga, lalu klik "Tambah Item".
+                                Belum ada item. Klik "Cari" untuk memilih bahan baku, isi jumlah, satuan, dan harga, lalu klik "Tambah Item"
                             </div>
                         }
                     </div>
@@ -332,6 +315,7 @@
                     }
                 </div>
 
+                @* ---------- Footer modal ---------- *@
                 <footer class="dialog-foot">
                     <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                     <button type="button" class="btn-solid" disabled="@sedangSimpan" @onclick="SimpanData">
@@ -349,20 +333,20 @@
         </div>
     }
 
-    @* ================= MODAL CARI PEMASOK ================= *@
+    @* ================= 6. MODAL CARI PEMASOK ================= *@
     @if (cariPemasokTampil)
     {
         var pemasokView = DaftarPemasokAktif.ToList();
 
         <div class="overlay stacked" @onclick="TutupPencarianPemasok">
             <div class="dialog wide" @onclick:stopPropagation>
+
                 <header class="dialog-head">
-                    <div class="dialog-icon"><i class="fa-solid fa-users"></i></div>
                     <div>
                         <h5>Pilih Pemasok</h5>
                         <p>Cari dan pilih pemasok untuk pembelian bahan baku</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupPencarianPemasok">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupPencarianPemasok">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
@@ -380,7 +364,7 @@
                         <table class="detail-table batch-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 180px;">Kode Pemasok</th>
+                                    <th class="col-kode">Kode Pemasok</th>
                                     <th>Nama Pemasok</th>
                                 </tr>
                             </thead>
@@ -404,26 +388,26 @@
                 </div>
 
                 <footer class="dialog-foot">
-                    <button type="button" class="btn-ghost" @onclick="TutupPencarianPemasok">Batal</button>
+                    <button type="button" class="btn-ghost" @onclick="TutupPencarianPemasok">Batalkan</button>
                 </footer>
             </div>
         </div>
     }
 
-    @* ================= MODAL CARI BAHAN BAKU ================= *@
+    @* ================= 7. MODAL CARI BAHAN BAKU ================= *@
     @if (cariBahanTampil)
     {
         var bahanView = DaftarBahanAktif.ToList();
 
         <div class="overlay stacked" @onclick="TutupPencarianBahan">
             <div class="dialog wide" @onclick:stopPropagation>
+
                 <header class="dialog-head">
-                    <div class="dialog-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
                     <div>
                         <h5>Pilih Bahan Baku</h5>
                         <p>Klik baris untuk memilih bahan baku</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupPencarianBahan">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupPencarianBahan">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
@@ -441,7 +425,7 @@
                         <table class="detail-table batch-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 180px;">Kode Bahan Baku</th>
+                                    <th class="col-kode">Kode Bahan Baku</th>
                                     <th>Nama Bahan Baku</th>
                                 </tr>
                             </thead>
@@ -465,7 +449,7 @@
                 </div>
 
                 <footer class="dialog-foot">
-                    <button type="button" class="btn-ghost" @onclick="TutupPencarianBahan">Batal</button>
+                    <button type="button" class="btn-ghost" @onclick="TutupPencarianBahan">Batalkan</button>
                 </footer>
             </div>
         </div>
@@ -541,41 +525,21 @@
     private async Task MuatData()
     {
         isLoading = true;
-        pesanError = "";
+        var galat = new List<string>();
 
-        try
-        {
-            daftarPembelian = await PembelianService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError = "Gagal memuat transaksi pembelian: " + ex.Message;
-        }
-        try
-        {
-            daftarPemasok = await PemasokService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat pemasok: " + ex.Message;
-        }
-        try
-        {
-            daftarBahanBaku = await BahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat bahan baku: " + ex.Message;
-        }
-        try
-        {
-            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat satuan: " + ex.Message;
-        }
+        try { daftarPembelian = await PembelianService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat transaksi pembelian: " + ex.Message); }
 
+        try { daftarPemasok = await PemasokService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat pemasok: " + ex.Message); }
+
+        try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+
+        try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+
+        pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
@@ -610,10 +574,8 @@
         => daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == id)?.NamaBahanBaku ?? (id ?? "-");
 
     // =====================================================
-    // 4. HERO & DAFTAR PEMBELIAN
+    // 4. DAFTAR PEMBELIAN: PENCARIAN
     // =====================================================
-    private int JumlahHariIni => daftarPembelian.Count(p => p.TglPembelian == HariIni);
-
     private IEnumerable<PembelianModels> Filtered => daftarPembelian
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
             || (p.IdPembelian ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
@@ -712,10 +674,10 @@
     }
 
     // =====================================================
-    // 6. MODAL FORM: HEADER (PEMASOK)
+    // 6. MODAL CARI: PEMASOK
     // =====================================================
     private IEnumerable<PemasokRow> DaftarPemasokAktif => daftarPemasok
-        .Where(p => p.Status == true)
+        .Where(p => p.Status)
         .Select(p => new PemasokRow(p.IdPemasok, p.NamaPemasok))
         .Where(p => string.IsNullOrWhiteSpace(teksCariPemasok)
             || p.IdPemasok.Contains(teksCariPemasok, StringComparison.OrdinalIgnoreCase)
@@ -737,7 +699,7 @@
     }
 
     // =====================================================
-    // 7. MODAL FORM: DETAIL (BAHAN BAKU)
+    // 7. MODAL CARI: BAHAN BAKU
     // =====================================================
     private IEnumerable<BahanRow> DaftarBahanAktif => daftarBahanBaku
         .Where(b => b.Status)
@@ -762,6 +724,9 @@
         cariBahanTampil = false;
     }
 
+    // =====================================================
+    // 8. MODAL FORM: DETAIL (ITEM PEMBELIAN)
+    // =====================================================
     private string SubtotalInput
         => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
             ? FormatAngka(j * h)
@@ -878,7 +843,7 @@
     }
 
     // =====================================================
-    // 8. MODAL FORM: SIMPAN
+    // 9. MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
