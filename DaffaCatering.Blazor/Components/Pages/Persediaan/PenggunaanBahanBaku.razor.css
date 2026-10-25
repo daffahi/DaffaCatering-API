@@ -1,4 +1,6 @@
-/* CSS for PenggunaanBahanBaku component */
+/* =====================================================
+   1. VARIABEL & WRAPPER HALAMAN
+   ===================================================== */
 .penggunaan-bahan-baku-page {
     --brand-950: #0c3b2e;
     --brand-800: #135846;
@@ -11,49 +13,22 @@
     --muted: #71827a;
     --line: #ece8e0;
     --danger: #d64550;
+    font-family: 'Roboto', sans-serif;
     color: var(--ink);
     padding-bottom: 2rem;
 }
 
-/* ---------- Hero ---------- */
-.hero {
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px;
-    padding: 1.75rem 2rem;
-    color: #fff;
-    background: linear-gradient(120deg, var(--brand-950), var(--brand-800) 55%, var(--brand-600));
-    box-shadow: 0 18px 34px -14px rgba(12, 59, 46, .55);
-}
-
-    .hero::before, .hero::after {
-        content: "";
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, .07);
-        pointer-events: none;
+    .penggunaan-bahan-baku-page button,
+    .penggunaan-bahan-baku-page input,
+    .penggunaan-bahan-baku-page select,
+    .penggunaan-bahan-baku-page textarea {
+        font-family: inherit;
     }
 
-    .hero::before {
-        width: 300px;
-        height: 300px;
-        right: -70px;
-        top: -130px;
-    }
-
-    .hero::after {
-        width: 190px;
-        height: 190px;
-        right: 210px;
-        bottom: -120px;
-    }
-
-    .hero > * {
-        position: relative;
-        z-index: 1;
-    }
-
-.hero-top {
+/* =====================================================
+   2. HEADER HALAMAN (judul + tombol tambah)
+   ===================================================== */
+.page-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -61,25 +36,20 @@
     flex-wrap: wrap;
 }
 
-.eyebrow {
-    font-size: .72rem;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    opacity: .7;
-    font-weight: 600;
-}
+    .page-head h1 {
+        margin: 0;
+        font-family: 'Merriweather Sans', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
 
-.hero h1 {
-    margin: .2rem 0 .25rem;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -.02em;
-}
-
-.hero p {
-    margin: 0;
-    opacity: .8;
-}
+    .page-head p {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        margin: .64rem 0 0;
+        color: var(--muted);
+    }
 
 .btn-add {
     display: inline-flex;
@@ -87,53 +57,27 @@
     gap: .55rem;
     border: 0;
     cursor: pointer;
-    padding: .7rem 1.2rem;
+    padding: .7rem 1.3rem;
     border-radius: 12px;
     font-weight: 600;
-    color: var(--brand-800);
-    background: #fff;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
-    transition: transform .15s ease, box-shadow .15s ease;
+    color: #fff;
+    background: var(--brand-800);
+    box-shadow: 0 8px 16px -8px rgba(19, 88, 70, .6);
+    transition: background .15s ease, transform .15s ease;
 }
 
     .btn-add:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 22px rgba(0, 0, 0, .25);
+        background: var(--brand-950);
+        transform: translateY(-1px);
     }
 
     .btn-add:active {
         transform: translateY(0);
     }
 
-.hero-stats {
-    display: flex;
-    gap: .75rem;
-    margin-top: 1.4rem;
-    flex-wrap: wrap;
-}
-
-.chip {
-    display: flex;
-    align-items: baseline;
-    gap: .55rem;
-    padding: .55rem 1rem;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, .12);
-    border: 1px solid rgba(255, 255, 255, .18);
-    backdrop-filter: blur(6px);
-}
-
-.chip-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-
-.chip-label {
-    font-size: .8rem;
-    opacity: .8;
-}
-
-/* ---------- Banner ---------- */
+/* =====================================================
+   3. BANNER SUKSES & ERROR
+   ===================================================== */
 .banner {
     display: flex;
     align-items: center;
@@ -155,6 +99,12 @@
         margin-top: 1rem;
     }
 
+    .banner.ok {
+        color: var(--brand-800);
+        background: var(--brand-100);
+        border-color: #bfe3d0;
+    }
+
 .banner-close {
     border: 0;
     background: transparent;
@@ -167,7 +117,54 @@
         opacity: 1;
     }
 
-/* ---------- Panel & toolbar ---------- */
+/* =====================================================
+   4. TOOLBAR: SEARCH
+   ===================================================== */
+.toolbar-card {
+    display: flex;
+    align-items: center;
+    margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px -18px rgba(29, 43, 37, .35);
+}
+
+.search {
+    font-size: 16px;
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+    margin: 0;
+}
+
+    .search i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+    }
+
+    .search input {
+        width: 100%;
+        padding: .75rem 1rem .75rem 2.8rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+        .search input:focus {
+            border-color: var(--brand-500);
+            box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
+        }
+
+/* =====================================================
+   5. PANEL TABEL
+   ===================================================== */
 .panel {
     margin-top: 1.25rem;
     background: var(--surface);
@@ -177,118 +174,6 @@
     overflow: hidden;
 }
 
-.toolbar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--line);
-}
-
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    flex-wrap: wrap;
-}
-
-.search {
-    position: relative;
-    flex: 1;
-    min-width: 240px;
-    max-width: 420px;
-    margin: 0;
-}
-
-    .search i {
-        position: absolute;
-        left: .95rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--muted);
-        font-size: .9rem;
-    }
-
-    .search input {
-        width: 100%;
-        padding: .65rem 1rem .65rem 2.6rem;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        background: #faf8f4;
-        outline: none;
-        transition: border-color .15s, box-shadow .15s, background .15s;
-    }
-
-        .search input:focus {
-            background: #fff;
-            border-color: var(--brand-500);
-            box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
-        }
-
-.segmented {
-    display: inline-flex;
-    padding: 4px;
-    gap: 2px;
-    border-radius: 12px;
-    background: #f3f0ea;
-}
-
-.seg {
-    display: inline-flex;
-    align-items: center;
-    gap: .45rem;
-    border: 0;
-    background: transparent;
-    padding: .45rem .9rem;
-    border-radius: 9px;
-    font-size: .85rem;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .15s ease;
-}
-
-    .seg span {
-        font-size: .72rem;
-        padding: .05rem .45rem;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, .06);
-    }
-
-    .seg:hover {
-        color: var(--ink);
-    }
-
-    .seg.active {
-        background: var(--brand-800);
-        color: #fff;
-        box-shadow: 0 4px 10px rgba(19, 88, 70, .35);
-    }
-
-        .seg.active span {
-            background: rgba(255, 255, 255, .22);
-        }
-
-.btn-refresh {
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #fff;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .15s ease;
-}
-
-    .btn-refresh:hover {
-        color: var(--brand-800);
-        border-color: var(--brand-500);
-        background: var(--brand-50);
-    }
-
-/* ---------- Table ---------- */
 .table-wrap {
     overflow-x: auto;
 }
@@ -298,6 +183,7 @@ table {
     border-collapse: collapse;
 }
 
+/* ---------- Header tabel ---------- */
 thead th {
     text-align: left;
     padding: .8rem 1.25rem;
@@ -310,6 +196,7 @@ thead th {
     white-space: nowrap;
 }
 
+/* ---------- Baris tabel ---------- */
 tbody td {
     padding: .85rem 1.25rem;
     border-top: 1px solid var(--line);
@@ -344,6 +231,7 @@ tbody tr {
     }
 }
 
+/* ---------- Kolom penggunaan (avatar + nomor) ---------- */
 .who {
     display: flex;
     align-items: center;
@@ -358,11 +246,6 @@ tbody tr {
     font-size: .75rem;
     color: var(--muted);
     letter-spacing: .03em;
-}
-
-.muted {
-    color: var(--muted);
-    font-size: .9rem;
 }
 
 .mono {
@@ -406,6 +289,7 @@ tbody tr {
     color: #48602a;
 }
 
+/* ---------- Pill (legenda & status batch) ---------- */
 .pill {
     display: inline-flex;
     align-items: center;
@@ -414,6 +298,7 @@ tbody tr {
     border-radius: 999px;
     font-size: .76rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
     .pill i {
@@ -423,16 +308,17 @@ tbody tr {
         background: currentColor;
     }
 
-    .pill.on {
-        background: var(--brand-100);
-        color: var(--brand-800);
+    .pill.exp {
+        background: #fdeced;
+        color: #9b2c33;
     }
 
-    .pill.off {
-        background: #f1eee8;
-        color: #857f72;
+    .pill.soon {
+        background: #fbecc9;
+        color: #8a5a06;
     }
 
+/* ---------- Kolom aksi ---------- */
 .actions {
     text-align: right;
     white-space: nowrap;
@@ -444,32 +330,94 @@ tbody tr {
     border: 0;
     border-radius: 10px;
     background: transparent;
-    color: var(--muted);
+    color: var(--brand-600);
     cursor: pointer;
-    opacity: 0;
-    transition: all .15s ease;
+    transition: background .15s ease;
 }
-
-    tbody tr:hover .icon-btn, .icon-btn:focus-visible {
-        opacity: 1;
-    }
 
     .icon-btn:hover {
         background: var(--brand-100);
-        color: var(--brand-800);
     }
 
-    .icon-btn.warn:hover {
-        background: #fdf1d8;
-        color: #a86a05;
+    .icon-btn.danger {
+        color: var(--danger);
     }
 
-    .icon-btn.ok:hover {
+        .icon-btn.danger:hover {
+            background: #fdeced;
+        }
+
+/* ---------- Accordion detail penggunaan ---------- */
+.usage-row {
+    cursor: pointer;
+}
+
+.usage-total {
+    font-weight: 700;
+    color: var(--brand-800);
+}
+
+.usage-chevron {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--brand-600);
+    cursor: pointer;
+    transition: transform .2s ease, background .15s ease;
+}
+
+    .usage-chevron.open {
+        transform: rotate(180deg);
         background: var(--brand-100);
         color: var(--brand-800);
     }
 
-/* ---------- Empty, footer, skeleton ---------- */
+.usage-detail-row,
+.usage-detail-row:hover {
+    opacity: 1;
+    animation: none;
+    background: var(--brand-50);
+}
+
+    .usage-detail-row td {
+        padding: .25rem 1.25rem 1rem;
+        border-top: 0;
+    }
+
+    .usage-detail-row:hover td:first-child {
+        box-shadow: none;
+    }
+
+.usage-detail {
+    padding: .5rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.usage-detail-table th {
+    padding: .55rem .75rem;
+    font-size: .7rem;
+    letter-spacing: .06em;
+    background: transparent;
+    border-bottom: 1px solid var(--line);
+}
+
+.usage-detail-table td {
+    padding: .65rem .75rem;
+    border-top: 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.usage-detail-table tr:last-child td {
+    border-bottom: 0;
+}
+
+/* =====================================================
+   6. EMPTY STATE, FOOTER PANEL, SKELETON
+   ===================================================== */
 .empty {
     display: grid;
     justify-items: center;
@@ -549,7 +497,9 @@ tbody tr {
     }
 }
 
-/* ---------- Modal ---------- */
+/* =====================================================
+   7. MODAL: OVERLAY & DIALOG
+   ===================================================== */
 .overlay {
     position: fixed;
     inset: 0;
@@ -557,29 +507,29 @@ tbody tr {
     display: grid;
     place-items: center;
     padding: 1rem;
-    background: rgba(12, 59, 46, .45);
-    backdrop-filter: blur(4px);
-    animation: fade .18s ease;
+    background: rgba(12, 30, 24, .5);
+    animation: fade .15s ease;
 }
+
+    .overlay.stacked {
+        z-index: 1060;
+    }
 
 .dialog {
     width: 100%;
-    max-width: 540px;
+    max-width: 520px;
     max-height: 92vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .45);
-    animation: pop .22s cubic-bezier(.2, .9, .3, 1.2);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, .35);
+    animation: pop .18s ease;
 }
 
-    .dialog ::deep form {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        min-height: 0;
+    .dialog.wide {
+        max-width: 780px;
     }
 
 @keyframes fade {
@@ -595,7 +545,7 @@ tbody tr {
 @keyframes pop {
     from {
         opacity: 0;
-        transform: translateY(12px) scale(.97);
+        transform: translateY(8px);
     }
 
     to {
@@ -604,196 +554,317 @@ tbody tr {
     }
 }
 
+/* ---------- Header modal ---------- */
 .dialog-head {
+    font-family: 'Merriweather Sans', sans-serif;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
-    gap: .9rem;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(120deg, var(--brand-950), var(--brand-800));
-    color: #fff;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--line);
 }
 
     .dialog-head h5 {
         margin: 0;
+        font-size: 24px;
         font-weight: 700;
+        color: var(--ink);
     }
 
     .dialog-head p {
-        margin: 0;
-        font-size: .8rem;
-        opacity: .75;
+        margin: .15rem 0 0;
+        font-size: 14px;
+        color: var(--muted);
     }
 
-.dialog-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background: rgba(255, 255, 255, .15);
-}
-
 .dialog-close {
-    margin-left: auto;
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border: 0;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, .12);
-    color: #fff;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
     cursor: pointer;
-    transition: background .15s;
+    transition: background .15s, color .15s;
 }
 
     .dialog-close:hover {
-        background: rgba(255, 255, 255, .25);
+        background: #f3f0ea;
+        color: var(--ink);
     }
 
+/* ---------- Isi modal ---------- */
 .dialog-body {
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem 1.5rem;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
 }
 
+/* =====================================================
+   8. MODAL: FIELD FORM
+   ===================================================== */
 .row2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
 
+.row4 {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1.4fr 1fr;
+    gap: 1rem;
+}
+
 .field {
     display: grid;
-    gap: .4rem;
+    gap: .35rem;
     margin-bottom: 1rem;
     align-content: start;
 }
 
     .field label {
         margin: 0;
-        font-size: .8rem;
+        font-size: 16px;
         font-weight: 600;
+        color: var(--ink);
     }
 
-.auto-tag {
-    margin-left: .35rem;
-    padding: .1rem .5rem;
+        .field label small {
+            font-weight: 400;
+            color: var(--muted);
+        }
+
+    .field input {
+        width: 100%;
+        padding: .6rem .8rem;
+        border: 1px solid #d9d5cb;
+        border-radius: 8px;
+        background: #fff;
+        font: inherit;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+        .field input:focus {
+            border-color: var(--brand-600);
+            box-shadow: 0 0 0 3px rgba(34, 160, 107, .18);
+        }
+
+        .field input:disabled {
+            background: #f3f0ea;
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+.req {
+    color: var(--danger);
+}
+
+.hint {
+    margin: 0;
+    font-size: .75rem;
+    color: var(--muted);
+}
+
+/* ---------- Pilih bahan baku (input + tombol cari) ---------- */
+.pick-row {
+    display: flex;
+    gap: .5rem;
+}
+
+    .pick-row input {
+        flex: 1;
+        min-width: 0;
+    }
+
+/* =====================================================
+   9. MODAL: DATA DETAIL
+   ===================================================== */
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1.25rem 0 .8rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+}
+
+    .section-head h6 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+.count-tag {
+    padding: .1rem .6rem;
     border-radius: 999px;
-    font-size: .65rem;
+    font-size: .72rem;
     font-weight: 700;
-    letter-spacing: .05em;
-    text-transform: uppercase;
     color: var(--brand-800);
     background: var(--brand-100);
 }
 
-.field ::deep input, .field ::deep textarea {
-    width: 100%;
-    padding: .65rem .85rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #faf8f4;
-    font: inherit;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s, background .15s;
+/* ---------- Form input detail ---------- */
+.detail-form {
+    padding: 1rem 1rem .8rem;
+    margin-bottom: 1rem;
+    border: 1px dashed #d9d5cb;
+    border-radius: 8px;
+    background: #fcfbf8;
+    transition: border-color .15s, background .15s;
 }
 
-    .field ::deep input:focus, .field ::deep textarea:focus {
-        background: #fff;
-        border-color: var(--brand-500);
-        box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
+    .detail-form.editing {
+        border-style: solid;
+        border-color: var(--brand-600);
+        background: var(--brand-50);
     }
 
-    .field ::deep input:disabled {
-        background: #f0ede6;
-        color: var(--muted);
+    .detail-form .field {
+        margin-bottom: .6rem;
+    }
+
+.detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .6rem;
+}
+
+.btn-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem .95rem;
+    border: 1px solid #d9d5cb;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+    .btn-mini:hover {
+        background: #f6f3ec;
+    }
+
+    .btn-mini.solid {
+        border-color: transparent;
+        color: #fff;
+        background: var(--brand-800);
+    }
+
+        .btn-mini.solid:hover {
+            background: var(--brand-950);
+        }
+
+/* ---------- Tabel detail ---------- */
+.detail-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.detail-table thead th {
+    padding: .6rem .9rem;
+}
+
+.detail-table tbody td {
+    padding: .55rem .9rem;
+}
+
+/* matikan animasi & aksen hover khas tabel utama */
+.detail-table tbody tr {
+    opacity: 1;
+    animation: none;
+}
+
+    .detail-table tbody tr:hover td:first-child {
+        box-shadow: none;
+    }
+
+    .detail-table tbody tr.row-edit {
+        background: var(--brand-50);
+    }
+
+.detail-empty {
+    padding: 1.1rem;
+    text-align: center;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+/* ---------- Modal cari: tabel batch ---------- */
+.batch-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.legend {
+    display: flex;
+    gap: .5rem;
+}
+
+.batch-table tbody tr {
+    cursor: pointer;
+}
+
+    .batch-table tbody tr.row-exp {
+        background: #fdeced;
         cursor: not-allowed;
     }
 
-.field ::deep .invalid {
-    border-color: var(--danger);
-}
-
-.field ::deep .validation-message {
-    color: var(--danger);
-    font-size: .78rem;
-}
-
-.switch {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: .7rem;
-    margin: 0;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-    .switch ::deep input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
+    .batch-table tbody tr.row-soon {
+        background: #fdf6dc;
     }
 
-.sw-track {
-    position: relative;
-    width: 44px;
-    height: 26px;
-    border-radius: 999px;
-    background: #d9d4c9;
-    transition: background .2s;
-}
-
-    .sw-track::after {
-        content: "";
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, .25);
-        transition: transform .2s;
+    .batch-table tbody tr:hover td:first-child {
+        box-shadow: inset 3px 0 0 var(--brand-500);
     }
 
-.switch ::deep input:checked ~ .sw-track {
-    background: var(--brand-500);
-}
-
-    .switch ::deep input:checked ~ .sw-track::after {
-        transform: translateX(18px);
+    .batch-table tbody tr.row-exp:hover td:first-child {
+        box-shadow: inset 3px 0 0 var(--danger);
     }
 
-.switch ::deep input:focus-visible ~ .sw-track {
-    box-shadow: 0 0 0 4px rgba(34, 160, 107, .2);
+.batch-table .pill {
+    margin-left: .4rem;
 }
 
+/* =====================================================
+   10. MODAL: FOOTER & TOMBOL
+   ===================================================== */
 .dialog-foot {
     flex-shrink: 0;
     display: flex;
     justify-content: flex-end;
     gap: .6rem;
-    padding: 1rem 1.5rem;
+    padding: .9rem 1.5rem;
     border-top: 1px solid var(--line);
-    background: #fcfbf8;
 }
 
 .btn-ghost, .btn-solid {
     display: inline-flex;
     align-items: center;
     gap: .5rem;
-    padding: .6rem 1.2rem;
-    border-radius: 12px;
+    padding: .55rem 1.2rem;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: all .15s ease;
+    transition: background .15s ease;
 }
 
 .btn-ghost {
-    border: 1px solid var(--line);
+    border: 1px solid #d9d5cb;
     background: #fff;
     color: var(--ink);
 }
@@ -805,60 +876,38 @@ tbody tr {
 .btn-solid {
     border: 0;
     color: #fff;
-    background: linear-gradient(135deg, var(--brand-500), var(--brand-800));
-    box-shadow: 0 8px 16px -6px rgba(19, 88, 70, .6);
+    background: var(--brand-800);
 }
 
     .btn-solid:hover {
-        transform: translateY(-1px);
+        background: var(--brand-950);
     }
 
     .btn-solid:disabled {
         opacity: .7;
         cursor: progress;
-        transform: none;
     }
 
-/* ---------- Responsive & a11y ---------- */
-@media (hover: none) {
-    .actions .icon-btn {
-        opacity: 1
-    }
-
-    .icon-btn {
-        opacity: 1;
-    }
-}
-
-@media (max-width: 1000px) {
-    .col-addr {
-        display: none;
-    }
-}
-
+/* =====================================================
+   11. RESPONSIVE & ACCESSIBILITY
+   ===================================================== */
 @media (max-width: 720px) {
-    .col-date {
+    .col-detail {
         display: none;
     }
 
-    .hero {
-        padding: 1.25rem;
+    .page-head h1 {
+        font-size: 1.5rem;
     }
 
-        .hero h1 {
-            font-size: 1.6rem;
-        }
+    .row4 {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 @media (max-width: 520px) {
-    .row4 {
+    .row2, .row4 {
         grid-template-columns: 1fr;
-    }
-
-    .header-grid {
-        grid-template-columns: 1fr;
-        grid-template-rows: none;
-        grid-auto-flow: row;
     }
 }
 
@@ -889,354 +938,4 @@ tbody tr {
     .field {
         margin-bottom: .75rem;
     }
-}
-
-/* ---------- Bahan Baku: tambahan ---------- */
-.pill.jenis-a {
-    background: #fbecc9;
-    color: #8a5a06;
-}
-
-.pill.jenis-b {
-    background: #d9f0ef;
-    color: #15645f;
-}
-
-.banner.ok {
-    color: var(--brand-800);
-    background: var(--brand-100);
-    border-color: #bfe3d0;
-}
-
-.dialog.wide {
-    max-width: 780px;
-}
-
-.segmented.fit {
-    width: fit-content;
-}
-
-.seg:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-.req {
-    color: var(--danger);
-}
-
-.hint {
-    margin: 0;
-    font-size: .75rem;
-    color: var(--muted);
-}
-
-/* select di dalam .field ikut gaya input */
-.field select {
-    width: 100%;
-    padding: .65rem .85rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #faf8f4;
-    font: inherit;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s, background .15s;
-}
-
-    .field select:focus {
-        background: #fff;
-        border-color: var(--brand-500);
-        box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
-    }
-
-.row4 {
-    display: grid;
-    grid-template-columns: 1.3fr 1.2fr 1fr 1fr;
-    gap: 1rem;
-}
-
-.section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: .6rem 0 .8rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--line);
-}
-
-    .section-head h6 {
-        margin: 0;
-        font-size: .8rem;
-        font-weight: 700;
-    }
-
-.count-tag {
-    padding: .1rem .6rem;
-    border-radius: 999px;
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--brand-800);
-    background: var(--brand-100);
-}
-
-.detail-form {
-    padding: 1rem 1rem .8rem;
-    margin-bottom: 1rem;
-    border: 1px dashed #d9d4c9;
-    border-radius: 14px;
-    background: #fcfbf8;
-    transition: border-color .15s, background .15s;
-}
-
-    .detail-form.editing {
-        border-style: solid;
-        border-color: var(--brand-500);
-        background: var(--brand-50);
-    }
-
-    .detail-form .field {
-        margin-bottom: .6rem;
-    }
-
-.detail-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: .5rem;
-    margin-top: .6rem;
-}
-
-.btn-mini {
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    padding: .5rem .95rem;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: #fff;
-    color: var(--brand-800);
-    font-size: .82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .15s ease;
-}
-
-    .btn-mini:hover {
-        background: var(--brand-50);
-        border-color: var(--brand-500);
-    }
-
-    .btn-mini.solid {
-        border-color: transparent;
-        color: #fff;
-        background: linear-gradient(135deg, var(--brand-500), var(--brand-800));
-    }
-
-        .btn-mini.solid:hover {
-            transform: translateY(-1px);
-        }
-
-.detail-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-}
-
-.detail-table thead th {
-    padding: .6rem .9rem;
-}
-
-.detail-table tbody td {
-    padding: .55rem .9rem;
-}
-
-/* matikan animasi & aksen hover khas tabel utama di tabel detail */
-.detail-table tbody tr {
-    opacity: 1;
-    animation: none;
-}
-
-    .detail-table tbody tr:hover td:first-child {
-        box-shadow: none;
-    }
-
-    .detail-table tbody tr.row-edit {
-        background: var(--brand-50);
-    }
-
-.detail-table .icon-btn {
-    opacity: 1;
-}
-
-    .detail-table .icon-btn.danger:hover {
-        background: #fdeced;
-        color: var(--danger);
-    }
-
-.detail-empty {
-    padding: 1.1rem;
-    text-align: center;
-    font-size: .85rem;
-    line-height: 1.5;
-    color: var(--muted);
-}
-
-.header-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    grid-auto-flow: column;
-    column-gap: 1rem;
-}
-
-.switch-box {
-    display: flex;
-    align-items: center;
-    align-self: start;
-    height: 56px;
-    padding: 0;
-}
-
-@media (max-width: 720px) {
-    .row4 {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 520px) {
-    .row4 {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ---------- Penggunaan: pencarian batch ---------- */
-.overlay.stacked {
-    z-index: 1060;
-}
-
-.pick-row {
-    display: flex;
-    gap: .5rem;
-}
-
-    .pick-row input {
-        flex: 1;
-        min-width: 0;
-    }
-
-.batch-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-}
-
-.legend {
-    display: flex;
-    gap: .5rem;
-}
-
-.pill.exp {
-    background: #fdeced;
-    color: #9b2c33;
-}
-
-.pill.soon {
-    background: #fbecc9;
-    color: #8a5a06;
-}
-
-.batch-table tbody tr {
-    cursor: pointer;
-}
-
-    .batch-table tbody tr.row-exp {
-        background: #fdeced;
-        cursor: not-allowed;
-    }
-
-    .batch-table tbody tr.row-soon {
-        background: #fdf6dc;
-    }
-
-    .batch-table tbody tr:hover td:first-child {
-        box-shadow: inset 3px 0 0 var(--brand-500);
-    }
-
-    .batch-table tbody tr.row-exp:hover td:first-child {
-        box-shadow: inset 3px 0 0 var(--danger);
-    }
-
-.batch-table .pill {
-    margin-left: .4rem;
-}
-
-/* ---------- Penggunaan: accordion ---------- */
-
-.usage-row {
-    cursor: pointer;
-}
-
-    .usage-row:hover td {
-        background: var(--brand-50);
-    }
-
-.usage-chevron {
-    width: 34px;
-    height: 34px;
-    border: 0;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--muted);
-    display: grid;
-    place-items: center;
-    transition: transform .2s ease, background .15s ease;
-}
-
-    .usage-chevron.open {
-        transform: rotate(180deg);
-        background: var(--brand-100);
-        color: var(--brand-800);
-    }
-
-.usage-detail-row td {
-    padding: 0.5rem 1.25rem 0.5rem;
-    background: var(--brand-50);
-}
-
-.usage-detail {
-    padding: .9rem 1rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #fff;
-}
-
-.usage-detail-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-    .usage-detail-table th {
-        padding: .55rem .75rem;
-        text-align: left;
-        font-size: .7rem;
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        color: var(--muted);
-        border-bottom: 1px solid var(--line);
-    }
-
-    .usage-detail-table td {
-        padding: .65rem .75rem;
-        border-bottom: 1px solid var(--line);
-    }
-
-    .usage-detail-table tr:last-child td {
-        border-bottom: 0;
-    }
-
-.usage-total {
-    font-weight: 700;
-    color: var(--brand-800);
 }

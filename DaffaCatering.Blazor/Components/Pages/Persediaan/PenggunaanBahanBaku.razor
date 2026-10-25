@@ -11,30 +11,18 @@
 
 <div class="penggunaan-bahan-baku-page">
 
-    <section class="hero">
-        <div class="hero-top">
-            <div>
-                <span class="eyebrow">Persediaan</span>
-                <h1>Penggunaan Bahan Baku</h1>
-                <p>Catat bahan baku yang dipakai beserta tanggal kadaluwarsanya, stok batch tersebut berkurang otomatis</p>
-            </div>
-            <button class="btn-add" @onclick="BukaModalTambah">
-                <i class="fa-solid fa-plus"></i> Tambah Penggunaan
-            </button>
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Penggunaan Bahan Baku</h1>
+            <p>Catat bahan baku yang dipakai beserta tanggal kadaluwarsanya, stok batch tersebut berkurang otomatis</p>
         </div>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Penggunaan
+        </button>
+    </header>
 
-        <div class="hero-stats">
-            <div class="chip">
-                <span class="chip-value">@daftarPenggunaan.Count</span>
-                <span class="chip-label">Total</span>
-            </div>
-            <div class="chip">
-                <span class="chip-value">@JumlahHariIni</span>
-                <span class="chip-label">Hari Ini</span>
-            </div>
-        </div>
-    </section>
-
+    @* ================= 2. BANNER SUKSES & ERROR ================= *@
     @if (!string.IsNullOrEmpty(pesanSukses))
     {
         <div class="banner ok">
@@ -57,20 +45,17 @@
         </div>
     }
 
-    <section class="panel">
-        <div class="toolbar">
-            <label class="search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari nomor penggunaan atau nama bahan baku..."
-                       @bind="teksCari" @bind:event="oninput" />
-            </label>
+    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari nomor penggunaan atau nama bahan baku..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+    </section>
 
-            <div class="toolbar-right">
-                <button class="btn-refresh" title="Refresh" @onclick="MuatData">
-                    <i class="fa-solid fa-rotate @(isLoading ? "fa-spin" : "")"></i>
-                </button>
-            </div>
-        </div>
+    @* ================= 4. TABEL PENGGUNAAN ================= *@
+    <section class="panel">
 
         @if (isLoading)
         {
@@ -92,54 +77,33 @@
                         <tr>
                             <th>Penggunaan</th>
                             <th>Tanggal</th>
-                            <th>Jumlah Detail</th>
+                            <th class="col-detail">Jumlah Detail</th>
                             <th>Total Digunakan</th>
-                            <th></th>
+                            <th class="actions">Detail</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach (var (item, i) in view.Select((item, i) => (item, i)))
                         {
                             var total = item.Details.Sum(x => x.JumlahPenggunaan);
-                            var jumlahDetail = item.Details.Count;
                             var isOpen = expandedId == item.IdPenggunaan;
 
-                            <tr class="usage-row"
-                                @key="item.IdPenggunaan"
-                                style="--i:@Math.Min(i, 12)"
+                            <tr class="usage-row" @key="item.IdPenggunaan" style="--i:@Math.Min(i, 12)"
                                 @onclick="() => ToggleDetail(item.IdPenggunaan)">
-
                                 <td>
                                     <div class="who">
-                                        <div class="avatar tone-@Warna(item.IdPenggunaan)">
-                                            PBP
-                                        </div>
-
+                                        <div class="avatar tone-@Warna(item.IdPenggunaan)">PBP</div>
                                         <div>
                                             <div class="name">@item.IdPenggunaan</div>
                                             <div class="sub">Penggunaan bahan baku</div>
                                         </div>
                                     </div>
                                 </td>
-
-                                <td>
-                                    @item.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture)
-                                </td>
-
-                                <td>
-                                    @jumlahDetail bahan
-                                </td>
-
-                                <td class="usage-total">
-                                    @FormatAngka(total) item
-                                </td>
-
-                                <td>
-                                    <button type="button"
-                                            class="usage-chevron @(isOpen ? "open" : "")"
-                                            @onclick:stopPropagation="true"
-                                            @onclick="() => ToggleDetail(item.IdPenggunaan)">
+                                <td>@item.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture)</td>
+                                <td class="col-detail">@item.Details.Count bahan</td>
+                                <td class="usage-total">@FormatAngka(total) item</td>
+                                <td class="actions">
+                                    <button type="button" class="usage-chevron @(isOpen ? "open" : "")" title="Lihat detail">
                                         <i class="fa-solid fa-chevron-down"></i>
                                     </button>
                                 </td>
@@ -150,7 +114,6 @@
                                 <tr class="usage-detail-row">
                                     <td colspan="5">
                                         <div class="usage-detail">
-
                                             <table class="usage-detail-table">
                                                 <thead>
                                                     <tr>
@@ -158,23 +121,16 @@
                                                         <th>Jumlah</th>
                                                     </tr>
                                                 </thead>
-
                                                 <tbody>
                                                     @foreach (var detail in item.Details)
                                                     {
                                                         <tr>
-                                                            <td>
-                                                                @detail.NamaBahanBaku
-                                                            </td>
-
-                                                            <td>
-                                                                @FormatAngka(detail.JumlahPenggunaan)
-                                                            </td>
+                                                            <td>@detail.NamaBahanBaku</td>
+                                                            <td class="mono">@FormatAngka(detail.JumlahPenggunaan)</td>
                                                         </tr>
                                                     }
                                                 </tbody>
                                             </table>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -199,29 +155,29 @@
         }
     </section>
 
-    @* ================= MODAL FORM PENGGUNAAN ================= *@
+    @* ================= 5. MODAL FORM PENGGUNAAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
             <div class="dialog wide" @onclick:stopPropagation>
 
+                @* ---------- Header modal ---------- *@
                 <header class="dialog-head">
-                    <div class="dialog-icon"><i class="fa-solid fa-plus"></i></div>
                     <div>
                         <h5>Tambah Penggunaan Bahan Baku</h5>
                         <p>Pilih bahan baku beserta tanggal kadaluwarsa yang dipakai</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupModal">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
 
                 <div class="dialog-body">
 
-                    @* ---------- HEADER ---------- *@
+                    @* ---------- Data utama ---------- *@
                     <div class="row2">
                         <div class="field">
-                            <label>No. Penggunaan <span class="auto-tag">Auto</span></label>
+                            <label>No. Penggunaan <small>(otomatis)</small></label>
                             <input type="text" value="@kodePenggunaan" disabled />
                         </div>
                         <div class="field">
@@ -236,7 +192,7 @@
                         </div>
                     </div>
 
-                    @* ---------- DETAIL ---------- *@
+                    @* ---------- Data detail ---------- *@
                     <div class="section-head">
                         <h6>Data Detail</h6>
                         <span class="count-tag">@items.Count item</span>
@@ -306,7 +262,7 @@
                                     <th>Sisa Stok</th>
                                     <th>Satuan</th>
                                     <th>Tgl Kadaluwarsa</th>
-                                    <th></th>
+                                    <th class="actions">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -341,7 +297,7 @@
                         @if (items.Count == 0)
                         {
                             <div class="detail-empty">
-                                Belum ada item. Klik "Cari" untuk memilih bahan baku, isi jumlah, lalu klik "Tambah Item".
+                                Belum ada item. Klik "Cari" untuk memilih bahan baku, isi jumlah, lalu klik "Tambah Item"
                             </div>
                         }
                     </div>
@@ -355,6 +311,7 @@
                     }
                 </div>
 
+                @* ---------- Footer modal ---------- *@
                 <footer class="dialog-foot">
                     <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                     <button type="button" class="btn-solid" disabled="@sedangSimpan" @onclick="SimpanData">
@@ -372,7 +329,7 @@
         </div>
     }
 
-    @* ================= MODAL CARI BAHAN BAKU (padanan frmCariBahanBaku) ================= *@
+    @* ================= 6. MODAL CARI BAHAN BAKU ================= *@
     @if (cariTampil)
     {
         var batchView = DaftarBatch.ToList();
@@ -381,12 +338,11 @@
             <div class="dialog wide" @onclick:stopPropagation>
 
                 <header class="dialog-head">
-                    <div class="dialog-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
                     <div>
                         <h5>Cari Bahan Baku</h5>
                         <p>Klik baris untuk memilih bahan baku dengan tanggal kadaluwarsa tersebut</p>
                     </div>
-                    <button type="button" class="dialog-close" @onclick="TutupPencarian">
+                    <button type="button" class="dialog-close" title="Tutup" @onclick="TutupPencarian">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </header>
@@ -466,41 +422,10 @@
 </div>
 
 @code {
-    private string? expandedId;
-
-    private void ToggleDetail(string id)
-    {
-        expandedId = expandedId == id ? null : id;
-    }
-
+    // =====================================================
+    // 1. STATE & MODEL
+    // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
-
-    private List<PenggunaanModels> daftarPenggunaan = new();
-    private List<BahanBakuModels> daftarBahanBaku = new();
-    private List<SatuanBahanBakuModels> daftarSatuan = new();
-    private bool isLoading = true;
-    private string pesanError = "";
-    private string pesanSukses = "";
-    private string teksCari = "";
-
-    // --- modal form ---
-    private bool modalTampil = false;
-    private bool sedangSimpan = false;
-    private string modalError = "";
-    private string kodePenggunaan = "";
-    private string tglPenggunaanInput = "";
-
-    // --- input detail ---
-    private readonly List<ItemPenggunaan> items = new();
-    private int indeksEdit = -1;            // -1 = tambah item, >= 0 = ubah item
-    private BatchRow? batchDipilih;
-    private string jumlahInput = "";
-    private string detailError = "";
-
-    // --- modal cari ---
-    private bool cariTampil = false;
-    private string teksCariBatch = "";
-    private string cariError = "";
 
     // Satu baris di dialog pencarian = satu batch (bahan baku + tgl kadaluwarsa)
     private record BatchRow(string IdBahanBaku, string NamaBahanBaku, DateOnly Tgl, decimal Sisa, string IdSatuan);
@@ -515,35 +440,69 @@
         public decimal StokSaatIni { get; set; }
     }
 
-    // --- daftar penggunaan ---
+    // --- data ---
+    private List<PenggunaanModels> daftarPenggunaan = new();
+    private List<BahanBakuModels> daftarBahanBaku = new();
+    private List<SatuanBahanBakuModels> daftarSatuan = new();
+
+    // --- halaman utama ---
+    private bool isLoading = true;
+    private string pesanSukses = "";
+    private string pesanError = "";
+    private string teksCari = "";
+    private string? expandedId;
+
+    // --- modal form: header ---
+    private bool modalTampil = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private string kodePenggunaan = "";
+    private string tglPenggunaanInput = "";
+
+    // --- modal form: detail ---
+    private readonly List<ItemPenggunaan> items = new();
+    private int indeksEdit = -1;            // -1 = tambah item, >= 0 = ubah item
+    private BatchRow? batchDipilih;
+    private string jumlahInput = "";
+    private string detailError = "";
+
+    // --- modal cari ---
+    private bool cariTampil = false;
+    private string teksCariBatch = "";
+    private string cariError = "";
+
+    // =====================================================
+    // 2. LIFECYCLE & MUAT DATA
+    // =====================================================
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        var galat = new List<string>();
+
+        try { daftarPenggunaan = await PenggunaanService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat penggunaan: " + ex.Message); }
+
+        try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+
+        try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+
+        pesanError = string.Join(" ", galat);
+        isLoading = false;
+    }
+
+    // =====================================================
+    // 3. HELPER UMUM (format & lookup)
+    // =====================================================
     private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
 
-    private int JumlahHariIni => daftarPenggunaan.Count(p => p.TglPenggunaan == HariIni);
-
-    private IEnumerable<PenggunaanModels> Filtered => daftarPenggunaan
-        .Where(p => string.IsNullOrWhiteSpace(teksCari)
-            || (p.IdPenggunaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
-            || p.Details.Any(d => (d.NamaBahanBaku ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
-        .OrderByDescending(p => p.IdPenggunaan);
-
-    // --- daftar batch untuk dialog pencarian ---
-    // Hanya bahan baku aktif dan batch yang masih ada stok (batch stok 0 memang tidak bisa dipakai)
-    private IEnumerable<BatchRow> DaftarBatch => daftarBahanBaku
-        .Where(b => b.Status)
-        .SelectMany(b => (b.Details ?? new List<DetailBahanBakuModel>())
-            .Where(d => d.SisaStok > 0)
-            .Select(d => new BatchRow(b.IdBahanBaku, b.NamaBahanBaku, d.TglKadaluwarsa, d.SisaStok, d.IdSatuan)))
-        .Where(r => string.IsNullOrWhiteSpace(teksCariBatch)
-            || r.IdBahanBaku.Contains(teksCariBatch, StringComparison.OrdinalIgnoreCase)
-            || r.NamaBahanBaku.Contains(teksCariBatch, StringComparison.OrdinalIgnoreCase))
-        .OrderBy(r => r.NamaBahanBaku)
-        .ThenBy(r => r.Tgl);
-
-    // exp = merah (sudah kadaluwarsa), soon = kuning (<= 7 hari), fresh = normal (sama seperti WinForms)
-    private static string StatusBatch(DateOnly tgl)
-        => tgl < HariIni ? "exp" : tgl <= HariIni.AddDays(7) ? "soon" : "fresh";
-
-    // --- helper ---
+    // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
 
     private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
@@ -564,7 +523,24 @@
                && hasil > 0;
     }
 
-    // ID otomatis: PBP + 7 digit (sama seperti WinForms)
+    // =====================================================
+    // 4. DAFTAR PENGGUNAAN: PENCARIAN & ACCORDION
+    // =====================================================
+    private IEnumerable<PenggunaanModels> Filtered => daftarPenggunaan
+        .Where(p => string.IsNullOrWhiteSpace(teksCari)
+            || (p.IdPenggunaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || p.Details.Any(d => (d.NamaBahanBaku ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
+        .OrderByDescending(p => p.IdPenggunaan);
+
+    private void ToggleDetail(string id)
+    {
+        expandedId = expandedId == id ? null : id;
+    }
+
+    // =====================================================
+    // 5. MODAL FORM: BUKA / TUTUP
+    // =====================================================
+    // ID otomatis: PBP + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<PenggunaanModels> data)
     {
         const string prefix = "PBP";
@@ -581,48 +557,6 @@
         return $"{prefix}{max + 1:D7}";
     }
 
-    // --- muat data ---
-    protected override async Task OnInitializedAsync()
-    {
-        await MuatData();
-    }
-
-    private async Task MuatData()
-    {
-        isLoading = true;
-        pesanError = "";
-
-        try
-        {
-            daftarPenggunaan = await PenggunaanService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError = "Gagal memuat penggunaan: " + ex.Message;
-        }
-
-        try
-        {
-            daftarBahanBaku = await BahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat bahan baku: " + ex.Message;
-        }
-
-        try
-        {
-            daftarSatuan = await SatuanBahanBakuService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError += " Gagal memuat satuan: " + ex.Message;
-        }
-
-        isLoading = false;
-    }
-
-    // --- modal form ---
     private async Task BukaModalTambah()
     {
         pesanSukses = "";
@@ -655,7 +589,25 @@
         modalTampil = false;
     }
 
-    // --- modal cari ---
+    // =====================================================
+    // 6. MODAL CARI: DAFTAR BATCH
+    // =====================================================
+    // Hanya bahan baku aktif dan batch yang masih ada stok
+    private IEnumerable<BatchRow> DaftarBatch => daftarBahanBaku
+        .Where(b => b.Status)
+        .SelectMany(b => (b.Details ?? new List<DetailBahanBakuModel>())
+            .Where(d => d.SisaStok > 0)
+            .Select(d => new BatchRow(b.IdBahanBaku, b.NamaBahanBaku, d.TglKadaluwarsa, d.SisaStok, d.IdSatuan)))
+        .Where(r => string.IsNullOrWhiteSpace(teksCariBatch)
+            || r.IdBahanBaku.Contains(teksCariBatch, StringComparison.OrdinalIgnoreCase)
+            || r.NamaBahanBaku.Contains(teksCariBatch, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(r => r.NamaBahanBaku)
+        .ThenBy(r => r.Tgl);
+
+    // exp = merah (sudah kadaluwarsa), soon = kuning (<= 7 hari), fresh = normal
+    private static string StatusBatch(DateOnly tgl)
+        => tgl < HariIni ? "exp" : tgl <= HariIni.AddDays(7) ? "soon" : "fresh";
+
     private void BukaPencarian()
     {
         teksCariBatch = "";
@@ -682,7 +634,9 @@
         cariTampil = false;
     }
 
-    // --- detail ---
+    // =====================================================
+    // 7. MODAL FORM: DETAIL (BAHAN BAKU YANG DIPAKAI)
+    // =====================================================
     private void KosongkanInputDetail()
     {
         indeksEdit = -1;
@@ -770,7 +724,9 @@
         else if (indeksEdit > index) indeksEdit--;
     }
 
-    // --- simpan ---
+    // =====================================================
+    // 8. MODAL FORM: SIMPAN
+    // =====================================================
     private async Task SimpanData()
     {
         modalError = "";
