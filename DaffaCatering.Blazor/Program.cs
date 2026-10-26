@@ -38,6 +38,7 @@ builder.Services.AddScoped<ResepService>();
 
 // PENJUALAN //
 builder.Services.AddScoped<PesananPenjualanService>();
+builder.Services.AddScoped<PenjualanService>();
 
 // PEMBELIAN //
 builder.Services.AddScoped<PembelianService>();
