@@ -35,6 +35,7 @@ namespace DaffaCatering.Blazor.Models.Penjualan
     {
         public string IdPesanan { get; set; } = "";
         public string IdMenu { get; set; } = "";
+        public string IdSatuan { get; set; } = "";
         public decimal Jumlah { get; set; }
         public decimal Harga { get; set; }
     }
