@@ -138,7 +138,7 @@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
-            <div class="dialog wide" @onclick:stopPropagation>
+            <div class="dialog wide" @onclick:stopPropagation>  
 
                 @* ---------- Header modal ---------- *@
                 <header class="dialog-head">
@@ -166,7 +166,7 @@
                                    @onchange="e => tglPembelianInput = e.Value?.ToString() ?? string.Empty" />
                             @if (items.Count > 0)
                             {
-                                <span class="hint">Terkunci selama masih ada item.</span>
+                                <span class="hint">Terkunci selama masih ada item</span>
                             }
                         </div>
                     </div>
