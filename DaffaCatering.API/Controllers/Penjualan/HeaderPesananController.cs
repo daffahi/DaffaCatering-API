@@ -139,6 +139,70 @@ namespace DaffaCatering.API.Controllers.Penjualan
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] HeaderPesananDto input)
+        {
+            if (id != input.IdPesanan)
+                return BadRequest("ID pesanan tidak sesuai");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var entity = await _context.HeaderPesanans
+                    .Include(h => h.DetailPesanans)
+                    .FirstOrDefaultAsync(h => h.IdPesanan == id);
+
+                if (entity == null) return NotFound();
+
+                if (string.Equals(entity.Status, "Close", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest("Pesanan penjualan sudah ditutup dan tidak dapat diubah");
+
+                if (!await _context.Pelanggans.AnyAsync(p => p.IdPelanggan == input.IdPelanggan))
+                    return BadRequest($"Pelanggan '{input.IdPelanggan}' tidak ditemukan");
+
+                // HEADER
+                entity.IdPelanggan = input.IdPelanggan;
+                entity.TglPesanan = input.TglPesanan;
+                entity.TglPengambilan = input.TglPengambilan;
+                entity.MetodePembayaran = input.MetodePembayaran;
+                entity.UangMuka = input.UangMuka;
+                entity.Keterangan = input.Keterangan;
+                entity.Status = input.Status;
+                entity.Total = input.Details.Sum(d => d.Jumlah * d.Harga);
+
+                // DETAIL: hapus yang lama, lalu simpan yang baru
+                _context.DetailPesanans.RemoveRange(entity.DetailPesanans);
+                await _context.SaveChangesAsync();
+
+                foreach (var detailInput in input.Details)
+                {
+                    _context.DetailPesanans.Add(new Models.DetailPesanan
+                    {
+                        IdPesanan = id,
+                        IdMenu = detailInput.IdMenu,
+                        IdSatuan = detailInput.IdSatuan,
+                        Jumlah = detailInput.Jumlah,
+                        Harga = detailInput.Harga
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                await transaction.RollbackAsync();
+                return Conflict($"Gagal memperbarui, cek referensi data. Detail: {ex.InnerException?.Message}");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
