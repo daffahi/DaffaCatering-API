@@ -23,10 +23,33 @@ namespace DaffaCatering.API.Controllers.Penjualan
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] string? status)
         {
-            var query = _context.HeaderPesanans.AsQueryable();
+            var query = _context.HeaderPesanans.AsNoTracking().AsQueryable();
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(x => x.Status == status);
-            var data = await query.ToListAsync();
+
+            var data = await query
+                .Select(h => new
+                {
+                    h.IdPesanan,
+                    h.IdPelanggan,
+                    h.MetodePembayaran,
+                    h.TglPesanan,
+                    h.TglPengambilan,
+                    h.UangMuka,
+                    h.Total,
+                    h.Keterangan,
+                    h.Status,
+                    Details = h.DetailPesanans.Select(d => new
+                    {
+                        d.IdPesanan,
+                        d.IdMenu,
+                        d.IdSatuan,
+                        d.Jumlah,
+                        d.Harga
+                    })
+                })
+                .ToListAsync();
+
             return Ok(data);
         }
 
@@ -34,8 +57,30 @@ namespace DaffaCatering.API.Controllers.Penjualan
         public async Task<IActionResult> GetById(string id)
         {
             var data = await _context.HeaderPesanans
-                .Include(h => h.DetailPesanans)
-                .FirstOrDefaultAsync(h => h.IdPesanan == id);
+                .AsNoTracking()
+                .Where(h => h.IdPesanan == id)
+                .Select(h => new
+                {
+                    h.IdPesanan,
+                    h.IdPelanggan,
+                    h.MetodePembayaran,
+                    h.TglPesanan,
+                    h.TglPengambilan,
+                    h.UangMuka,
+                    h.Total,
+                    h.Keterangan,
+                    h.Status,
+                    Details = h.DetailPesanans.Select(d => new
+                    {
+                        d.IdPesanan,
+                        d.IdMenu,
+                        d.IdSatuan,
+                        d.Jumlah,
+                        d.Harga
+                    })
+                })
+                .FirstOrDefaultAsync();
+
             if (data == null) return NotFound();
             return Ok(data);
         }
