@@ -9,85 +9,66 @@
 
 <PageTitle>Daffa Catering</PageTitle>
 
-<div class="welcomeText-Style">
-    <h1 class="h1-style">Dashboard</h1>
+<div class="dashboard-page">
 
-    <AuthorizeView>
-        <p class="p-style">
-            Selamat datang, @context.User.Identity?.Name!
-        </p>
-    </AuthorizeView>
-</div>
+    @* ================= 1. WELCOME BANNER ================= *@
+    <section class="welcome-banner">
+        <AuthorizeView>
+            <h1>Selamat datang kembali, @context.User.Identity?.Name</h1>
+        </AuthorizeView>
+        <p>Ringkasan aktivitas Daffa Catering</p>
+    </section>
 
-<div class="dashboard-cards">
+    @* ================= 2. KARTU RINGKASAN ================= *@
+    <section class="dashboard-cards">
 
-    <!-- Sales Card -->
-    <div class="dashboard-card">
-        <div class="card-icon sales-icon">
-            <i class="fa-solid fa-dollar-sign"></i>
-        </div>
-
-        <div class="card-content">
-            <div class="card-title">
-                @totalSales Penjualan
+        @* ---------- Penjualan ---------- *@
+        <div class="dashboard-card">
+            <div class="card-icon sales-icon">
+                <i class="fa-solid fa-dollar-sign"></i>
             </div>
-
-            <div class="card-subtitle">
-                Total Penjualan
+            <div class="card-content">
+                <div class="card-title">@totalSales Penjualan</div>
+                <div class="card-subtitle">Total Penjualan</div>
             </div>
         </div>
-    </div>
 
-    <!-- Pending Card -->
-    <div class="dashboard-card">
-        <div class="card-icon">
-            <i class="fa-regular fa-clock"></i>
-        </div>
-
-        <div class="card-content">
-            <div class="card-title">
-                @waitingPayments Pending
+        @* ---------- Pembayaran tertunda ---------- *@
+        <div class="dashboard-card">
+            <div class="card-icon">
+                <i class="fa-regular fa-clock"></i>
             </div>
-
-            <div class="card-subtitle">
-                Pembayaran yang masih tertunda
+            <div class="card-content">
+                <div class="card-title">@waitingPayments Pending</div>
+                <div class="card-subtitle">Pembayaran yang masih tertunda</div>
             </div>
         </div>
-    </div>
 
-    <!-- Revenue Card -->
-    <div class="dashboard-card">
-        <div class="card-icon">
-            <i class="fa-solid fa-money-bills"></i>
-        </div>
-
-        <div class="card-content">
-            <div class="card-title">
-                @totalRevenue.ToString("C0", new System.Globalization.CultureInfo("id-ID"))
+        @* ---------- Pendapatan ---------- *@
+        <div class="dashboard-card">
+            <div class="card-icon">
+                <i class="fa-solid fa-money-bills"></i>
             </div>
-
-            <div class="card-subtitle">
-                Total pendapatan
+            <div class="card-content">
+                <div class="card-title">
+                    @totalRevenue.ToString("C0", new System.Globalization.CultureInfo("id-ID"))
+                </div>
+                <div class="card-subtitle">Total pendapatan</div>
             </div>
         </div>
-    </div>
 
-    <!-- Low Stock Card -->
-    <div class="dashboard-card">
-        <div class="card-icon">
-            <i class="fa-solid fa-boxes-stacked"></i>
-        </div>
-
-        <div class="card-content">
-            <div class="card-title">
-                @lowStock Stok Menipis
+        @* ---------- Stok menipis ---------- *@
+        <div class="dashboard-card">
+            <div class="card-icon">
+                <i class="fa-solid fa-boxes-stacked"></i>
             </div>
-
-            <div class="card-subtitle">
-                Persediaan Hampir Habis
+            <div class="card-content">
+                <div class="card-title">@lowStock Stok Menipis</div>
+                <div class="card-subtitle">Persediaan Hampir Habis</div>
             </div>
         </div>
-    </div>
+
+    </section>
 
 </div>
 

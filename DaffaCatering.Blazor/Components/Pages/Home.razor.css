@@ -1,25 +1,48 @@
-/* CSS for Home component */
-.h1-style {
-    font-family: 'Merriweather Sans', sans-serif;
-    font-style: normal;
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 24px;
-}
-
-.p-style {
+/* =====================================================
+   1. VARIABEL & WRAPPER HALAMAN
+   ===================================================== */
+.dashboard-page {
+    --brand-800: #135846;
+    --ink: #1d2b25;
     font-family: 'Roboto', sans-serif;
-    font-style: normal;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 24px;
+    color: var(--ink);
+    padding-bottom: 2rem;
 }
 
+/* =====================================================
+   2. WELCOME BANNER
+   ===================================================== */
+.welcome-banner {
+    padding: 2rem;
+    border-radius: 18px;
+    color: #fff;
+    background: var(--brand-800);
+    box-shadow: 0 10px 30px -18px rgba(29, 43, 37, .35);
+}
+
+    .welcome-banner h1 {
+        margin: 0;
+        font-family: 'Merriweather Sans', sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
+
+    .welcome-banner p {
+        margin: .5rem 0 0;
+        font-size: 14px;
+        color: rgba(255, 255, 255, .8);
+    }
+
+/* =====================================================
+   3. KARTU RINGKASAN
+   ===================================================== */
 .dashboard-cards {
     display: flex;
     gap: 16px;
     width: 100%;
     flex-wrap: wrap;
+    margin-top: 1.25rem;
 }
 
 .dashboard-card {
@@ -34,6 +57,7 @@
     border-radius: 8px;
 }
 
+/* ---------- Ikon kartu ---------- */
 .card-icon {
     width: 42px;
     height: 42px;
@@ -45,6 +69,7 @@
     color: #DAD7CD;
 }
 
+/* ---------- Teks kartu ---------- */
 .card-content {
     display: flex;
     flex-direction: column;
@@ -60,4 +85,17 @@
     font-family: 'Roboto', sans-serif;
     font-size: 12px;
     color: #888;
+}
+
+/* =====================================================
+   4. RESPONSIVE
+   ===================================================== */
+@media (max-width: 720px) {
+    .welcome-banner {
+        padding: 1.25rem;
+    }
+
+        .welcome-banner h1 {
+            font-size: 22px;
+        }
 }
