@@ -9,7 +9,7 @@ namespace DaffaCatering.Blazor.Models.Penjualan
         public string IdPenjualan { get; set; } = "";
 
         [StringLength(10)]
-        public string IdPesanan { get; set; } = "";
+        public string? IdPesanan { get; set; }
 
         [Required(ErrorMessage = "ID Pelanggan wajib diisi")]
         [StringLength(10)]
@@ -19,7 +19,7 @@ namespace DaffaCatering.Blazor.Models.Penjualan
 
         public DateOnly TglPenjualan { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-        public decimal UangMuka { get; set; }
+        public decimal? UangMuka { get; set; }
 
         public decimal Total { get; set; }
 
@@ -33,7 +33,7 @@ namespace DaffaCatering.Blazor.Models.Penjualan
         public string IdPenjualan { get; set; } = "";
         public string IdMenu { get; set; } = "";
         public string IdSatuan { get; set; } = "";
-        public decimal Jumlah { get; set; }
+        public int Jumlah { get; set; }
         public decimal Harga { get; set; }
     }
 }
