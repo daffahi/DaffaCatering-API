@@ -1,4 +1,5 @@
 ﻿@page "/master-bahan-baku"
+@attribute [Authorize(Roles = AppRoles.AdminPersediaan)]
 
 @using System.Globalization
 @inject BahanBakuService BahanBakuService

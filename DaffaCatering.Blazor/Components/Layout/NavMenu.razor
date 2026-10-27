@@ -8,6 +8,8 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
+
+        @* ================= 1. DASHBOARD (semua role) ================= *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All" title="Home">
                 <i class="fa-solid fa-house fa-fw"></i>
@@ -18,6 +20,7 @@
             </NavLink>
         </div>
 
+        @* ================= 2. MASTER DATA (isi submenu per role) ================= *@
         <div class="nav-item px-3">
             <button class="nav-link btn-submenu" @onclick="ToggleMasterData" title="Master Data">
                 <i class="fa-solid fa-database fa-fw"></i>
@@ -31,110 +34,127 @@
             @if (masterDataOpen && !Collapsed)
             {
                 <div class="submenu">
-                    <NavLink class="nav-link submenu-link" href="pelanggan">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Pelanggan
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="pemasok">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Pemasok
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="master-bahan-baku">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Bahan Baku
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="satuan-bahan-baku">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Satuan Bahan Baku
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="konversi-satuan">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Konversi Satuan
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="resep-makanan">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Resep Menu Makanan
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="menu-makanan">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Menu Makanan
-                    </NavLink>
+                    <AuthorizeView Roles="@AppRoles.AdminPenjualan">
+                        <NavLink class="nav-link submenu-link" href="pelanggan">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Pelanggan
+                        </NavLink>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@AppRoles.AdminPembelian">
+                        <NavLink class="nav-link submenu-link" href="pemasok">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Pemasok
+                        </NavLink>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@AppRoles.AdminPersediaan">
+                        <NavLink class="nav-link submenu-link" href="master-bahan-baku">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Bahan Baku
+                        </NavLink>
+                        <NavLink class="nav-link submenu-link" href="satuan-bahan-baku">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Satuan Bahan Baku
+                        </NavLink>
+                        <NavLink class="nav-link submenu-link" href="konversi-satuan">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Konversi Satuan
+                        </NavLink>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@AppRoles.AdminPenjualan">
+                        <NavLink class="nav-link submenu-link" href="menu-makanan">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Menu Makanan
+                        </NavLink>
+                    </AuthorizeView>
                 </div>
             }
         </div>
 
-        <div class="nav-item px-3">
-            <button class="nav-link btn-submenu" @onclick="TogglePenjualan" title="Penjualan">
-                <i class="fa-solid fa-cart-shopping fa-fw"></i>
-                @if (!Collapsed)
+        @* ================= 3. PENJUALAN ================= *@
+        <AuthorizeView Roles="@AppRoles.AdminPenjualan">
+            <div class="nav-item px-3">
+                <button class="nav-link btn-submenu" @onclick="TogglePenjualan" title="Penjualan">
+                    <i class="fa-solid fa-cart-shopping fa-fw"></i>
+                    @if (!Collapsed)
+                    {
+                        <span>Penjualan</span>
+                        <i class="fa-solid fa-chevron-down chevron @(penjualanOpen ? "rotated" : "")"></i>
+                    }
+                </button>
+                @if (penjualanOpen && !Collapsed)
                 {
-                    <span>Penjualan</span>
-                    <i class="fa-solid fa-chevron-down chevron @(penjualanOpen ? "rotated" : "")"></i>
+                    <div class="submenu">
+                        <NavLink class="nav-link submenu-link" href="pesanan-penjualan">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Pesanan Penjualan
+                        </NavLink>
+                        <NavLink class="nav-link submenu-link" href="penjualan">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Penjualan
+                        </NavLink>
+                    </div>
                 }
-            </button>
-            @if ( penjualanOpen && !Collapsed)
-            {
-                <div class="submenu">
-                    <NavLink class="nav-link submenu-link" href="pesanan-penjualan">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Pesanan Penjualan
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="penjualan">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Penjualan
-                    </NavLink>
-                </div>
-            }
-        </div>
+            </div>
+        </AuthorizeView>
 
-        <div class="nav-item px-3">
-            <button class="nav-link btn-submenu" @onclick="TogglePembelian" title="Pembelian">
-                <i class="fa-solid fa-truck-fast fa-fw"></i>
-                @if (!Collapsed)
+        @* ================= 4. PEMBELIAN ================= *@
+        <AuthorizeView Roles="@AppRoles.AdminPembelian">
+            <div class="nav-item px-3">
+                <button class="nav-link btn-submenu" @onclick="TogglePembelian" title="Pembelian">
+                    <i class="fa-solid fa-truck-fast fa-fw"></i>
+                    @if (!Collapsed)
+                    {
+                        <span>Pembelian</span>
+                        <i class="fa-solid fa-chevron-down chevron @(pembelianOpen ? "rotated" : "")"></i>
+                    }
+                </button>
+                @if (pembelianOpen && !Collapsed)
                 {
-                    <span>Pembelian</span>
-                    <i class="fa-solid fa-chevron-down chevron @(pembelianOpen ? "rotated" : "")"></i>
+                    <div class="submenu">
+                        <NavLink class="nav-link submenu-link" href="pembelian-bahan-baku">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Pembelian
+                        </NavLink>
+                        <NavLink class="nav-link submenu-link" href="penerimaan-bahan-baku">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Penerimaan BB
+                        </NavLink>
+                    </div>
                 }
-            </button>
-            @if ( pembelianOpen && !Collapsed)
-            {
-                <div class="submenu">
-                    <NavLink class="nav-link submenu-link" href="pembelian-bahan-baku">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Pembelian
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="penerimaan-bahan-baku">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Penerimaan BB
-                    </NavLink>
-                </div>
-            }
-        </div>
+            </div>
+        </AuthorizeView>
 
-        <div class="nav-item px-3">
-            <button class="nav-link btn-submenu" @onclick="ToggleInventory" title="Persediaan">
-                <i class="fa-solid fa-warehouse fa-fw"></i>
-                @if (!Collapsed)
+        @* ================= 5. PERSEDIAAN ================= *@
+        <AuthorizeView Roles="@AppRoles.AdminPersediaan">
+            <div class="nav-item px-3">
+                <button class="nav-link btn-submenu" @onclick="ToggleInventory" title="Persediaan">
+                    <i class="fa-solid fa-warehouse fa-fw"></i>
+                    @if (!Collapsed)
+                    {
+                        <span>Persediaan</span>
+                        <i class="fa-solid fa-chevron-down chevron @(inventoryOpen ? "rotated" : "")"></i>
+                    }
+                </button>
+                @if (inventoryOpen && !Collapsed)
                 {
-                    <span>Persediaan</span>
-                    <i class="fa-solid fa-chevron-down chevron @(inventoryOpen ? "rotated" : "")"></i>
+                    <div class="submenu">
+                        <NavLink class="nav-link submenu-link" href="penggunaan-bahan-baku">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Penggunaan BB
+                        </NavLink>
+                        <NavLink class="nav-link submenu-link" href="penyesuaian-bahan-baku">
+                            <i class="fa-solid fa-circle-dot fa-fw"></i> Penyesuaian BB
+                        </NavLink>
+                    </div>
                 }
-            </button>
-            @if ( inventoryOpen && !Collapsed)
-            {
-                <div class="submenu">
-                    <NavLink class="nav-link submenu-link" href="penggunaan-bahan-baku">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Penggunaan BB
-                    </NavLink>
-                    <NavLink class="nav-link submenu-link" href="penyesuaian-bahan-baku">
-                        <i class="fa-solid fa-circle-dot fa-fw"></i> Penyesuaian BB
-                    </NavLink>
-                </div>
-            }
-        </div>
+            </div>
+        </AuthorizeView>
 
-        <hr class="text-white-50 mx-3" />
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="settings" title="Settings">
-                <i class="fa-solid fa-gear fa-fw"></i>
-                @if (!Collapsed)
-                {
-                    <span>Pengaturan</span>
-                }
-            </NavLink>
-        </div>
+        @* ================= 6. PENGATURAN (khusus Admin) ================= *@
+        <AuthorizeView Roles="@AppRoles.Admin">
+            <hr class="text-white-50 mx-3" />
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="settings" title="Settings">
+                    <i class="fa-solid fa-gear fa-fw"></i>
+                    @if (!Collapsed)
+                    {
+                        <span>Pengaturan</span>
+                    }
+                </NavLink>
+            </div>
+        </AuthorizeView>
+
     </nav>
 </div>
-
 
 @code {
     [Parameter]

@@ -1,0 +1,42 @@
+/* CSS for AksesDitolak component */
+.denied-page {
+    display: grid;
+    justify-items: center;
+    gap: .5rem;
+    padding: 4rem 1rem;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    color: #1d2b25;
+}
+
+    .denied-page i {
+        font-size: 2.5rem;
+        color: #71827a;
+        margin-bottom: .5rem;
+    }
+
+    .denied-page h1 {
+        margin: 0;
+        font-family: 'Merriweather Sans', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .denied-page p {
+        margin: 0 0 1rem;
+        font-size: 14px;
+        color: #71827a;
+    }
+
+.btn-back {
+    padding: .55rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    background: #135846;
+}
+
+    .btn-back:hover {
+        background: #0c3b2e;
+    }

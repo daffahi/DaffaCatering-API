@@ -1,4 +1,5 @@
 ﻿@page "/pelanggan"
+@attribute [Authorize(Roles = AppRoles.AdminPenjualan)]
 
 @inject PelangganService PelangganService
 

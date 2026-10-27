@@ -1,4 +1,5 @@
 ﻿@page "/resep-makanan"
+@attribute [Authorize(Roles = AppRoles.AdminPenjualan)]
 
 @inject ResepService ResepService
 @inject MenuMakananService MenuMakananService

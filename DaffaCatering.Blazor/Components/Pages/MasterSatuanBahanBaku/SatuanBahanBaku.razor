@@ -1,4 +1,5 @@
 ﻿@page "/satuan-bahan-baku"
+@attribute [Authorize(Roles = AppRoles.AdminPersediaan)]
 
 @inject SatuanBahanBakuService SatuanBahanBakuService
 
