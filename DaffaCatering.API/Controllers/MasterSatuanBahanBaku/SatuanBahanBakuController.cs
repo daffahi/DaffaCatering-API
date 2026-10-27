@@ -1,4 +1,5 @@
-﻿using DaffaCatering.API.Data;
+﻿using DaffaCatering.API.Constants;
+using DaffaCatering.API.Data;
 using DaffaCatering.API.DTOs.MasterSatuanBahanBaku;
 using DaffaCatering.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ namespace DaffaCatering.API.Controllers.MasterSatuanBahanBaku
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "R001,R004")]
+    [Authorize(Roles = AppRoles.BacaSatuan)]
 
     public class SatuanBahanBakuController : ControllerBase
     {
@@ -40,6 +41,7 @@ namespace DaffaCatering.API.Controllers.MasterSatuanBahanBaku
 
         // POST - Create satuan bahan baku baru
         [HttpPost]
+        [Authorize(Roles = AppRoles.AdminPersediaan)]
         public async Task<IActionResult> Create([FromBody] SatuanBahanBakuDto input)
         {
             try
@@ -66,6 +68,7 @@ namespace DaffaCatering.API.Controllers.MasterSatuanBahanBaku
 
         // PUT - Update satuan bahan baku berdasarkan ID
         [HttpPut("{id}")]
+        [Authorize(Roles = AppRoles.AdminPersediaan)]
         public async Task<IActionResult> Update(string id, [FromBody] SatuanBahanBakuDto input)
         {
             if (id != input.IdSatuan)
@@ -83,6 +86,7 @@ namespace DaffaCatering.API.Controllers.MasterSatuanBahanBaku
 
         // DELETE - Hapus satuan bahan baku berdasarkan ID
         [HttpDelete("{id}")]
+        [Authorize(Roles = AppRoles.AdminPersediaan)]
         public async Task<IActionResult> Delete(string id)
         {
             var existing = await _context.SatuanBahanBakus.FindAsync(id);

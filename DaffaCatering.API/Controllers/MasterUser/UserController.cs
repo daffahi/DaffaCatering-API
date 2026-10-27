@@ -46,7 +46,6 @@ namespace DaffaCatering.API.Controllers.User
         }
 
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] UserDto input)
         {
             try

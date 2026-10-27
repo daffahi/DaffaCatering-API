@@ -1,4 +1,5 @@
-﻿using DaffaCatering.API.Data;
+﻿using DaffaCatering.API.Constants;
+using DaffaCatering.API.Data;
 using DaffaCatering.API.DTOs.MasterBahanBaku;
 using DaffaCatering.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "R001,R004")]
+    [Authorize(Roles = AppRoles.BacaBahanBaku)]
 
     public class HeaderBahanBakuController : ControllerBase
     {
@@ -87,6 +88,7 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         // POST - Create data baru, dengan validasi otomatis dari DTO
         // dan error handling untuk duplicate ID
         [HttpPost]
+        [Authorize(Roles = AppRoles.AdminPersediaan)]
         public async Task<IActionResult> Create([FromBody] HeaderBahanBakuDto input)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -132,6 +134,7 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
 
         // PUT - Update header + detail (update yang ada, tambah yang baru, tidak menghapus)
         [HttpPut("{id}")]
+        [Authorize(Roles = AppRoles.AdminPersediaan)]
         public async Task<IActionResult> Update(string id, [FromBody] HeaderBahanBakuDto input)
         {
             if (id != input.IdBahanBaku)
@@ -189,6 +192,7 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
 
         // DELETE - Hapus data berdasarkan ID
         [HttpDelete("{id}")]
+        [Authorize(Roles = AppRoles.AdminPersediaan)]
         public async Task<IActionResult> Delete(string id)
         {
             var existing = await _context.HeaderBahanBakus.FindAsync(id);

@@ -4,12 +4,13 @@ using DaffaCatering.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DaffaCatering.API.Constants;
 
 namespace DaffaCatering.API.Controllers.MasterPelanggan
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "R001,R002")]
+    [Authorize(Roles = AppRoles.BacaPelanggan)]
 
     public class PelangganController : ControllerBase
     {
@@ -45,6 +46,7 @@ namespace DaffaCatering.API.Controllers.MasterPelanggan
 
         // POST - Create pelanggan baru
         [HttpPost]
+        [Authorize(Roles = AppRoles.AdminPenjualan)]
         public async Task<IActionResult> Create([FromBody] PelangganDto input)
         {
             try
@@ -75,6 +77,7 @@ namespace DaffaCatering.API.Controllers.MasterPelanggan
 
         // PUT - Update pelanggan
         [HttpPut("{id}")]
+        [Authorize(Roles = AppRoles.AdminPenjualan)]
         public async Task<IActionResult> Update(string id, [FromBody] PelangganDto input)
         {
             if (id != input.IdPelanggan)
@@ -96,6 +99,7 @@ namespace DaffaCatering.API.Controllers.MasterPelanggan
 
         // DELETE - Hapus pelanggan
         [HttpDelete("{id}")]
+        [Authorize(Roles = AppRoles.AdminPenjualan)]
         public async Task<IActionResult> Delete(string id)
         {
             var existing = await _context.Pelanggans.FindAsync(id);
