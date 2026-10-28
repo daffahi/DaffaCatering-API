@@ -10,6 +10,7 @@
         public const string AdminPenjualan = Admin + "," + Penjualan;
         public const string AdminPembelian = Admin + "," + Pembelian;
         public const string AdminPersediaan = Admin + "," + Persediaan;
+        public const string BacaMenuMakanan = Admin + "," + Penjualan;
         public const string Semua = Admin + "," + Penjualan + "," + Pembelian + "," + Persediaan;
     }
 }
