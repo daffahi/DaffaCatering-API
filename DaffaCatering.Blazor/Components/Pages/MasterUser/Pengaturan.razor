@@ -1,0 +1,508 @@
+﻿@page "/settings"
+@attribute [Authorize(Roles = AppRoles.Admin)]
+
+@inject UserService UserService
+@inject RoleService RoleService
+
+@{
+    var view = Filtered.ToList();
+}
+
+<div class="set-page">
+
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Pengaturan</h1>
+            <p>Kelola akun pengguna dan hak akses aplikasi</p>
+        </div>
+        <button class="btn-add" @onclick="BukaModalTambah">
+            <i class="fa-solid fa-plus"></i> Tambah Pengguna
+        </button>
+    </header>
+
+    @* ================= 2. BANNER ERROR & SUKSES ================= *@
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@pesanError</span>
+            <button class="banner-close" @onclick="() => pesanError = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(pesanSukses))
+    {
+        <div class="banner ok">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@pesanSukses</span>
+            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    @* ================= 3. TOOLBAR: SEARCH + FILTER ================= *@
+    <section class="toolbar-card">
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari ID, nama, atau role..."
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+
+        <div class="toolbar-right">
+            <div class="segmented">
+                <button class="@Seg(FilterStatus.Semua)" @onclick="() => filterStatus = FilterStatus.Semua">
+                    Semua <span>@daftarUser.Count</span>
+                </button>
+                <button class="@Seg(FilterStatus.Aktif)" @onclick="() => filterStatus = FilterStatus.Aktif">
+                    Aktif <span>@JumlahAktif</span>
+                </button>
+                <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => filterStatus = FilterStatus.NonAktif">
+                    Tidak Aktif <span>@(daftarUser.Count - JumlahAktif)</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    @* ================= 4. TABEL PENGGUNA ================= *@
+    <section class="panel">
+
+        @if (isLoading)
+        {
+            <div class="skeleton">
+                @for (var s = 0; s < 6; s++)
+                {
+                    <div class="sk-row">
+                        <div class="sk-avatar"></div>
+                        <div class="sk-lines"><div></div><div></div></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pengguna</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (item, i) in view.Select((item, i) => (item, i)))
+                        {
+                            <tr @key="item.IdUser" style="--i:@Math.Min(i, 12)">
+                                <td>
+                                    <div class="who">
+                                        <div class="avatar tone-@Warna(item.NamaUser)">@Inisial(item.NamaUser)</div>
+                                        <div>
+                                            <div class="name">@item.NamaUser</div>
+                                            <div class="sub">@item.IdUser</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-pill">@item.NamaRole</span></td>
+                                <td>
+                                    <span class="pill @(item.Status ? "on" : "off")">
+                                        <i></i>@(item.Status ? "Aktif" : "Tidak Aktif")
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <button class="icon-btn" title="Edit" @onclick="() => BukaModalEdit(item)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="icon-btn" title="Reset password" @onclick="() => BukaModalReset(item)">
+                                        <i class="fa-solid fa-key"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (view.Count == 0)
+                {
+                    <div class="empty">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                        <strong>Pengguna tidak ditemukan</strong>
+                        <span>Coba ubah kata kunci atau filter status</span>
+                    </div>
+                }
+            </div>
+
+            <div class="panel-foot">
+                Menampilkan <b>@view.Count</b> dari <b>@daftarUser.Count</b> pengguna
+            </div>
+        }
+    </section>
+
+    @* ================= 5. MODAL FORM PENGGUNA ================= *@
+    @if (modalTampil)
+    {
+        <div class="overlay" @onclick="TutupModal">
+            <div class="dialog" @onclick:stopPropagation>
+                <EditForm Model="formModel" OnValidSubmit="SimpanData">
+                    <DataAnnotationsValidator />
+
+                    @* ---------- Header modal ---------- *@
+                    <header class="dialog-head">
+                        <div>
+                            <h5>@(isEditMode ? "Ubah" : "Tambah") Pengguna</h5>
+                            <p>@(isEditMode ? "Perbarui data pengguna" : "Isi data pengguna baru")</p>
+                        </div>
+                        <button type="button" class="dialog-close" title="Tutup" @onclick="TutupModal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </header>
+
+                    @* ---------- Isi form ---------- *@
+                    <div class="dialog-body">
+                        <div class="row2">
+                            <div class="field">
+                                <label>ID Pengguna <small>(otomatis)</small></label>
+                                <InputText @bind-Value="formModel.IdUser" disabled="true" />
+                            </div>
+                            <div class="field">
+                                <label>Role <b class="req">*</b></label>
+                                <InputSelect @bind-Value="formModel.IdRole" disabled="@EditDiriSendiri">
+                                    <option value="">Pilih role</option>
+                                    @foreach (var r in daftarRole)
+                                    {
+                                        <option value="@r.IdRole">@r.NamaRole</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => formModel.IdRole" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Nama Lengkap <b class="req">*</b></label>
+                            <InputText @bind-Value="formModel.NamaUser" />
+                            <ValidationMessage For="() => formModel.NamaUser" />
+                        </div>
+
+                        @if (!isEditMode)
+                        {
+                            <div class="field">
+                                <label>Password <b class="req">*</b></label>
+                                <InputText type="password" @bind-Value="formModel.Password" autocomplete="new-password" />
+                                <ValidationMessage For="() => formModel.Password" />
+                            </div>
+                        }
+
+                        <div class="status-row">
+                            <span class="status-label">Status</span>
+                            <label class="switch">
+                                <span class="status-value">@(formModel.Status ? "Aktif" : "Tidak Aktif")</span>
+                                <InputCheckbox @bind-Value="formModel.Status" disabled="@EditDiriSendiri" />
+                                <span class="sw-track"></span>
+                            </label>
+                        </div>
+
+                        @if (EditDiriSendiri)
+                        {
+                            <p class="hint">Ini akun yang sedang Anda pakai, jadi role dan status tidak bisa diubah</p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(modalError))
+                        {
+                            <div class="banner in-dialog">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span>@modalError</span>
+                            </div>
+                        }
+                    </div>
+
+                    @* ---------- Footer modal ---------- *@
+                    <footer class="dialog-foot">
+                        <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
+                        <button type="submit" class="btn-solid" disabled="@sedangSimpan">
+                            @if (sedangSimpan)
+                            {
+                                <i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>
+                            }
+                            else
+                            {
+                                <span>Simpan</span>
+                            }
+                        </button>
+                    </footer>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @* ================= 6. MODAL RESET PASSWORD ================= *@
+    @if (resetTampil)
+    {
+        <div class="overlay" @onclick="TutupReset">
+            <div class="dialog sm" @onclick:stopPropagation>
+                <EditForm Model="resetModel" OnValidSubmit="SimpanReset">
+                    <DataAnnotationsValidator />
+
+                    <header class="dialog-head">
+                        <div>
+                            <h5>Reset Password</h5>
+                            <p>Atur password baru untuk @targetReset?.NamaUser</p>
+                        </div>
+                        <button type="button" class="dialog-close" title="Tutup" @onclick="TutupReset">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </header>
+
+                    <div class="dialog-body">
+                        <div class="field">
+                            <label>Password Baru <b class="req">*</b></label>
+                            <InputText type="password" @bind-Value="resetModel.PasswordBaru" autocomplete="new-password" />
+                            <ValidationMessage For="() => resetModel.PasswordBaru" />
+                        </div>
+
+                        <div class="field">
+                            <label>Konfirmasi Password <b class="req">*</b></label>
+                            <InputText type="password" @bind-Value="resetModel.KonfirmasiPassword" autocomplete="new-password" />
+                            <ValidationMessage For="() => resetModel.KonfirmasiPassword" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(resetError))
+                        {
+                            <div class="banner in-dialog">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span>@resetError</span>
+                            </div>
+                        }
+                    </div>
+
+                    <footer class="dialog-foot">
+                        <button type="button" class="btn-ghost" @onclick="TutupReset">Batalkan</button>
+                        <button type="submit" class="btn-solid" disabled="@sedangSimpan">
+                            @if (sedangSimpan)
+                            {
+                                <i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>
+                            }
+                            else
+                            {
+                                <span>Simpan</span>
+                            }
+                        </button>
+                    </footer>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    private List<UserModels> daftarUser = new();
+    private List<RoleModels> daftarRole = new();
+    private string idSaya = "";
+    private bool isLoading = true;
+    private string pesanError = "";
+    private string pesanSukses = "";
+
+    // --- modal form pengguna ---
+    private bool modalTampil = false;
+    private bool isEditMode = false;
+    private bool sedangSimpan = false;
+    private string modalError = "";
+    private UserModels formModel = new();
+
+    // --- modal reset password ---
+    private bool resetTampil = false;
+    private string resetError = "";
+    private UserModels? targetReset;
+    private ResetPasswordModel resetModel = new();
+
+    // --- filter & pencarian ---
+    private enum FilterStatus { Semua, Aktif, NonAktif }
+
+    private string teksCari = "";
+    private FilterStatus filterStatus = FilterStatus.Semua;
+
+    private int JumlahAktif => daftarUser.Count(c => c.Status);
+
+    private bool EditDiriSendiri => isEditMode && formModel.IdUser == idSaya;
+
+    private IEnumerable<UserModels> Filtered => daftarUser
+        .Where(c => filterStatus switch
+        {
+            FilterStatus.Aktif => c.Status,
+            FilterStatus.NonAktif => !c.Status,
+            _ => true
+        })
+        .Where(c => string.IsNullOrWhiteSpace(teksCari)
+            || (c.IdUser ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NamaUser ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+            || (c.NamaRole ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+
+    private string Seg(FilterStatus f) => filterStatus == f ? "seg active" : "seg";
+
+    private static string Inisial(string? nama)
+    {
+        var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length == 0 ? "?"
+             : p.Length == 1 ? p[0][..1].ToUpper()
+             : (p[0][..1] + p[^1][..1]).ToUpper();
+    }
+
+    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
+
+    // --- ID otomatis: U + 3 digit ---
+    private static string BuatIdBerikutnya(IEnumerable<UserModels> data)
+    {
+        const string prefix = "U";
+
+        var max = data
+            .Select(c => c.IdUser)
+            .Where(id => !string.IsNullOrEmpty(id)
+                         && id.StartsWith(prefix)
+                         && int.TryParse(id[prefix.Length..], out _))
+            .Select(id => int.Parse(id[prefix.Length..]))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return $"{prefix}{max + 1:D3}";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState is not null)
+        {
+            var state = await AuthState;
+            idSaya = state.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+        }
+
+        await MuatData();
+    }
+
+    private async Task MuatData()
+    {
+        isLoading = true;
+        pesanError = "";
+        try
+        {
+            daftarUser = await UserService.GetAllAsync();
+            daftarRole = await RoleService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal memuat data: " + ex.Message;
+        }
+        isLoading = false;
+    }
+
+    private async Task BukaModalTambah()
+    {
+        formModel = new UserModels { Status = true };
+        isEditMode = false;
+        modalError = "";
+
+        try
+        {
+            // ambil data terbaru supaya nomor urut tidak basi
+            var terbaru = await UserService.GetAllAsync();
+            formModel.IdUser = BuatIdBerikutnya(terbaru);
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            return;
+        }
+
+        modalTampil = true;
+    }
+
+    private void BukaModalEdit(UserModels item)
+    {
+        formModel = new UserModels
+        {
+            IdUser = item.IdUser,
+            IdRole = item.IdRole,
+            NamaRole = item.NamaRole,
+            NamaUser = item.NamaUser,
+            Status = item.Status
+        };
+        isEditMode = true;
+        modalError = "";
+        modalTampil = true;
+    }
+
+    private void TutupModal()
+    {
+        modalTampil = false;
+    }
+
+    private async Task SimpanData()
+    {
+        modalError = "";
+
+        if (!isEditMode && string.IsNullOrWhiteSpace(formModel.Password))
+        {
+            modalError = "Password wajib diisi";
+            return;
+        }
+
+        sedangSimpan = true;
+
+        var (success, error) = isEditMode
+            ? await UserService.UpdateAsync(formModel.IdUser, formModel)
+            : await UserService.CreateAsync(formModel);
+
+        if (success)
+        {
+            modalTampil = false;
+            await MuatData();
+        }
+        else
+        {
+            modalError = error;
+        }
+
+        sedangSimpan = false;
+    }
+
+    private void BukaModalReset(UserModels item)
+    {
+        targetReset = item;
+        resetModel = new ResetPasswordModel();
+        resetError = "";
+        resetTampil = true;
+    }
+
+    private void TutupReset()
+    {
+        resetTampil = false;
+    }
+
+    private async Task SimpanReset()
+    {
+        if (targetReset is null) return;
+
+        sedangSimpan = true;
+        resetError = "";
+
+        var (success, error) = await UserService.ResetPasswordAsync(targetReset.IdUser, resetModel.PasswordBaru);
+
+        if (success)
+        {
+            resetTampil = false;
+            pesanSukses = $"Password {targetReset.NamaUser} berhasil diganti";
+        }
+        else
+        {
+            resetError = error;
+        }
+
+        sedangSimpan = false;
+    }
+}
