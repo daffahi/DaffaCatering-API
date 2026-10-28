@@ -139,7 +139,56 @@
             </div>
         </AuthorizeView>
 
-        @* ================= 6. PENGATURAN (khusus Admin) ================= *@
+        @* ================= 6. LAPORAN (isi submenu per role) ================= *@
+        <AuthorizeView Roles="@AppRoles.Semua" Context="grupLaporan">
+            <div class="nav-item px-3">
+                <button class="nav-link btn-submenu" @onclick="ToggleLaporan" title="Laporan">
+                    <i class="fa-solid fa-chart-column fa-fw"></i>
+                    @if (!Collapsed)
+                    {
+                        <span>Laporan</span>
+                        <i class="fa-solid fa-chevron-down chevron @(laporanOpen ? "rotated" : "")"></i>
+                    }
+                </button>
+                @if (laporanOpen && !Collapsed)
+                {
+                    <div class="submenu">
+                        <AuthorizeView Roles="@AppRoles.AdminPenjualan">
+                            <NavLink class="nav-link submenu-link" href="laporan/penjualan">
+                                <i class="fa-solid fa-circle-dot fa-fw"></i> Penjualan
+                            </NavLink>
+                        </AuthorizeView>
+                        <AuthorizeView Roles="@AppRoles.AdminPembelian">
+                            <NavLink class="nav-link submenu-link" href="laporan/pembelian">
+                                <i class="fa-solid fa-circle-dot fa-fw"></i> Pembelian
+                            </NavLink>
+                        </AuthorizeView>
+                        <AuthorizeView Roles="@AppRoles.AdminPersediaan">
+                            <NavLink class="nav-link submenu-link" href="laporan/bahan-baku">
+                                <i class="fa-solid fa-circle-dot fa-fw"></i> Bahan Baku
+                            </NavLink>
+                        </AuthorizeView>
+                        <AuthorizeView Roles="@AppRoles.BacaMenuMakanan">
+                            <NavLink class="nav-link submenu-link" href="laporan/menu-makanan">
+                                <i class="fa-solid fa-circle-dot fa-fw"></i> Menu Makanan
+                            </NavLink>
+                        </AuthorizeView>
+                        <AuthorizeView Roles="@AppRoles.AdminPenjualan">
+                            <NavLink class="nav-link submenu-link" href="laporan/pelanggan">
+                                <i class="fa-solid fa-circle-dot fa-fw"></i> Pelanggan
+                            </NavLink>
+                        </AuthorizeView>
+                        <AuthorizeView Roles="@AppRoles.AdminPembelian">
+                            <NavLink class="nav-link submenu-link" href="laporan/pemasok">
+                                <i class="fa-solid fa-circle-dot fa-fw"></i> Pemasok
+                            </NavLink>
+                        </AuthorizeView>
+                    </div>
+                }
+            </div>
+        </AuthorizeView>
+
+        @* ================= 7. PENGATURAN (khusus Admin) ================= *@
         <AuthorizeView Roles="@AppRoles.Admin">
             <hr class="text-white-50 mx-3" />
             <div class="nav-item px-3">
@@ -164,6 +213,7 @@
     private bool penjualanOpen = false;
     private bool pembelianOpen = false;
     private bool inventoryOpen = false;
+    private bool laporanOpen = false;
 
     private void ToggleMasterData()
     {
@@ -171,6 +221,7 @@
         penjualanOpen = false;
         pembelianOpen = false;
         inventoryOpen = false;
+        laporanOpen = false;
     }
 
     private void TogglePenjualan()
@@ -179,6 +230,7 @@
         masterDataOpen = false;
         pembelianOpen = false;
         inventoryOpen = false;
+        laporanOpen = false;
     }
 
     private void TogglePembelian()
@@ -187,6 +239,7 @@
         masterDataOpen = false;
         penjualanOpen = false;
         inventoryOpen = false;
+        laporanOpen = false;
     }
 
     private void ToggleInventory()
@@ -195,5 +248,15 @@
         masterDataOpen = false;
         penjualanOpen = false;
         pembelianOpen = false;
+        laporanOpen = false;
+    }
+
+    private void ToggleLaporan()
+    {
+        laporanOpen = !laporanOpen;
+        masterDataOpen = false;
+        penjualanOpen = false;
+        pembelianOpen = false;
+        inventoryOpen = false;
     }
 }
