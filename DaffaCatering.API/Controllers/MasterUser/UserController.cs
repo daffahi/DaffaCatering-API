@@ -1,4 +1,5 @@
-﻿using DaffaCatering.API.Data;
+﻿using DaffaCatering.API.Constants;
+using DaffaCatering.API.Data;
 using DaffaCatering.API.DTOs.MasterUser;
 using DaffaCatering.API.DTOs.User;
 using DaffaCatering.API.Models;
@@ -14,8 +15,7 @@ namespace DaffaCatering.API.Controllers.User
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "R001")]
-
+    [Authorize(Roles = AppRoles.Admin)]
     public class UserController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
@@ -27,20 +27,37 @@ namespace DaffaCatering.API.Controllers.User
             _config = config;
         }
 
+        // ID user yang sedang login, diambil dari token
+        private string? IdSaya => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        // User digabung dengan nama role, password tidak ikut
+        private IQueryable<UserResponseDto> QueryUser() =>
+            from u in _context.Users
+            join r in _context.Roles on u.IdRole equals r.IdRole
+            select new UserResponseDto
+            {
+                IdUser = u.IdUser,
+                IdRole = u.IdRole,
+                NamaRole = r.NamaRole,
+                NamaUser = u.NamaUser,
+                Status = u.Status
+            };
+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool? status)
         {
-            var query = _context.Users.AsQueryable();
+            var query = QueryUser();
             if (status.HasValue)
                 query = query.Where(x => x.Status == status.Value);
-            var data = await query.ToListAsync();
+
+            var data = await query.OrderBy(x => x.IdUser).ToListAsync();
             return Ok(data);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var data = await _context.Users.FindAsync(id);
+            var data = await QueryUser().FirstOrDefaultAsync(x => x.IdUser == id);
             if (data == null) return NotFound();
             return Ok(data);
         }
@@ -48,39 +65,60 @@ namespace DaffaCatering.API.Controllers.User
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserDto input)
         {
+            if (!await _context.Roles.AnyAsync(r => r.IdRole == input.IdRole))
+                return BadRequest("Role tidak ditemukan");
+
             try
             {
                 var entity = new Models.User
                 {
                     IdUser = input.IdUser,
                     IdRole = input.IdRole,
-                    NamaUser = input.NamaUser,
+                    NamaUser = input.NamaUser.Trim(),
                     Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
                     Status = input.Status
                 };
 
                 _context.Users.Add(entity);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetById), new { id = entity.IdUser }, entity);
+
+                var hasil = await QueryUser().FirstAsync(x => x.IdUser == entity.IdUser);
+                return CreatedAtAction(nameof(GetById), new { id = entity.IdUser }, hasil);
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                return Conflict($"Gagal menyimpan — cek ID atau data lain. Detail: {ex.InnerException?.Message}");
+                return Conflict("ID user tersebut sudah ada. Silakan gunakan ID yang lain");
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UserDto input)
+        public async Task<IActionResult> Update(string id, [FromBody] UserUpdateDto input)
         {
-            if (id != input.IdUser) return BadRequest("ID tidak sesuai");
-
             var existing = await _context.Users.FindAsync(id);
             if (existing == null) return NotFound();
 
+            if (!await _context.Roles.AnyAsync(r => r.IdRole == input.IdRole))
+                return BadRequest("Role tidak ditemukan");
+
+            // Admin tidak boleh mengunci dirinya sendiri
+            if (id == IdSaya && (!input.Status || input.IdRole != existing.IdRole))
+                return BadRequest("Akun yang sedang dipakai tidak bisa dinonaktifkan atau diubah rolenya");
+
             existing.IdRole = input.IdRole;
-            existing.NamaUser = input.NamaUser;
-            existing.Password = BCrypt.Net.BCrypt.HashPassword(input.Password);
+            existing.NamaUser = input.NamaUser.Trim();
             existing.Status = input.Status;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpPut("{id}/password")]
+        public async Task<IActionResult> ResetPassword(string id, [FromBody] ResetPasswordDto input)
+        {
+            var existing = await _context.Users.FindAsync(id);
+            if (existing == null) return NotFound();
+
+            existing.Password = BCrypt.Net.BCrypt.HashPassword(input.PasswordBaru);
 
             await _context.SaveChangesAsync();
             return NoContent();
