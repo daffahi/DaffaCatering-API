@@ -5,6 +5,7 @@ using DaffaCatering.Blazor.Services.MasterMakanan;
 using DaffaCatering.Blazor.Services.MasterPelanggan;
 using DaffaCatering.Blazor.Services.MasterPemasok;
 using DaffaCatering.Blazor.Services.MasterSatuanBahanBaku;
+using DaffaCatering.Blazor.Services.MasterUser;
 using DaffaCatering.Blazor.Services.Pembelian;
 using DaffaCatering.Blazor.Services.Penjualan;
 using DaffaCatering.Blazor.Services.Persediaan;
@@ -35,6 +36,8 @@ builder.Services.AddScoped<SatuanBahanBakuService>();
 builder.Services.AddScoped<KonversiSatuanService>();
 builder.Services.AddScoped<MenuMakananService>();
 builder.Services.AddScoped<ResepService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<RoleService>();
 
 // PENJUALAN //
 builder.Services.AddScoped<PesananPenjualanService>();
