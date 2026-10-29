@@ -51,6 +51,9 @@ builder.Services.AddScoped<PenerimaanBahanBakuService>();
 builder.Services.AddScoped<PenggunaanService>();
 builder.Services.AddScoped<PenyesuaianBahanBakuService>();
 
+// LAPORAN //
+builder.Services.AddScoped<LaporanPenjualanService>();
+
 var cultureInfo = new CultureInfo("id-ID");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
