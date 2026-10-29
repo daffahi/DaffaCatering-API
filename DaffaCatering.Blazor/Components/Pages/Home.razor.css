@@ -1,101 +1,352 @@
 /* =====================================================
-   1. VARIABEL & WRAPPER HALAMAN
+   1. DASAR
    ===================================================== */
 .dashboard-page {
-    --brand-800: #135846;
+    --brand: #135846;
     --ink: #1d2b25;
+    --muted: #66756d;
+    --line: #e6e1d6;
+    --telat: #a3392b;
+    --tipis: #8a5a0a;
+    --naik: #1e7a4f;
     font-family: 'Roboto', sans-serif;
     color: var(--ink);
     padding-bottom: 2rem;
 }
 
 /* =====================================================
-   2. WELCOME BANNER
+   2. BANNER
    ===================================================== */
 .welcome-banner {
-    padding: 2rem;
-    border-radius: 18px;
+    padding: 1.5rem 2rem;
+    border-radius: 14px;
     color: #fff;
-    background: var(--brand-800);
-    box-shadow: 0 10px 30px -18px rgba(29, 43, 37, .35);
+    background: var(--brand);
 }
 
     .welcome-banner h1 {
         margin: 0;
         font-family: 'Merriweather Sans', sans-serif;
-        font-size: 28px;
+        font-size: 26px;
         font-weight: 700;
         letter-spacing: -.01em;
     }
 
     .welcome-banner p {
-        margin: .5rem 0 0;
+        margin: .35rem 0 0;
         font-size: 14px;
         color: rgba(255, 255, 255, .8);
     }
 
+.galat {
+    margin: 1rem 0 0;
+    font-size: 13px;
+    color: var(--telat);
+}
+
+.memuat {
+    margin: 1.5rem 0;
+    font-size: 14px;
+    color: var(--muted);
+}
+
 /* =====================================================
-   3. KARTU RINGKASAN
+   3. ANGKA UTAMA
    ===================================================== */
-.dashboard-cards {
-    display: flex;
-    gap: 16px;
-    width: 100%;
-    flex-wrap: wrap;
+.ringkas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     margin-top: 1.25rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
 }
 
-.dashboard-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex: 1;
-    width: 250px;
-    padding: 18px 20px;
-    background: white;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
+.fig {
+    padding: 16px 20px;
 }
 
-/* ---------- Ikon kartu ---------- */
-.card-icon {
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: #344E41;
-    color: #DAD7CD;
+    .fig + .fig {
+        border-left: 1px solid var(--line);
+    }
+
+.fig-label {
+    font-size: 13px;
+    color: var(--muted);
 }
 
-/* ---------- Teks kartu ---------- */
-.card-content {
+.fig-value {
+    margin-top: 2px;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.fig-note {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+    .fig-note.naik {
+        color: var(--naik);
+    }
+
+    .fig-note.turun {
+        color: var(--telat);
+    }
+
+/* =====================================================
+   4. TATA LETAK
+   ===================================================== */
+.dash-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+    align-items: start;
+}
+
+    /* kalau hanya ada satu kolom (peran Persediaan) */
+    .dash-body > :only-child {
+        grid-column: 1 / -1;
+    }
+
+.kolom {
     display: flex;
     flex-direction: column;
+    gap: 16px;
 }
 
-.card-title {
-    font-family: 'Merriweather Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
+.panel {
+    padding: 18px 20px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
 }
 
-.card-subtitle {
-    font-family: 'Roboto', sans-serif;
+    .panel h2 {
+        margin: 0 0 12px;
+        font-family: 'Merriweather Sans', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+        .panel h2 small {
+            margin-left: 6px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--muted);
+        }
+
+.kosong {
+    margin: 0;
+    padding: 12px 0 4px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.sisa {
+    margin: 12px 0 0;
     font-size: 12px;
-    color: #888;
+    color: var(--muted);
 }
 
 /* =====================================================
-   4. RESPONSIVE
+   5. PESANAN MENUNGGU
    ===================================================== */
+.pesanan-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pesanan {
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    align-items: baseline;
+    gap: 16px;
+    padding: 11px 0;
+    border-top: 1px solid var(--line);
+}
+
+    .pesanan:first-child {
+        border-top: 0;
+        padding-top: 2px;
+    }
+
+    .pesanan strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .pesanan span {
+        display: block;
+        margin-top: 1px;
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .pesanan.telat .p-waktu strong {
+        color: var(--telat);
+    }
+
+.p-total {
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =====================================================
+   6. GRAFIK HARIAN
+   ===================================================== */
+.tren {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 84px;
+    border-bottom: 1px solid var(--line);
+}
+
+.tren-bar {
+    flex: 1;
+    background: #b8cfc4;
+}
+
+    .tren-bar:hover {
+        background: #86ad9b;
+    }
+
+    .tren-bar.hari-ini {
+        background: var(--brand);
+    }
+
+.tren-sumbu {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+/* =====================================================
+   7. MENU TERLARIS & STOK
+   ===================================================== */
+.peringkat {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: urut;
+}
+
+    .peringkat li {
+        counter-increment: urut;
+        display: grid;
+        grid-template-columns: 18px 1fr auto;
+        gap: 2px 8px;
+        padding: 9px 0;
+        border-top: 1px solid var(--line);
+        font-size: 14px;
+    }
+
+        .peringkat li:first-child {
+            border-top: 0;
+            padding-top: 2px;
+        }
+
+        .peringkat li::before {
+            content: counter(urut);
+            grid-row: 1 / span 2;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+.pr-nama {
+    font-weight: 500;
+}
+
+.pr-nilai {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.pr-porsi {
+    grid-column: 2 / -1;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.stok-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+    .stok-list li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 0;
+        border-top: 1px solid var(--line);
+        font-size: 14px;
+    }
+
+        .stok-list li:first-child {
+            border-top: 0;
+            padding-top: 2px;
+        }
+
+    .stok-list strong {
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: var(--tipis);
+    }
+
+        .stok-list strong.habis {
+            color: var(--telat);
+        }
+
+/* =====================================================
+   8. RESPONSIVE
+   ===================================================== */
+@media (max-width: 900px) {
+    .dash-body {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 720px) {
     .welcome-banner {
         padding: 1.25rem;
     }
 
         .welcome-banner h1 {
-            font-size: 22px;
+            font-size: 21px;
         }
+
+    .ringkas {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .fig + .fig {
+        border-left: 0;
+    }
+
+    .fig:nth-child(even) {
+        border-left: 1px solid var(--line);
+    }
+
+    .fig:nth-child(n+3) {
+        border-top: 1px solid var(--line);
+    }
+
+    .pesanan {
+        grid-template-columns: 90px 1fr;
+    }
+
+    .p-total {
+        grid-column: 2;
+    }
 }

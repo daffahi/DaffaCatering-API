@@ -1,140 +1,399 @@
 ﻿@page "/"
 @attribute [Authorize]
 
+@using System.Globalization
 @using System.Net.Http.Headers
 @using System.Net.Http.Json
+@using System.Security.Claims
 @using DaffaCatering.Blazor.Services
 
 @inject IHttpClientFactory HttpClientFactory
 @inject JwtAuthStateProvider AuthStateProvider
+@inject LaporanPenjualanService LaporanService
+@inject PelangganService PelangganService
+@inject MenuMakananService MenuMakananService
 
 <PageTitle>Daffa Catering</PageTitle>
 
 <div class="dashboard-page">
 
-    @* ================= 1. WELCOME BANNER ================= *@
+    @* ================= 1. BANNER ================= *@
     <section class="welcome-banner">
         <AuthorizeView>
             <h1>Selamat datang kembali, @context.User.Identity?.Name</h1>
         </AuthorizeView>
-        <p>Ringkasan aktivitas Daffa Catering</p>
+        <p>@hariIni.ToString("dddd, dd MMMM yyyy", IdCulture)</p>
     </section>
 
-    @* ================= 2. KARTU RINGKASAN ================= *@
-    <section class="dashboard-cards">
+    @if (!string.IsNullOrEmpty(pesanError))
+    {
+        <p class="galat">@pesanError</p>
+    }
 
-        @* ---------- Penjualan ---------- *@
-        <div class="dashboard-card">
-            <div class="card-icon sales-icon">
-                <i class="fa-solid fa-dollar-sign"></i>
-            </div>
-            <div class="card-content">
-                <div class="card-title">@totalSales Penjualan</div>
-                <div class="card-subtitle">Total Penjualan</div>
-            </div>
-        </div>
-
-        @* ---------- Pembayaran tertunda ---------- *@
-        <div class="dashboard-card">
-            <div class="card-icon">
-                <i class="fa-regular fa-clock"></i>
-            </div>
-            <div class="card-content">
-                <div class="card-title">@waitingPayments Pending</div>
-                <div class="card-subtitle">Pembayaran yang masih tertunda</div>
-            </div>
-        </div>
-
-        @* ---------- Pendapatan ---------- *@
-        <div class="dashboard-card">
-            <div class="card-icon">
-                <i class="fa-solid fa-money-bills"></i>
-            </div>
-            <div class="card-content">
-                <div class="card-title">
-                    @totalRevenue.ToString("C0", new System.Globalization.CultureInfo("id-ID"))
+    @if (isLoading)
+    {
+        <p class="memuat">Memuat ringkasan...</p>
+    }
+    else if (!bolehPenjualan && !bolehStok)
+    {
+        <p class="memuat">Belum ada ringkasan untuk peran Anda. Pakai menu di samping untuk mulai bekerja.</p>
+    }
+    else
+    {
+        @* ================= 2. ANGKA UTAMA ================= *@
+        <section class="ringkas">
+            @if (bolehPenjualan)
+            {
+                <div class="fig">
+                    <div class="fig-label">Penjualan bulan ini</div>
+                    <div class="fig-value">@FormatRupiah(nilaiBulanIni)</div>
+                    @if (deltaPersen is { } d && d != 0)
+                    {
+                        <div class="fig-note @(d > 0 ? "naik" : "turun")">
+                            @(d > 0 ? "Naik" : "Turun") @Math.Abs(d).ToString("0.#", IdCulture)% dari periode sama bulan lalu
+                        </div>
+                    }
                 </div>
-                <div class="card-subtitle">Total pendapatan</div>
-            </div>
-        </div>
 
-        @* ---------- Stok menipis ---------- *@
-        <div class="dashboard-card">
-            <div class="card-icon">
-                <i class="fa-solid fa-boxes-stacked"></i>
-            </div>
-            <div class="card-content">
-                <div class="card-title">@lowStock Stok Menipis</div>
-                <div class="card-subtitle">Persediaan Hampir Habis</div>
-            </div>
-        </div>
+                <div class="fig">
+                    <div class="fig-label">Transaksi bulan ini</div>
+                    <div class="fig-value">@jmlTransaksiBulanIni</div>
+                </div>
 
-    </section>
+                <div class="fig">
+                    <div class="fig-label">Pesanan menunggu</div>
+                    <div class="fig-value">@jmlPending</div>
+                    @if (jmlTelat > 0)
+                    {
+                        <div class="fig-note turun">@jmlTelat sudah lewat tanggalnya</div>
+                    }
+                </div>
+            }
+
+            @if (bolehStok)
+            {
+                <div class="fig">
+                    <div class="fig-label">Stok menipis</div>
+                    <div class="fig-value">@stokMenipis.Count</div>
+                    <div class="fig-note">Di bawah @FormatAngka(BatasStok) unit</div>
+                </div>
+            }
+        </section>
+
+        <section class="dash-body">
+
+            @if (bolehPenjualan)
+            {
+                @* ================= 3. PESANAN MENUNGGU ================= *@
+                <div class="panel">
+                    <h2>Pesanan menunggu <small>yang terdekat lebih dulu</small></h2>
+
+                    @if (pesananPending.Count == 0)
+                    {
+                        <p class="kosong">Tidak ada pesanan yang menunggu.</p>
+                    }
+                    else
+                    {
+                        <ul class="pesanan-list">
+                            @foreach (var p in pesananPending)
+                            {
+                                var telat = p.Trx.Tanggal < hariIni;
+
+                                <li class="pesanan @(telat ? "telat" : "")">
+                                    <div class="p-waktu">
+                                        <strong>@Selisih(p.Trx.Tanggal)</strong>
+                                        <span>@p.Trx.Tanggal.ToString("dd MMM yyyy", IdCulture)</span>
+                                    </div>
+                                    <div class="p-siapa">
+                                        <strong>@NamaPelanggan(p.IdPelanggan)</strong>
+                                        <span>@p.Trx.IdTransaksi</span>
+                                    </div>
+                                    <div class="p-total">@FormatRupiah(p.Trx.TotalTransaksi)</div>
+                                </li>
+                            }
+                        </ul>
+
+                        @if (jmlPending > pesananPending.Count)
+                        {
+                            <p class="sisa">@(jmlPending - pesananPending.Count) pesanan lainnya tidak ditampilkan.</p>
+                        }
+                    }
+                </div>
+            }
+
+            <div class="kolom">
+
+                @if (bolehPenjualan)
+                {
+                    @* ================= 4. PENJUALAN HARIAN ================= *@
+                    <div class="panel">
+                        <h2>Penjualan harian <small>14 hari terakhir</small></h2>
+
+                        @if (trenMax == 0)
+                        {
+                            <p class="kosong">Belum ada penjualan dalam 14 hari terakhir.</p>
+                        }
+                        else
+                        {
+                            <div class="tren">
+                                @foreach (var h in tren)
+                                {
+                                    var tinggi = h.Total <= 0 ? 0 : Math.Max(3, (int)Math.Round(h.Total / trenMax * 100));
+
+                                    <div class="tren-bar @(h.Tgl == hariIni ? "hari-ini" : "")"
+                                         style="height:@(tinggi)%"
+                                         title="@h.Tgl.ToString("dd MMM", IdCulture): @FormatRupiah(h.Total)"></div>
+                                }
+                            </div>
+                            <div class="tren-sumbu">
+                                <span>@tren.First().Tgl.ToString("dd MMM", IdCulture)</span>
+                                <span>@tren.Last().Tgl.ToString("dd MMM", IdCulture)</span>
+                            </div>
+                        }
+                    </div>
+
+                    @* ================= 5. MENU TERLARIS ================= *@
+                    <div class="panel">
+                        <h2>Menu terlaris <small>bulan ini</small></h2>
+
+                        @if (menuTerlaris.Count == 0)
+                        {
+                            <p class="kosong">Belum ada menu yang terjual bulan ini.</p>
+                        }
+                        else
+                        {
+                            <ol class="peringkat">
+                                @foreach (var m in menuTerlaris)
+                                {
+                                    <li>
+                                        <span class="pr-nama">@NamaMenu(m.Id)</span>
+                                        <span class="pr-porsi">@FormatAngka(m.TotalJumlah) porsi</span>
+                                        <span class="pr-nilai">@FormatRupiah(m.Subtotal)</span>
+                                    </li>
+                                }
+                            </ol>
+                        }
+                    </div>
+                }
+
+                @if (bolehStok)
+                {
+                    @* ================= 6. STOK MENIPIS ================= *@
+                    <div class="panel">
+                        <h2>Stok menipis <small>paling sedikit dulu</small></h2>
+
+                        @if (stokMenipis.Count == 0)
+                        {
+                            <p class="kosong">Semua stok masih di atas batas.</p>
+                        }
+                        else
+                        {
+                            <ul class="stok-list">
+                                @foreach (var s in stokMenipis.Take(8))
+                                {
+                                    <li>
+                                        <span>@s.Nama</span>
+                                        @if (s.Sisa <= 0)
+                                        {
+                                            <strong class="habis">Habis</strong>
+                                        }
+                                        else
+                                        {
+                                            <strong>@FormatAngka(s.Sisa)</strong>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
+
+            </div>
+        </section>
+    }
 
 </div>
 
 @code {
 
-    private int totalSales = 0;
-    private int waitingPayments = 0;
-    private decimal totalRevenue = 0;
-    private int lowStock = 0;
+    private static readonly CultureInfo IdCulture = new("id-ID");
+    private const decimal BatasStok = 10;
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    // --- halaman ---
+    private bool isLoading = true;
+    private bool bolehPenjualan;
+    private bool bolehStok;
+    private string pesanError = "";
+    private DateOnly hariIni;
+
+    // --- master, hanya untuk menampilkan nama ---
+    private List<PelangganModels> daftarPelanggan = new();
+    private List<MenuMakananModels> daftarMenu = new();
+
+    // --- penjualan ---
+    private decimal nilaiBulanIni;
+    private int jmlTransaksiBulanIni;
+    private decimal? deltaPersen;
+    private List<(DateOnly Tgl, decimal Total)> tren = new();
+    private decimal trenMax;
+    private List<LaporanKelompok> menuTerlaris = new();
+
+    // --- pesanan ---
+    private int jmlPending;
+    private int jmlTelat;
+    private List<(string IdPelanggan, LaporanBaris Trx)> pesananPending = new();
+
+    // --- stok ---
+    private List<(string Nama, decimal Sisa)> stokMenipis = new();
+
+    // =====================================================
+    // LIFECYCLE
+    // =====================================================
     protected override async Task OnInitializedAsync()
     {
-        var token = await AuthStateProvider.AmbilTokenAsync();
-        var client = HttpClientFactory.CreateClient("API");
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        hariIni = DateOnly.FromDateTime(DateTime.Today);
 
-        // SALES
-        try
+        if (AuthState is not null)
         {
-            var sales = await client.GetFromJsonAsync<List<PenjualanResponse>>(
-                "api/HeaderPenjualan"
-            );
-            totalSales = sales?.Count ?? 0;
-            totalRevenue = sales?.Sum(x => x.Total) ?? 0;
-        }
-        catch (HttpRequestException)
-        {
-            totalSales = 0;
-            totalRevenue = 0;
+            var user = (await AuthState).User;
+            bolehPenjualan = PunyaPeran(user, AppRoles.AdminPenjualan);
+            bolehStok = PunyaPeran(user, AppRoles.AdminPersediaan);
         }
 
-        // LOW STOCK
-        try
-        {
-            var bahanBaku = await client.GetFromJsonAsync<List<BahanBakuResponse>>(
-                "api/HeaderBahanBaku"
-            );
+        var galat = new List<string>();
 
-            int batasMinimum = 10;
+        if (bolehPenjualan) await MuatPenjualan(galat);
+        if (bolehStok) await MuatStok(galat);
 
-            lowStock = bahanBaku?
-                .Where(x => x.Status && x.Jenis)
-                .Count(x => x.Details.Sum(d => d.SisaStok ?? 0) < batasMinimum) ?? 0;
-        }
-        catch (HttpRequestException)
-        {
-            lowStock = 0;
-        }
+        pesanError = string.Join(" ", galat);
+        isLoading = false;
     }
 
-    // SALES RESPONSE
-    public class PenjualanResponse
+    // =====================================================
+    // MUAT DATA
+    // =====================================================
+    private async Task MuatPenjualan(List<string> galat)
     {
-        public string IdPenjualan { get; set; } = "";
-        public decimal Total { get; set; }
-        public string? Status { get; set; }
+        var awalBulan = new DateOnly(hariIni.Year, hariIni.Month, 1);
+        var awalBulanLalu = awalBulan.AddMonths(-1);
+
+        try { daftarPelanggan = await PelangganService.GetAllAsync(); } catch { }
+        try { daftarMenu = await MenuMakananService.GetAllAsync(); } catch { }
+
+        // Penjualan dari awal bulan lalu sampai hari ini: dipakai untuk angka, perbandingan, dan grafik
+        var (penjualan, e1) = await LaporanService.AmbilAsync("penjualan", "pelanggan", awalBulanLalu, hariIni, "", "");
+        if (penjualan is null) galat.Add("Gagal memuat penjualan: " + e1);
+
+        var semuaTrx = (penjualan ?? new())
+            .SelectMany(g => g.Baris)
+            .GroupBy(b => b.IdTransaksi)
+            .Select(t => t.First())
+            .ToList();
+
+        var bulanIni = semuaTrx.Where(t => t.Tanggal >= awalBulan).ToList();
+        nilaiBulanIni = bulanIni.Sum(t => t.TotalTransaksi);
+        jmlTransaksiBulanIni = bulanIni.Count;
+
+        // Pembanding: bulan lalu sampai tanggal yang sama dengan hari ini
+        var hariPembanding = Math.Min(hariIni.Day, DateTime.DaysInMonth(awalBulanLalu.Year, awalBulanLalu.Month));
+        var akhirPembanding = awalBulanLalu.AddDays(hariPembanding - 1);
+        var nilaiLalu = semuaTrx
+            .Where(t => t.Tanggal >= awalBulanLalu && t.Tanggal <= akhirPembanding)
+            .Sum(t => t.TotalTransaksi);
+        deltaPersen = nilaiLalu == 0 ? null : (nilaiBulanIni - nilaiLalu) / nilaiLalu * 100;
+
+        tren = Enumerable.Range(0, 14)
+            .Select(i => hariIni.AddDays(i - 13))
+            .Select(d => (d, semuaTrx.Where(t => t.Tanggal == d).Sum(t => t.TotalTransaksi)))
+            .ToList();
+        trenMax = tren.Max(h => h.Total);
+
+        // Menu terlaris bulan ini, diurutkan dari nilai penjualan
+        var (perMenu, e2) = await LaporanService.AmbilAsync("penjualan", "menu", awalBulan, hariIni, "", "");
+        if (perMenu is null) galat.Add("Gagal memuat menu terlaris: " + e2);
+        menuTerlaris = (perMenu ?? new()).OrderByDescending(g => g.Subtotal).Take(5).ToList();
+
+        // Pesanan yang masih Pending, 30 hari ke belakang sampai 30 hari ke depan
+        var (pending, e3) = await LaporanService.AmbilAsync("pesanan", "pelanggan",
+            hariIni.AddDays(-30), hariIni.AddDays(30), "", "Pending");
+        if (pending is null) galat.Add("Gagal memuat pesanan: " + e3);
+
+        var daftarPending = (pending ?? new())
+            .SelectMany(g => g.Baris.GroupBy(b => b.IdTransaksi).Select(t => (IdPelanggan: g.Id, Trx: t.First())))
+            .OrderBy(x => x.Trx.Tanggal)
+            .ToList();
+
+        jmlPending = daftarPending.Count;
+        jmlTelat = daftarPending.Count(x => x.Trx.Tanggal < hariIni);
+        pesananPending = daftarPending.Take(8).ToList();
     }
 
-    // BAHAN BAKU RESPONSE
+    private async Task MuatStok(List<string> galat)
+    {
+        try
+        {
+            var token = await AuthStateProvider.AmbilTokenAsync();
+            var client = HttpClientFactory.CreateClient("API");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var bahanBaku = await client.GetFromJsonAsync<List<BahanBakuResponse>>("api/HeaderBahanBaku");
+
+            stokMenipis = (bahanBaku ?? new())
+                .Where(x => x.Status && x.Jenis)
+                .Select(x => (x.NamaBahanBaku, Sisa: x.Details.Sum(d => d.SisaStok ?? 0)))
+                .Where(x => x.Sisa < BatasStok)
+                .OrderBy(x => x.Sisa)
+                .ToList();
+        }
+        catch (HttpRequestException ex)
+        {
+            galat.Add("Gagal memuat stok: " + ex.Message);
+        }
+    }
+
+    // =====================================================
+    // HELPER
+    // =====================================================
+    private static string FormatRupiah(decimal v) => v.ToString("C0", IdCulture);
+
+    private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
+
+    // AppRoles.* berisi daftar role dipisah koma (format atribut [Authorize(Roles = ...)])
+    private static bool PunyaPeran(ClaimsPrincipal user, string daftarPeran)
+        => daftarPeran
+            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Any(user.IsInRole);
+
+    private string Selisih(DateOnly tgl)
+    {
+        var n = tgl.DayNumber - hariIni.DayNumber;
+        return n switch
+        {
+            0 => "Hari ini",
+            1 => "Besok",
+            -1 => "Kemarin",
+            < 0 => $"Lewat {-n} hari",
+            _ => $"{n} hari lagi"
+        };
+    }
+
+    private string NamaPelanggan(string? id)
+        => daftarPelanggan.FirstOrDefault(p => p.IdPelanggan == id)?.NamaPelanggan ?? (id ?? "-");
+
+    private string NamaMenu(string? id)
+        => daftarMenu.FirstOrDefault(m => m.IdMenu == id)?.NamaMenu ?? (id ?? "-");
+
+    // =====================================================
+    // MODEL RESPONSE
+    // =====================================================
     public class BahanBakuResponse
     {
         public string IdBahanBaku { get; set; } = "";
         public string NamaBahanBaku { get; set; } = "";
-        public bool Jenis { get; set; }  
+        public bool Jenis { get; set; }
         public bool Status { get; set; }
 
         public List<DetailBahanBakuResponse> Details { get; set; } = new();
