@@ -1,0 +1,780 @@
+﻿@page "/laporan/penjualan"
+@attribute [Authorize(Roles = AppRoles.AdminPenjualan)]
+@implements IAsyncDisposable
+
+@using System.Globalization
+@inject LaporanPenjualanService LaporanService
+@inject PelangganService PelangganService
+@inject MenuMakananService MenuMakananService
+@inject SatuanBahanBakuService SatuanBahanBakuService
+@inject IConfiguration Config
+@inject IJSRuntime JS
+
+@{
+    var tampil = Tampil;
+    var perPelanggan = kelompok == KelompokLaporan.Pelanggan;
+    var labelJenis = jenis == JenisLaporan.Penjualan ? "penjualan" : "pesanan";
+    var jmlTransaksi = tampil.SelectMany(g => g.Baris).Select(b => b.IdTransaksi).Distinct().Count();
+    var totalNilai = tampil.Sum(g => g.Subtotal);
+    var totalJumlah = tampil.Sum(g => g.TotalJumlah);
+    var jmlKolom = perPelanggan ? 5 : 6;
+}
+
+<div class="laporan-page">
+
+    @* ================= 1. HEADER HALAMAN ================= *@
+    <header class="page-head">
+        <div>
+            <h1>Laporan Penjualan</h1>
+            <p>Rekap penjualan dan pesanan penjualan per periode</p>
+        </div>
+        <button class="btn-ghost" disabled="@(isLoading || tampil.Count == 0)" @onclick="Cetak">
+            <i class="fa-solid fa-print"></i> Cetak
+        </button>
+    </header>
+
+    @* ================= 2. BANNER ERROR ================= *@
+    @if (!string.IsNullOrEmpty(PesanError))
+    {
+        <div class="banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@PesanError</span>
+            <button class="banner-close" @onclick="TutupError">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    }
+
+    @* ================= 3. FILTER LAPORAN ================= *@
+    <section class="filter-card">
+        <div class="filter-row">
+
+            <div class="fg">
+                <span class="fl">Jenis</span>
+                <div class="segmented">
+                    <button class="@Seg(jenis == JenisLaporan.Pesanan)" @onclick="() => PilihJenis(JenisLaporan.Pesanan)">Pesanan Penjualan</button>
+                    <button class="@Seg(jenis == JenisLaporan.Penjualan)" @onclick="() => PilihJenis(JenisLaporan.Penjualan)">Penjualan</button>
+                </div>
+            </div>
+
+            <div class="fg">
+                <span class="fl">Kelompok</span>
+                <div class="segmented">
+                    <button class="@Seg(kelompok == KelompokLaporan.Pelanggan)" @onclick="() => PilihKelompok(KelompokLaporan.Pelanggan)">
+                        Per Pelanggan
+                    </button>
+                    <button class="@Seg(kelompok == KelompokLaporan.Menu)" @onclick="() => PilihKelompok(KelompokLaporan.Menu)">
+                        Per Menu
+                    </button>
+                </div>
+            </div>
+
+            <div class="fg">
+                <span class="fl">Periode</span>
+                <div class="segmented">
+                    <button class="@Seg(preset == PresetPeriode.HariIni)" @onclick="() => PilihPreset(PresetPeriode.HariIni)">
+                        Hari Ini
+                    </button>
+                    <button class="@Seg(preset == PresetPeriode.TujuhHari)" @onclick="() => PilihPreset(PresetPeriode.TujuhHari)">
+                        7 Hari
+                    </button>
+                    <button class="@Seg(preset == PresetPeriode.BulanIni)" @onclick="() => PilihPreset(PresetPeriode.BulanIni)">
+                        Bulan Ini
+                    </button>
+                </div>
+            </div>
+
+            <label class="fg">
+                <span class="fl">Dari</span>
+                <input type="date" value="@Iso(dari)" max="@Iso(sampai)" @onchange="UbahDari" />
+            </label>
+
+            <label class="fg">
+                <span class="fl">Sampai</span>
+                <input type="date" value="@Iso(sampai)" min="@Iso(dari)" @onchange="UbahSampai" />
+            </label>
+
+            <label class="fg">
+                <span class="fl">Metode</span>
+                <select value="@metode" @onchange="UbahMetode">
+                    <option value="">Semua metode</option>
+                    <option value="Tunai">Tunai</option>
+                    <option value="Debit">Debit</option>
+                </select>
+            </label>
+
+            @if (jenis == JenisLaporan.Pesanan)
+            {
+                <label class="fg">
+                    <span class="fl">Status</span>
+                    <select value="@status" @onchange="UbahStatus">
+                        <option value="">Semua status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Close">Close</option>
+                    </select>
+                </label>
+            }
+        </div>
+
+        <label class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="@(perPelanggan ? "Cari kode atau nama pelanggan..." : "Cari kode atau nama menu...")"
+                   @bind="teksCari" @bind:event="oninput" />
+        </label>
+    </section>
+
+    @* ================= 4. KARTU RINGKASAN ================= *@
+    @if (!isLoading)
+    {
+        <section class="dashboard-cards">
+            @if (perPelanggan)
+            {
+                <div class="dashboard-card">
+                    <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="card-content">
+                        <div class="card-title">@tampil.Count Pelanggan</div>
+                        <div class="card-subtitle">Pelanggan bertransaksi</div>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-icon"><i class="fa-solid fa-receipt"></i></div>
+                    <div class="card-content">
+                        <div class="card-title">@jmlTransaksi Transaksi</div>
+                        <div class="card-subtitle">Jumlah @labelJenis</div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="dashboard-card">
+                    <div class="card-icon"><i class="fa-solid fa-utensils"></i></div>
+                    <div class="card-content">
+                        <div class="card-title">@tampil.Count Menu</div>
+                        <div class="card-subtitle">Menu @(jenis == JenisLaporan.Penjualan ? "terjual" : "dipesan")</div>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    <div class="card-content">
+                        <div class="card-title">@FormatAngka(totalJumlah)</div>
+                        <div class="card-subtitle">Total jumlah menu</div>
+                    </div>
+                </div>
+            }
+
+            <div class="dashboard-card">
+                <div class="card-icon"><i class="fa-solid fa-money-bills"></i></div>
+                <div class="card-content">
+                    <div class="card-title">@FormatRupiah(totalNilai)</div>
+                    <div class="card-subtitle">Total nilai @labelJenis</div>
+                </div>
+            </div>
+        </section>
+    }
+
+    @* ================= 5. TABEL LAPORAN ================= *@
+    <section class="panel">
+
+        @if (isLoading)
+        {
+            <div class="skeleton">
+                @for (var s = 0; s < 6; s++)
+                {
+                    <div class="sk-row">
+                        <div class="sk-avatar"></div>
+                        <div class="sk-lines"><div></div><div></div></div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        @if (perPelanggan)
+                        {
+                            <tr>
+                                <th>No. Transaksi</th>
+                                <th>Tanggal</th>
+                                <th>Metode</th>
+                                <th>Status</th>
+                                <th class="num">Total</th>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <th>No. Transaksi</th>
+                                <th>Tanggal</th>
+                                <th>Pelanggan</th>
+                                <th class="num">Jumlah</th>
+                                <th class="num">Harga</th>
+                                <th class="num">Subtotal</th>
+                            </tr>
+                        }
+                    </thead>
+
+                    @foreach (var g in tampil)
+                    {
+                        var nama = NamaKelompok(g);
+
+                        <tbody @key="g.Id">
+                            <tr class="grp-head">
+                                <td colspan="@jmlKolom">
+                                    <div class="who">
+                                        <div class="avatar tone-@Warna(nama)">@Inisial(nama)</div>
+                                        <div>
+                                            <div class="name">@nama</div>
+                                            <div class="sub">@g.Id - @g.JumlahTransaksi transaksi</div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            @if (perPelanggan)
+                            {
+                                foreach (var t in g.Baris.GroupBy(x => x.IdTransaksi))
+                                {
+                                    var b = t.First();
+
+                                    <tr class="row-trx">
+                                        <td class="mono">@b.IdTransaksi</td>
+                                        <td>@b.Tanggal.ToString("dd MMM yyyy", IdCulture)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(b.Metode) ? "-" : b.Metode)</td>
+                                        <td>
+                                            <span class="pill @(IsClose(b.Status) ? "closed" : "pending")">
+                                                <i></i>@(string.IsNullOrWhiteSpace(b.Status) ? "-" : b.Status)
+                                            </span>
+                                        </td>
+                                        <td class="num mono">@FormatAngka(b.TotalTransaksi)</td>
+                                    </tr>
+                                }
+
+                                <tr class="grp-total">
+                                    <td colspan="4">Subtotal</td>
+                                    <td class="num mono">@FormatAngka(g.Subtotal)</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var b in g.Baris)
+                                {
+                                    <tr class="row-trx">
+                                        <td class="mono">@b.IdTransaksi</td>
+                                        <td>@b.Tanggal.ToString("dd MMM yyyy", IdCulture)</td>
+                                        <td>@NamaPelanggan(b.IdPelanggan)</td>
+                                        <td class="num mono">@FormatAngka(b.Jumlah) @NamaSatuan(b.IdSatuan)</td>
+                                        <td class="num mono">@FormatAngka(b.Harga)</td>
+                                        <td class="num mono">@FormatAngka(b.Subtotal)</td>
+                                    </tr>
+                                }
+
+                                <tr class="grp-total">
+                                    <td colspan="3">Subtotal</td>
+                                    <td class="num mono">@FormatAngka(g.TotalJumlah)</td>
+                                    <td></td>
+                                    <td class="num mono">@FormatAngka(g.Subtotal)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    }
+                </table>
+
+                @if (tampil.Count == 0)
+                {
+                    <div class="empty">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                        <strong>Data laporan tidak ditemukan</strong>
+                        <span>Tidak ada @labelJenis pada periode ini, coba ubah periode atau filter lainnya</span>
+                    </div>
+                }
+            </div>
+
+            <div class="panel-foot">
+                <span>
+                    Menampilkan <b>@jmlTransaksi</b> transaksi dari <b>@tampil.Count</b> @(perPelanggan ? "pelanggan" : "menu")
+                </span>
+                <span>Total <b>@FormatRupiah(totalNilai)</b></span>
+            </div>
+        }
+    </section>
+
+    @* ================= 6. DOKUMEN CETAK (tidak tampil di layar) ================= *@
+    @if (!isLoading && tampil.Count > 0)
+    {
+        <div id="dokumen-cetak" class="doc">
+
+            <header class="doc-kop">
+                <img src="images/logo.png" class="doc-logo" alt="" onerror="this.style.display='none'" />
+                <div class="doc-judul">
+                    <h1>@JudulLaporan</h1>
+                    <div class="doc-usaha">@NamaUsaha</div>
+                    <div class="doc-alamat">@AlamatUsaha</div>
+                </div>
+                <div></div>
+            </header>
+
+            <hr class="doc-garis" />
+
+            <div class="doc-meta">
+                <span>Dicetak oleh: <b>@namaPencetak</b></span>
+                <span>Tanggal Cetak: <b>@Tgl(DateOnly.FromDateTime(DateTime.Today))</b></span>
+            </div>
+            <div class="doc-meta">
+                <span>
+                    Periode: <b>@Tgl(dari) s/d @Tgl(sampai)</b>
+                    @if (!string.IsNullOrEmpty(metode))
+                    {
+                        <text> | Metode: <b>@metode</b></text>
+                    }
+                    @if (!string.IsNullOrEmpty(status))
+                    {
+                        <text> | Status: <b>@status</b></text>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(teksCari))
+                    {
+                        <text> | Pencarian: <b>@teksCari</b></text>
+                    }
+                </span>
+            </div>
+
+            @if (perPelanggan)
+            {
+                foreach (var x in TransaksiUrut(tampil))
+                {
+                    var pertama = x.Baris[0];
+                    var nomor = 0;
+
+                    <section class="doc-blok">
+                        <table class="doc-info">
+                            <tr>
+                                <th>Kode Pelanggan</th>
+                                <td class="sep">:</td>
+                                <td>@x.IdPelanggan</td>
+                                <td>@x.Nama</td>
+                            </tr>
+                            <tr>
+                                <th>@(jenis == JenisLaporan.Penjualan ? "No. Penjualan" : "No. Pesanan")</th>
+                                <td class="sep">:</td>
+                                <td colspan="2">@pertama.IdTransaksi</td>
+                            </tr>
+                            <tr>
+                                <th>@(jenis == JenisLaporan.Penjualan ? "Tgl Penjualan" : "Tgl Pesanan")</th>
+                                <td class="sep">:</td>
+                                <td colspan="2">@Tgl(pertama.Tanggal)</td>
+                            </tr>
+                        </table>
+
+                        <table class="doc-tabel">
+                            <colgroup>
+                                <col style="width:44px" />
+                                <col />
+                                <col style="width:90px" />
+                                <col style="width:120px" />
+                                <col style="width:130px" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Nama Menu</th>
+                                    <th>Jumlah</th>
+                                    <th>Harga</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in x.Baris)
+                                {
+                                    <tr>
+                                        <td class="c">@(++nomor)</td>
+                                        <td>@NamaMenu(b.IdMenu)</td>
+                                        <td class="c">@FormatAngka(b.Jumlah)</td>
+                                        <td>@Rp(b.Harga)</td>
+                                        <td>@Rp(b.Subtotal)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" class="r"><b>Uang Muka</b></td>
+                                    <td>@Rp(pertama.UangMuka ?? 0)</td>
+                                    <td class="r"><b>Total</b></td>
+                                    <td>@Rp(pertama.TotalTransaksi)</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </section>
+                }
+            }
+            else
+            {
+                foreach (var g in tampil)
+                {
+                    var nomor = 0;
+
+                    <section class="doc-blok">
+                        <table class="doc-info">
+                            <tr>
+                                <th>Kode Menu</th>
+                                <td class="sep">:</td>
+                                <td>@g.Id</td>
+                                <td>@NamaKelompok(g)</td>
+                            </tr>
+                        </table>
+
+                        <table class="doc-tabel">
+                            <colgroup>
+                                <col style="width:40px" />
+                                <col style="width:105px" />
+                                <col style="width:80px" />
+                                <col />
+                                <col style="width:70px" />
+                                <col style="width:95px" />
+                                <col style="width:110px" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>@(jenis == JenisLaporan.Penjualan ? "No. Penjualan" : "No. Pesanan")</th>
+                                    <th>Tanggal</th>
+                                    <th>Pelanggan</th>
+                                    <th>Jumlah</th>
+                                    <th>Harga</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in g.Baris.OrderBy(b => b.IdTransaksi, StringComparer.Ordinal))
+                                {
+                                    <tr>
+                                        <td class="c">@(++nomor)</td>
+                                        <td>@b.IdTransaksi</td>
+                                        <td class="c">@Tgl(b.Tanggal)</td>
+                                        <td>@NamaPelanggan(b.IdPelanggan)</td>
+                                        <td class="c">@FormatAngka(b.Jumlah)</td>
+                                        <td>@Rp(b.Harga)</td>
+                                        <td>@Rp(b.Subtotal)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="r"><b>Total</b></td>
+                                    <td class="c"><b>@FormatAngka(g.TotalJumlah)</b></td>
+                                    <td></td>
+                                    <td>@Rp(g.Subtotal)</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </section>
+                }
+            }
+
+            <div class="doc-grand">
+                <span>Total Keseluruhan</span>
+                @Rp(totalNilai)
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    // =====================================================
+    // 1. STATE
+    // =====================================================
+    private static readonly CultureInfo IdCulture = new("id-ID");
+
+    private enum JenisLaporan { Penjualan, Pesanan }
+    private enum KelompokLaporan { Pelanggan, Menu }
+    private enum PresetPeriode { HariIni, TujuhHari, BulanIni, Kustom }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    // --- data ---
+    private List<LaporanKelompok> data = new();
+    private List<PelangganModels> daftarPelanggan = new();
+    private List<MenuMakananModels> daftarMenuMakanan = new();
+    private List<SatuanBahanBakuModels> daftarSatuan = new();
+
+    // --- halaman ---
+    private bool isLoading = true;
+    private string errorMaster = "";
+    private string errorLaporan = "";
+    private string teksCari = "";
+    private string namaPencetak = "";
+    private int permintaanKe;
+    private IJSObjectReference? modulCetak;
+
+    // --- filter ---
+    private JenisLaporan jenis = JenisLaporan.Pesanan;
+    private KelompokLaporan kelompok = KelompokLaporan.Pelanggan;
+    private PresetPeriode preset = PresetPeriode.TujuhHari;
+    private DateOnly dari;
+    private DateOnly sampai;
+    private string metode = "";
+    private string status = "";
+
+    private string PesanError => string.Join(" ",
+        new[] { errorMaster, errorLaporan }.Where(s => !string.IsNullOrEmpty(s)));
+
+    private void TutupError()
+    {
+        errorMaster = "";
+        errorLaporan = "";
+    }
+
+    // =====================================================
+    // 2. LIFECYCLE & MUAT DATA
+    // =====================================================
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState is not null)
+        {
+            var state = await AuthState;
+            namaPencetak = state.User.Identity?.Name ?? "";
+        }
+
+        AturPreset(PresetPeriode.TujuhHari);
+        await MuatMaster();
+        await MuatLaporan();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (modulCetak is null) return;
+
+        try { await modulCetak.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+
+    // Master dipakai untuk menampilkan nama dari kode
+    private async Task MuatMaster()
+    {
+        var galat = new List<string>();
+
+        try { daftarPelanggan = await PelangganService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat pelanggan: " + ex.Message); }
+
+        try { daftarMenuMakanan = await MenuMakananService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat menu makanan: " + ex.Message); }
+
+        try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+
+        errorMaster = string.Join(" ", galat);
+    }
+
+    private async Task MuatLaporan()
+    {
+        // permintaan lama yang masih berjalan dibatalkan hasilnya
+        var permintaan = ++permintaanKe;
+        errorLaporan = "";
+
+        if (dari > sampai)
+        {
+            errorLaporan = "Tanggal awal tidak boleh lebih besar dari tanggal akhir";
+            data = new();
+            isLoading = false;
+            return;
+        }
+
+        isLoading = true;
+
+        try
+        {
+            var (hasilApi, error) = await LaporanService.AmbilAsync(
+                jenis.ToString().ToLowerInvariant(),
+                kelompok.ToString().ToLowerInvariant(),
+                dari, sampai, metode, status);
+
+            if (permintaan != permintaanKe) return;
+
+            if (hasilApi is null)
+            {
+                errorLaporan = "Gagal memuat laporan: " + error;
+                data = new();
+            }
+            else
+            {
+                data = hasilApi;
+            }
+        }
+        catch (Exception ex)
+        {
+            if (permintaan != permintaanKe) return;
+            errorLaporan = "Gagal memuat laporan: " + ex.Message;
+            data = new();
+        }
+
+        isLoading = false;
+    }
+
+    // =====================================================
+    // 3. HELPER UMUM (format & lookup nama)
+    // =====================================================
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private static string Tgl(DateOnly d) => d.ToString("dd/MM/yyyy", IdCulture);
+
+    private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
+
+    private static string FormatRupiah(decimal v) => v.ToString("C0", IdCulture);
+
+    private static string Seg(bool aktif) => aktif ? "seg active" : "seg";
+
+    private static bool IsClose(string? s) => string.Equals(s, "Close", StringComparison.OrdinalIgnoreCase);
+
+    // "Rp" rata kiri dan angka rata kanan, seperti di Crystal Report
+    private RenderFragment Rp(decimal v) => @<div class="rp"><span>Rp</span><span>@FormatAngka(v)</span></div>;
+
+    private static string Inisial(string? nama)
+    {
+        var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length == 0 ? "?"
+             : p.Length == 1 ? p[0][..1].ToUpper()
+             : (p[0][..1] + p[^1][..1]).ToUpper();
+    }
+
+    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
+
+    private string NamaPelanggan(string? id)
+        => daftarPelanggan.FirstOrDefault(p => p.IdPelanggan == id)?.NamaPelanggan ?? (id ?? "-");
+
+    private string NamaMenu(string? id)
+        => daftarMenuMakanan.FirstOrDefault(m => m.IdMenu == id)?.NamaMenu ?? (id ?? "-");
+
+    private string NamaSatuan(string? id)
+        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
+
+    private string NamaKelompok(LaporanKelompok g)
+        => kelompok == KelompokLaporan.Pelanggan ? NamaPelanggan(g.Id) : NamaMenu(g.Id);
+
+    // =====================================================
+    // 4. TAMPILAN: PENCARIAN & URUTAN
+    // =====================================================
+    private List<LaporanKelompok> Tampil
+    {
+        get
+        {
+            var hasil = data.Where(g => string.IsNullOrWhiteSpace(teksCari)
+                || g.Id.Contains(teksCari, StringComparison.OrdinalIgnoreCase)
+                || NamaKelompok(g).Contains(teksCari, StringComparison.OrdinalIgnoreCase));
+
+            // Per menu: urut kode menu. Per pelanggan: urut nama pelanggan
+            // (urutan di dokumen cetak per pelanggan diatur terpisah oleh TransaksiUrut)
+            return kelompok == KelompokLaporan.Menu
+                ? hasil.OrderBy(g => g.Id, StringComparer.Ordinal).ToList()
+                : hasil.OrderBy(g => NamaKelompok(g)).ToList();
+        }
+    }
+
+    // =====================================================
+    // 5. FILTER: PERIODE & PILIHAN
+    // =====================================================
+    private void AturPreset(PresetPeriode p)
+    {
+        var hariIni = DateOnly.FromDateTime(DateTime.Today);
+        preset = p;
+
+        switch (p)
+        {
+            case PresetPeriode.HariIni:
+                dari = hariIni;
+                sampai = hariIni;
+                break;
+            case PresetPeriode.TujuhHari:
+                dari = hariIni.AddDays(-6);
+                sampai = hariIni;
+                break;
+            case PresetPeriode.BulanIni:
+                dari = new DateOnly(hariIni.Year, hariIni.Month, 1);
+                sampai = hariIni;
+                break;
+        }
+    }
+
+    private async Task PilihPreset(PresetPeriode p)
+    {
+        AturPreset(p);
+        await MuatLaporan();
+    }
+
+    private async Task PilihJenis(JenisLaporan j)
+    {
+        if (jenis == j) return;
+
+        jenis = j;
+        if (j == JenisLaporan.Penjualan) status = "";   // penjualan selalu berstatus Close
+        await MuatLaporan();
+    }
+
+    private async Task PilihKelompok(KelompokLaporan k)
+    {
+        if (kelompok == k) return;
+
+        kelompok = k;
+        teksCari = "";
+        await MuatLaporan();
+    }
+
+    private async Task UbahDari(ChangeEventArgs e)
+    {
+        if (!DateOnly.TryParseExact(e.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tgl)) return;
+
+        dari = tgl;
+        preset = PresetPeriode.Kustom;
+        await MuatLaporan();
+    }
+
+    private async Task UbahSampai(ChangeEventArgs e)
+    {
+        if (!DateOnly.TryParseExact(e.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tgl)) return;
+
+        sampai = tgl;
+        preset = PresetPeriode.Kustom;
+        await MuatLaporan();
+    }
+
+    private async Task UbahMetode(ChangeEventArgs e)
+    {
+        metode = e.Value?.ToString() ?? "";
+        await MuatLaporan();
+    }
+
+    private async Task UbahStatus(ChangeEventArgs e)
+    {
+        status = e.Value?.ToString() ?? "";
+        await MuatLaporan();
+    }
+
+    // =====================================================
+    // 6. DOKUMEN CETAK
+    // =====================================================
+    private string NamaUsaha => Config["Usaha:Nama"] ?? "";
+
+    private string AlamatUsaha => Config["Usaha:Alamat"] ?? "";
+
+    private string JudulLaporan
+        => $"Laporan {(jenis == JenisLaporan.Penjualan ? "Penjualan" : "Pesanan Penjualan")} per {(kelompok == KelompokLaporan.Pelanggan ? "Pelanggan" : "Menu")}";
+
+    // Judul ini juga menjadi nama file bawaan saat disimpan sebagai PDF
+    private string JudulDokumen => $"{JudulLaporan} {Iso(dari)} sd {Iso(sampai)}";
+
+    private async Task Cetak()
+    {
+        modulCetak ??= await JS.InvokeAsync<IJSObjectReference>("import", "/js/cetak.js");
+        await modulCetak.InvokeVoidAsync("cetakElemen", "dokumen-cetak", JudulDokumen);
+    }
+
+    // Dokumen cetak per pelanggan: satu blok per transaksi, urut nomor pesanan/penjualan
+    private IEnumerable<(string IdPelanggan, string Nama, List<LaporanBaris> Baris)> TransaksiUrut(List<LaporanKelompok> kelompokTampil)
+        => kelompokTampil
+            .SelectMany(g => g.Baris
+                .GroupBy(b => b.IdTransaksi)
+                .Select(t => (IdPelanggan: g.Id, Nama: NamaKelompok(g), Baris: t.ToList())))
+            .OrderBy(x => x.Baris[0].IdTransaksi, StringComparer.Ordinal);
+}
