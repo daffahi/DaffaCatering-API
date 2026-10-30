@@ -108,7 +108,10 @@
                                     </span>
                                 </td>
                                 <td class="actions">
-                                    <button class="icon-btn" title="Edit" @onclick="() => BukaModalEdit(item)">
+                                    <button class="icon-btn"
+                                            title="@(IsClose(item) ? "Penjualan sudah ditutup" : "Edit")"
+                                            disabled="@IsClose(item)"
+                                            @onclick="() => BukaModalEdit(item)">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
                                 </td>
