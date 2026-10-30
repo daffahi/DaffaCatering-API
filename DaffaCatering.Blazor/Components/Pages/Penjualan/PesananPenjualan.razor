@@ -1,7 +1,10 @@
 ﻿@page "/pesanan-penjualan"
 @attribute [Authorize(Roles = AppRoles.AdminPenjualan)]
+@implements IAsyncDisposable
 
 @using System.Globalization
+@inject IConfiguration Config
+@inject IJSRuntime JS
 @inject PesananPenjualanService PesananPenjualanService
 @inject PelangganService PelangganService
 @inject MenuMakananService MenuMakananService
@@ -112,6 +115,11 @@
                                             disabled="@tutup"
                                             @onclick="() => BukaModalEdit(item)">
                                         <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="icon-btn" title="Cetak bukti pesanan"
+                                            disabled="@sedangCetak"
+                                            @onclick="() => CetakBukti(item)">
+                                        <i class="fa-solid fa-print"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -479,6 +487,117 @@
         </div>
     }
 
+    @* ================= 8. BUKTI PESANAN CETAK ================= *@
+    @if (buktiCetak is not null)
+    {
+        var b = buktiCetak;
+        var nomor = 0;
+
+        <div id="bukti-cetak" class="bukti">
+
+            <header class="bukti-kop">
+                <img src="images/logo.png" class="bukti-logo" alt="" onerror="this.style.display='none'" />
+                <div class="bukti-judul">
+                    <h1>Bukti Pesanan Penjualan</h1>
+                    <div class="bukti-usaha">@NamaUsaha</div>
+                    <div class="bukti-alamat">@AlamatUsaha</div>
+                </div>
+                <div></div>
+            </header>
+
+            <hr class="bukti-garis" />
+
+            <div class="bukti-meta">
+                <span>Dicetak oleh: <b>@namaPencetak</b></span>
+                <span>Tanggal Cetak: <b>@Tgl(HariIni)</b></span>
+            </div>
+
+            <div class="bukti-info">
+                <table>
+                    <tr>
+                        <th>Kode Pelanggan</th>
+                        <td class="sep">:</td>
+                        <td class="isi">@b.IdPelanggan</td>
+                    </tr>
+                    <tr>
+                        <th>Nama Pelanggan</th>
+                        <td class="sep">:</td>
+                        <td class="isi">@NamaPelanggan(b.IdPelanggan)</td>
+                    </tr>
+                    <tr>
+                        <th>Uang Muka</th>
+                        <td class="sep">:</td>
+                        <td class="isi">Rp @FormatAngka(b.UangMuka)</td>
+                    </tr>
+                    <tr>
+                        <th>Keterangan</th>
+                        <td class="sep">:</td>
+                        <td class="isi">@(string.IsNullOrWhiteSpace(b.Keterangan) ? "-" : b.Keterangan)</td>
+                    </tr>
+                </table>
+
+                <table>
+                    <tr>
+                        <th>No. Pesanan</th>
+                        <td class="sep">:</td>
+                        <td class="isi">@b.IdPesanan</td>
+                    </tr>
+                    <tr>
+                        <th>Tgl Pesanan</th>
+                        <td class="sep">:</td>
+                        <td class="isi">@Tgl(b.TglPesanan)</td>
+                    </tr>
+                    <tr>
+                        <th>Tgl Pengambilan</th>
+                        <td class="sep">:</td>
+                        <td class="isi">@Tgl(b.TglPengambilan)</td>
+                    </tr>
+                    <tr>
+                        <th>Pembayaran</th>
+                        <td class="sep">:</td>
+                        <td class="isi">@(string.IsNullOrWhiteSpace(b.MetodePembayaran) ? "-" : b.MetodePembayaran)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <table class="bukti-tabel">
+                <colgroup>
+                    <col style="width:44px" />
+                    <col style="width:120px" />
+                    <col />
+                    <col style="width:90px" />
+                    <col style="width:100px" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Kode Menu</th>
+                        <th>Nama Menu</th>
+                        <th>Jumlah</th>
+                        <th>Satuan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in b.Details)
+                    {
+                        <tr>
+                            <td class="c">@(++nomor)</td>
+                            <td class="c">@d.IdMenu</td>
+                            <td>@NamaMenuMakanan(d.IdMenu)</td>
+                            <td class="c">@FormatAngka(d.Jumlah)</td>
+                            <td class="c">@NamaSatuan(d.IdSatuan)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="bukti-ttd">
+                <div><p>Penerima</p><div class="garis"></div></div>
+                <div><p>Hormat kami</p><div class="garis"></div></div>
+            </div>
+        </div>
+    }
+
 </div>
 
 @code {
@@ -553,6 +672,9 @@
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
+        if (AuthState is not null)
+            namaPencetak = (await AuthState).User.Identity?.Name ?? "";
+
         await MuatData();
     }
 
@@ -1050,5 +1172,72 @@
         {
             sedangSimpan = false;
         }
+    }
+
+    // =====================================================
+    // 10. BUKTI PESANAN (CETAK)
+    // =====================================================
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    private PesananPenjualanModels? buktiCetak;
+    private bool perluCetak;
+    private bool sedangCetak;
+    private string namaPencetak = "";
+    private IJSObjectReference? modulCetak;
+
+    private string NamaUsaha => Config["Usaha:Nama"] ?? "";
+
+    private string AlamatUsaha => Config["Usaha:Alamat"] ?? "";
+
+    private static string Tgl(DateOnly d) => d.ToString("dd/MM/yyyy", IdCulture);
+
+    private async Task CetakBukti(PesananPenjualanModels item)
+    {
+        pesanError = "";
+        sedangCetak = true;
+
+        try
+        {
+            // Daftar pesanan bisa saja tidak membawa detail, jadi ambil data lengkap per ID
+            var lengkap = item;
+            if (item.Details == null || !item.Details.Any())
+                lengkap = await PesananPenjualanService.GetByIdAsync(item.IdPesanan) ?? item;
+
+            if (lengkap.Details == null || !lengkap.Details.Any())
+            {
+                pesanError = $"Pesanan {item.IdPesanan} tidak memiliki detail menu";
+                return;
+            }
+
+            buktiCetak = lengkap;
+            perluCetak = true;   // dicetak di OnAfterRenderAsync, setelah bukti ada di DOM
+        }
+        catch (Exception ex)
+        {
+            pesanError = "Gagal menyiapkan bukti pesanan: " + ex.Message;
+        }
+        finally
+        {
+            sedangCetak = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!perluCetak || buktiCetak is null) return;
+        perluCetak = false;
+
+        // Judul ini juga menjadi nama file bawaan saat disimpan sebagai PDF
+        modulCetak ??= await JS.InvokeAsync<IJSObjectReference>("import", "/js/cetak.js");
+        await modulCetak.InvokeVoidAsync("cetakElemen", "bukti-cetak", $"Bukti Pesanan Penjualan {buktiCetak.IdPesanan}");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (modulCetak is null) return;
+
+        try { await modulCetak.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
     }
 }
