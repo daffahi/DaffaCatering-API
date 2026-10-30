@@ -18,12 +18,12 @@
     padding-bottom: 2rem;
 }
 
-.pembelian-page button,
-.pembelian-page input,
-.pembelian-page select,
-.pembelian-page textarea {
-    font-family: inherit;
-}
+    .penjualan-page button,
+    .penjualan-page input,
+    .penjualan-page select,
+    .penjualan-page textarea {
+        font-family: inherit;
+    }
 
 /* =====================================================
    2. HEADER HALAMAN (judul + tombol tambah)
@@ -231,7 +231,7 @@ tbody tr {
     }
 }
 
-/* ---------- Kolom pembelian (avatar + nomor) ---------- */
+/* ---------- Kolom penjualan (avatar + nomor) ---------- */
 .who {
     display: flex;
     align-items: center;
@@ -606,7 +606,7 @@ tbody tr {
     color: var(--muted);
 }
 
-/* ---------- Pilih pemasok / bahan baku (input + tombol cari) ---------- */
+/* ---------- Pilih pelanggan / pesanan / menu (input + tombol cari) ---------- */
 .pick-row {
     display: flex;
     gap: .5rem;
@@ -766,7 +766,7 @@ tbody tr {
         color: var(--brand-800);
     }
 
-/* ---------- Modal cari: tabel pemasok & bahan baku ---------- */
+/* ---------- Modal cari: tabel pesanan, pelanggan & menu ---------- */
 .batch-toolbar {
     display: flex;
     align-items: center;
@@ -881,3 +881,251 @@ tbody tr {
         margin-bottom: .75rem;
     }
 }
+
+/* =====================================================
+   12. FAKTUR CETAK (gaya Crystal Report)
+   ===================================================== */
+@media screen {
+    .faktur {
+        display: none;
+    }
+}
+
+/* ---------- Reset: lepas style tabel halaman utama ----------
+   Penyebab faktur kosong: aturan "tbody tr { opacity: 0; animation: rise }"
+   di atas ikut mengenai tabel faktur, lalu saat cetak animasinya tidak
+   pernah berjalan sehingga semua baris tetap transparan. */
+.faktur,
+.faktur * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+    .faktur tr {
+        opacity: 1 !important;
+        animation: none !important;
+        transform: none !important;
+        transition: none;
+        background: transparent;
+    }
+
+    .faktur th,
+    .faktur td {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+        font-size: inherit;
+        letter-spacing: normal;
+        text-transform: none;
+        color: #000;
+        white-space: normal;
+    }
+
+.faktur {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 12px;
+    color: #000;
+    background: #fff;
+    width: 100%;
+}
+
+/* ---------- Kop ---------- */
+.faktur-kop {
+    display: grid;
+    grid-template-columns: 80px 1fr 80px;
+    align-items: center;
+    gap: 8px;
+}
+
+.faktur-logo {
+    width: 76px;
+    height: 76px;
+    object-fit: contain;
+}
+
+.faktur-judul {
+    text-align: center;
+}
+
+    .faktur-judul h1 {
+        margin: 0;
+        font-family: 'Merriweather Sans', sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #135846;
+    }
+
+.faktur-usaha {
+    margin-top: 6px;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.faktur-alamat {
+    font-size: 12px;
+}
+
+.faktur-garis {
+    margin: 8px 0 12px;
+    border: 0;
+    border-top: 3px solid #000;
+}
+
+/* ---------- Dicetak oleh / Tanggal cetak ---------- */
+.faktur-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 18px;
+}
+
+/* ---------- Info pelanggan (kiri) & penjualan (kanan) ---------- */
+.faktur-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 20px;
+}
+
+    .faktur-info table {
+        width: auto;
+        border-collapse: collapse;
+    }
+
+    .faktur-info th {
+        padding: 5px 0;
+        text-align: left;
+        font-weight: 700;
+        white-space: nowrap;
+        vertical-align: top;
+    }
+
+    .faktur-info td {
+        padding: 5px 0;
+        vertical-align: top;
+    }
+
+        .faktur-info td.sep {
+            width: 24px;
+            padding: 5px 10px;
+            text-align: center;
+        }
+
+/* ---------- Tabel menu (garis tebal penuh) ---------- */
+.faktur-tabel {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border: 2px solid #000;
+}
+
+    .faktur-tabel thead {
+        display: table-header-group;
+    }
+
+    .faktur-tabel th,
+    .faktur-tabel td {
+        padding: 9px 8px;
+        border: 2px solid #000;
+        vertical-align: middle;
+        overflow-wrap: anywhere;
+    }
+
+    .faktur-tabel th {
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .faktur-tabel tr {
+        break-inside: avoid;
+    }
+
+    .faktur-tabel .c {
+        text-align: center;
+    }
+
+/* "Rp" di kiri, angka di kanan */
+.rp {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* ---------- Terbilang & ringkasan ---------- */
+.faktur-bawah {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-top: 14px;
+    break-inside: avoid;
+}
+
+.faktur-terbilang {
+    flex: 1;
+    padding-top: 6px;
+}
+
+    .faktur-terbilang span {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 11px;
+        color: #555;
+    }
+
+    .faktur-terbilang i {
+        font-size: 13px;
+    }
+
+.faktur-ringkas {
+    width: 300px;
+    border-collapse: collapse;
+}
+
+    .faktur-ringkas th {
+        width: 50%;
+        padding: 5px 0;
+        text-align: right;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+        .faktur-ringkas th::after {
+            content: "\00a0:";
+        }
+
+    .faktur-ringkas td {
+        padding: 5px 0 5px 12px;
+    }
+
+    .faktur-ringkas tr.akhir th,
+    .faktur-ringkas tr.akhir td {
+        font-weight: 700;
+    }
+
+/* ---------- Tanda tangan ---------- */
+.faktur-ttd {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 36px;
+    padding: 0 24px;
+    break-inside: avoid;
+}
+
+    .faktur-ttd > div {
+        width: 170px;
+        text-align: center;
+    }
+
+    .faktur-ttd p {
+        margin: 0;
+    }
+
+    .faktur-ttd .garis {
+        margin-top: 64px;
+        border-top: 1px solid #000;
+    }
