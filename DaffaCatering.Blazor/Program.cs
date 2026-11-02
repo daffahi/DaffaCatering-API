@@ -53,6 +53,7 @@ builder.Services.AddScoped<PenyesuaianBahanBakuService>();
 
 // LAPORAN //
 builder.Services.AddScoped<LaporanPenjualanService>();
+builder.Services.AddScoped<LaporanPembelianService>();
 
 var cultureInfo = new CultureInfo("id-ID");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
