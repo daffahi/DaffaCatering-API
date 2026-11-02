@@ -1,6 +1,5 @@
 ﻿using DaffaCatering.API.Constants;
 using DaffaCatering.API.Data;
-using DaffaCatering.API.DTOs.MasterPelanggan;
 using DaffaCatering.API.DTOs.MasterPemasok;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +27,7 @@ namespace DaffaCatering.API.Controllers.MasterPemasok
             if (status != "semua" && status != "aktif" && status != "nonaktif")
                 return BadRequest("Filter status tidak valid");
 
-            var query = _context.Pelanggans.AsNoTracking();
+            var query = _context.Pemasoks.AsNoTracking();
 
             if (status == "aktif")
                 query = query.Where(p => p.Status);
