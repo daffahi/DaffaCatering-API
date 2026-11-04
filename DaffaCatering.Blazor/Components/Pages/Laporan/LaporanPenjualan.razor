@@ -28,7 +28,7 @@
             <h1>Laporan Penjualan</h1>
             <p>Rekap penjualan dan pesanan penjualan per periode</p>
         </div>
-        <button class="btn-ghost" disabled="@(isLoading || tampil.Count == 0)" @onclick="Cetak">
+        <button class="btn-cetak" disabled="@(isLoading || tampil.Count == 0)" @onclick="Cetak">
             <i class="fa-solid fa-print"></i> Cetak
         </button>
     </header>
