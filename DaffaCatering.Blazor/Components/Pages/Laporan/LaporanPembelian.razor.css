@@ -51,27 +51,34 @@
         color: var(--muted);
     }
 
-.btn-ghost {
+.btn-cetak {
     display: inline-flex;
     align-items: center;
     gap: .55rem;
-    padding: .7rem 1.3rem;
-    border: 1px solid #d9d5cb;
-    border-radius: 12px;
-    background: #fff;
-    color: var(--ink);
-    font-weight: 600;
+    border: 0;
     cursor: pointer;
-    transition: background .15s ease;
+    padding: .7rem 1.3rem;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--brand-800);
+    box-shadow: 0 8px 16px -8px rgba(19, 88, 70, .6);
+    transition: background .15s ease, transform .15s ease;
 }
 
-    .btn-ghost:hover {
-        background: #f6f3ec;
+    .btn-cetak:hover {
+        background: var(--brand-950);
+        transform: translateY(-1px);
     }
 
-    .btn-ghost:disabled {
+    .btn-cetak:active {
+        transform: translateY(0);
+    }
+
+    .btn-cetak:disabled {
         opacity: .55;
         cursor: not-allowed;
+        transform: none;
     }
 
 /* =====================================================
