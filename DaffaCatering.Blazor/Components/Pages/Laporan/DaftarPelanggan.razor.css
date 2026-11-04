@@ -1,4 +1,3 @@
-/* CSS for Daftar Pelanggan component */
 /* =====================================================
    1. VARIABEL & WRAPPER HALAMAN
    ===================================================== */
@@ -51,27 +50,34 @@
         color: var(--muted);
     }
 
-.btn-ghost {
+.btn-add {
     display: inline-flex;
     align-items: center;
     gap: .55rem;
-    padding: .7rem 1.3rem;
-    border: 1px solid #d9d5cb;
-    border-radius: 12px;
-    background: #fff;
-    color: var(--ink);
-    font-weight: 600;
+    border: 0;
     cursor: pointer;
-    transition: background .15s ease;
+    padding: .7rem 1.3rem;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--brand-800);
+    box-shadow: 0 8px 16px -8px rgba(19, 88, 70, .6);
+    transition: background .15s ease, transform .15s ease;
 }
 
-    .btn-ghost:hover {
-        background: #f6f3ec;
+    .btn-add:hover {
+        background: var(--brand-950);
+        transform: translateY(-1px);
     }
 
-    .btn-ghost:disabled {
+    .btn-add:active {
+        transform: translateY(0);
+    }
+
+    .btn-add:disabled {
         opacity: .55;
         cursor: not-allowed;
+        transform: none;
     }
 
 /* =====================================================
@@ -107,11 +113,13 @@
     }
 
 /* =====================================================
-   4. FILTER LAPORAN
+   4. TOOLBAR: SEARCH + FILTER STATUS
    ===================================================== */
-.filter-card {
-    display: grid;
+.toolbar-card {
+    display: flex;
+    align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
     margin-top: 1.25rem;
     padding: 1rem 1.25rem;
     background: var(--surface);
@@ -120,51 +128,18 @@
     box-shadow: 0 10px 30px -18px rgba(29, 43, 37, .35);
 }
 
-.filter-row {
+.toolbar-right {
     display: flex;
+    align-items: center;
+    gap: .6rem;
     flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 1rem 1.5rem;
 }
-
-/* ---------- Satu grup filter (label kecil + kontrol) ---------- */
-.fg {
-    display: grid;
-    gap: .35rem;
-    margin: 0;
-}
-
-.fl {
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--muted);
-}
-
-.fg input[type="date"],
-.fg select {
-    height: 2.75rem;
-    padding: 0 .8rem;
-    border: 1px solid #d9d5cb;
-    border-radius: 8px;
-    background: #fff;
-    font: inherit;
-    font-size: .9rem;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-}
-
-    .fg input[type="date"]:focus,
-    .fg select:focus {
-        border-color: var(--brand-600);
-        box-shadow: 0 0 0 3px rgba(34, 160, 107, .18);
-    }
 
 /* ---------- Search ---------- */
 .search {
     font-size: 16px;
     position: relative;
+    flex: 1;
     min-width: 240px;
     margin: 0;
 }
@@ -192,7 +167,7 @@
             box-shadow: 0 0 0 4px rgba(34, 160, 107, .15);
         }
 
-/* ---------- Pilihan segmented ---------- */
+/* ---------- Filter status (Semua / Aktif / Tidak Aktif) ---------- */
 .segmented {
     font-family: 'Roboto', sans-serif;
     font-size: 16px;
@@ -215,9 +190,15 @@
     font-weight: 600;
     color: var(--muted);
     cursor: pointer;
-    white-space: nowrap;
     transition: all .15s ease;
 }
+
+    .seg span {
+        font-size: .72rem;
+        padding: .05rem .45rem;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, .06);
+    }
 
     .seg:hover {
         color: var(--ink);
@@ -229,59 +210,12 @@
         box-shadow: 0 4px 10px rgba(19, 88, 70, .35);
     }
 
-/* =====================================================
-   5. KARTU RINGKASAN (sama dengan kartu di Dashboard)
-   ===================================================== */
-.dashboard-cards {
-    display: flex;
-    gap: 16px;
-    width: 100%;
-    flex-wrap: wrap;
-    margin-top: 1.25rem;
-}
-
-.dashboard-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex: 1;
-    width: 250px;
-    padding: 18px 20px;
-    background: white;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-}
-
-.card-icon {
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: #344E41;
-    color: #DAD7CD;
-}
-
-.card-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.card-title {
-    font-family: 'Merriweather Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.card-subtitle {
-    font-family: 'Roboto', sans-serif;
-    font-size: 12px;
-    color: #888;
-}
+        .seg.active span {
+            background: rgba(255, 255, 255, .22);
+        }
 
 /* =====================================================
-   6. PANEL TABEL
+   5. PANEL TABEL
    ===================================================== */
 .panel {
     margin-top: 1.25rem;
@@ -296,61 +230,60 @@
     overflow-x: auto;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+    .table-wrap table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* ---------- Header tabel ---------- */
+    .table-wrap thead th {
+        text-align: left;
+        padding: .8rem 1.25rem;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        background: #fcfbf8;
+        white-space: nowrap;
+    }
+
+    /* ---------- Baris tabel ---------- */
+    .table-wrap tbody td {
+        padding: .85rem 1.25rem;
+        border-top: 1px solid var(--line);
+        vertical-align: middle;
+        background: transparent;
+    }
+
+    .table-wrap tbody tr {
+        opacity: 0;
+        animation: rise .4s ease forwards;
+        animation-delay: calc(var(--i) * 35ms);
+        transition: background .15s;
+    }
+
+        .table-wrap tbody tr:hover {
+            background: var(--brand-50);
+        }
+
+            .table-wrap tbody tr:hover td:first-child {
+                box-shadow: inset 3px 0 0 var(--brand-500);
+            }
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
-/* ---------- Header tabel ---------- */
-thead th {
-    text-align: left;
-    padding: .8rem 1.25rem;
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: #fcfbf8;
-    white-space: nowrap;
-}
-
-.num {
-    text-align: right;
-}
-
-/* ---------- Kepala kelompok (pelanggan / menu) ---------- */
-.grp-head td {
-    padding: .7rem 1.25rem;
-    border-top: 1px solid var(--line);
-    background: #fcfbf8;
-}
-
-tbody + tbody .grp-head td {
-    border-top-width: 2px;
-}
-
-/* ---------- Baris transaksi ---------- */
-.row-trx td {
-    padding: .6rem 1.25rem;
-    border-top: 1px solid var(--line);
-    vertical-align: middle;
-    font-size: .9rem;
-}
-
-.row-trx:hover {
-    background: var(--brand-50);
-}
-
-/* ---------- Subtotal kelompok ---------- */
-.grp-total td {
-    padding: .65rem 1.25rem;
-    border-top: 1px solid var(--line);
-    background: var(--brand-50);
-    font-weight: 700;
-    font-size: .9rem;
-}
-
-/* ---------- Kolom kelompok (avatar + nama + kode) ---------- */
+/* ---------- Kolom pelanggan (avatar + nama + ID) ---------- */
 .who {
     display: flex;
     align-items: center;
@@ -365,6 +298,11 @@ tbody + tbody .grp-head td {
     font-size: .75rem;
     color: var(--muted);
     letter-spacing: .03em;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: .9rem;
 }
 
 .mono {
@@ -426,18 +364,18 @@ tbody + tbody .grp-head td {
         background: currentColor;
     }
 
-    .pill.closed {
+    .pill.on {
         background: var(--brand-100);
         color: var(--brand-800);
     }
 
-    .pill.pending {
-        background: #fbecc9;
-        color: #8a5a06;
+    .pill.off {
+        background: #f1eee8;
+        color: #857f72;
     }
 
 /* =====================================================
-   7. EMPTY STATE, FOOTER PANEL, SKELETON
+   6. EMPTY STATE, FOOTER PANEL, SKELETON
    ===================================================== */
 .empty {
     display: grid;
@@ -445,7 +383,6 @@ tbody + tbody .grp-head td {
     gap: .3rem;
     padding: 3rem 1rem;
     color: var(--muted);
-    text-align: center;
 }
 
     .empty i {
@@ -458,20 +395,12 @@ tbody + tbody .grp-head td {
     }
 
 .panel-foot {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: .5rem;
     padding: .8rem 1.25rem;
     border-top: 1px solid var(--line);
     font-size: .82rem;
     color: var(--muted);
     background: #fcfbf8;
 }
-
-    .panel-foot b {
-        color: var(--ink);
-    }
 
 .skeleton {
     padding: .5rem 1.25rem 1rem;
@@ -528,7 +457,7 @@ tbody + tbody .grp-head td {
 }
 
 /* =====================================================
-   8. DOKUMEN CETAK
+   7. DOKUMEN CETAK
    ===================================================== */
 @media screen {
     .doc {
@@ -594,32 +523,9 @@ tbody + tbody .grp-head td {
     margin-bottom: 4px;
 }
 
-/* ---------- Blok per transaksi / per menu ---------- */
 .doc-blok {
     margin-top: 14px;
-    break-inside: avoid;
 }
-
-.doc-info {
-    margin-bottom: 8px;
-    border-collapse: collapse;
-}
-
-    .doc-info th {
-        width: 120px;
-        padding: 3px 0;
-        text-align: left;
-        font-weight: 700;
-    }
-
-    .doc-info td {
-        padding: 3px 14px 3px 0;
-    }
-
-    .doc-info .sep {
-        width: 16px;
-        padding-right: 0;
-    }
 
 /* ---------- Tabel bergaris ---------- */
 .doc-tabel {
@@ -651,47 +557,31 @@ tbody + tbody .grp-head td {
         text-align: center;
     }
 
-    .doc-tabel .r {
-        text-align: right;
-    }
-
-/* "Rp" di kiri, angka di kanan */
-.rp {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.doc-grand {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    width: 280px;
-    margin: 14px 0 0 auto;
-    padding: 7px 8px;
-    border: 1.5px solid #000;
-    font-weight: 700;
-    break-inside: avoid;
-}
-
-    .doc-grand .rp {
-        min-width: 120px;
-    }
-
 /* =====================================================
-   9. RESPONSIVE & ACCESSIBILITY
+   8. RESPONSIVE & ACCESSIBILITY
    ===================================================== */
+@media (max-width: 1000px) {
+    .col-addr {
+        display: none;
+    }
+}
+
 @media (max-width: 720px) {
+    .col-date {
+        display: none;
+    }
+
     .page-head h1 {
         font-size: 1.5rem;
-    }
-
-    .filter-row {
-        gap: .75rem 1rem;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .table-wrap tbody tr {
+        animation: none;
+        opacity: 1;
+    }
+
     .sk-avatar, .sk-lines div {
         animation: none;
     }
