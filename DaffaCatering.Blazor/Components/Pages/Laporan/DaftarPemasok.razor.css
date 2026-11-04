@@ -50,7 +50,7 @@
         color: var(--muted);
     }
 
-.btn-add {
+.btn-cetak {
     display: inline-flex;
     align-items: center;
     gap: .55rem;
@@ -65,16 +65,16 @@
     transition: background .15s ease, transform .15s ease;
 }
 
-    .btn-add:hover {
+    .btn-cetak:hover {
         background: var(--brand-950);
         transform: translateY(-1px);
     }
 
-    .btn-add:active {
+    .btn-cetak:active {
         transform: translateY(0);
     }
 
-    .btn-add:disabled {
+    .btn-cetak:disabled {
         opacity: .55;
         cursor: not-allowed;
         transform: none;

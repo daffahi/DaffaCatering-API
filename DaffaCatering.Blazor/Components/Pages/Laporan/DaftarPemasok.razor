@@ -21,7 +21,7 @@
             <h1>Daftar Pemasok</h1>
             <p>Rekap data pemasok beserta status keaktifannya</p>
         </div>
-        <button class="btn-add" disabled="@(isLoading || view.Count == 0)" @onclick="Cetak">
+        <button class="btn-cetak" disabled="@(isLoading || view.Count == 0)" @onclick="Cetak">
             <i class="fa-solid fa-print"></i> Cetak
         </button>
     </header>
