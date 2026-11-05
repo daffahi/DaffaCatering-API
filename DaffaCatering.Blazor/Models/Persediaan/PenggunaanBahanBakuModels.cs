@@ -2,7 +2,7 @@
 
 namespace DaffaCatering.Blazor.Models.Persediaan
 {
-    public class PenggunaanModels
+    public class PenggunaanBahanBakuModels
     {
         [Required(ErrorMessage = "No. Penggunaan wajib diisi")]
         [StringLength(10)]
@@ -10,10 +10,10 @@ namespace DaffaCatering.Blazor.Models.Persediaan
 
         public DateOnly TglPenggunaan { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-        public List<DetailPenggunaanModel> Details { get; set; } = new();
+        public List<DetailPenggunaanBahanBakuModel> Details { get; set; } = new();
     }
 
-    public class DetailPenggunaanModel
+    public class DetailPenggunaanBahanBakuModel
     {
         public string IdBahanBaku { get; set; } = "";
 
