@@ -1,10 +1,10 @@
 ﻿namespace DaffaCatering.Blazor.Models.Persediaan
 {
-    public class LaporanStokBahanBakuModels
+    public class LaporanPersediaanModels
     {
     }
 
-    public class LaporanStokBahanBakuKelompok
+    public class LaporanPersediaanKelompok
     {
         public string Id { get; set; } = "";
         public string? IdSatuan { get; set; }
@@ -13,10 +13,10 @@
         public decimal TotalKeluar { get; set; }
         public decimal StokAkhir { get; set; }
         public int JumlahTransaksi { get; set; }
-        public List<LaporanStokBahanBakuBaris> Baris { get; set; } = new();
+        public List<LaporanPersediaanBaris> Baris { get; set; } = new();
     }
 
-    public class LaporanStokBahanBakuBaris
+    public class LaporanPersediaanBaris
     {
         public string IdTransaksi { get; set; } = "";
         public DateOnly Tanggal { get; set; }

@@ -4,28 +4,28 @@ using DaffaCatering.API.DTOs.Persediaan;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static DaffaCatering.API.DTOs.Persediaan.LaporanStokBahanBakuDto;
+using static DaffaCatering.API.DTOs.Persediaan.LaporanPersediaanDto;
 
 namespace DaffaCatering.API.Controllers.Persediaan
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = AppRoles.AdminPersediaan)]
-    public class LaporanStokBahanBakuController : ControllerBase
+    public class LaporanPersediaanController : ControllerBase
     {
         private readonly DaffaCateringContext _context;
 
         // hanya penerimaan dengan statusBahanBaku = 'False' yang menambah stok
         private const string StatusPenerimaanMasuk = "False";
 
-        public LaporanStokBahanBakuController(DaffaCateringContext context)
+        public LaporanPersediaanController(DaffaCateringContext context)
         {
             _context = context;
         }
 
         // jenis: stok | kadaluwarsa | penggunaan | penyesuaian
         // dari & sampai kosong = semua periode
-        [HttpGet]
+        [HttpGet] // Stok bahan baku (kartu stok per bahan baku)
         public async Task<IActionResult> Get(
             [FromQuery] string jenis,
             [FromQuery] DateOnly? dari,
@@ -65,7 +65,7 @@ namespace DaffaCatering.API.Controllers.Persediaan
             public decimal Keluar { get; set; }
         }
 
-        private async Task<List<LaporanStokBahanBakuKelompokDto>> LaporanStok(DateOnly? dari, DateOnly? sampai)
+        private async Task<List<LaporanPersediaanKelompokDto>> LaporanStok(DateOnly? dari, DateOnly? sampai)
         {
             // 1. Stok awal & satuan per bahan baku (jumlah stokAwal seluruh batch)
             var bahanBaku = await _context.DetailBahanBakus.AsNoTracking()
@@ -175,7 +175,7 @@ namespace DaffaCatering.API.Controllers.Persediaan
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             // 6. Susun kartu stok per bahan baku
-            var hasil = new List<LaporanStokBahanBakuKelompokDto>();
+            var hasil = new List<LaporanPersediaanKelompokDto>();
 
             foreach (var b in bahanBaku.OrderBy(b => b.IdBahanBaku, StringComparer.Ordinal))
             {
@@ -201,7 +201,7 @@ namespace DaffaCatering.API.Controllers.Persediaan
                 // Dengan filter periode, hanya bahan baku yang bergerak yang ditampilkan
                 if (dari.HasValue && dalamPeriode.Count == 0) continue;
 
-                var kelompok = new LaporanStokBahanBakuKelompokDto
+                var kelompok = new LaporanPersediaanKelompokDto
                 {
                     Id = b.IdBahanBaku,
                     IdSatuan = b.IdSatuan,
@@ -213,7 +213,7 @@ namespace DaffaCatering.API.Controllers.Persediaan
                 {
                     saldo += g.Masuk - g.Keluar;
 
-                    kelompok.Baris.Add(new LaporanStokBahanBakuBarisDto
+                    kelompok.Baris.Add(new LaporanPersediaanBarisDto
                     {
                         IdTransaksi = g.IdUrut,
                         Tanggal = g.Tanggal,

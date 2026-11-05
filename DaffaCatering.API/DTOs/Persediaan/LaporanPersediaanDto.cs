@@ -1,8 +1,8 @@
 ﻿namespace DaffaCatering.API.DTOs.Persediaan
 {
-    public class LaporanStokBahanBakuDto
+    public class LaporanPersediaanDto
     {
-        public class LaporanStokBahanBakuKelompokDto
+        public class LaporanPersediaanKelompokDto
         {
             public string Id { get; set; } = string.Empty;          // IdBahanBaku
             public string? IdSatuan { get; set; }
@@ -11,10 +11,10 @@
             public decimal TotalKeluar { get; set; }
             public decimal StokAkhir { get; set; }
             public int JumlahTransaksi { get; set; }
-            public List<LaporanStokBahanBakuBarisDto> Baris { get; set; } = new();
+            public List<LaporanPersediaanBarisDto> Baris { get; set; } = new();
         }
 
-        public class LaporanStokBahanBakuBarisDto
+        public class LaporanPersediaanBarisDto
         {
             public string IdTransaksi { get; set; } = string.Empty;
             public DateOnly Tanggal { get; set; }

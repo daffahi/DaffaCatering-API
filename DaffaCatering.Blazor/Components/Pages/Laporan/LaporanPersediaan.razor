@@ -5,7 +5,7 @@
 @using System.Globalization
 @using DaffaCatering.Blazor.Models.Persediaan
 @using DaffaCatering.Blazor.Services.Persediaan
-@inject LaporanStokBahanBakuService LaporanService
+@inject LaporanPersediaanService LaporanService
 @inject BahanBakuService BahanBakuService
 @inject SatuanBahanBakuService SatuanBahanBakuService
 @inject IConfiguration Config
@@ -649,7 +649,7 @@
     private Task<AuthenticationState>? AuthState { get; set; }
 
     // --- data ---
-    private List<LaporanStokBahanBakuKelompok> data = new();
+    private List<LaporanPersediaanKelompok> data = new();
     private List<BahanBakuModels> daftarBahanBaku = new();
     private List<SatuanBahanBakuModels> daftarSatuan = new();
 
@@ -831,7 +831,7 @@
     // =====================================================
     // 4. TAMPILAN: PENCARIAN & URUTAN
     // =====================================================
-    private bool Cocok(LaporanStokBahanBakuKelompok g)
+    private bool Cocok(LaporanPersediaanKelompok g)
     {
         if (string.IsNullOrWhiteSpace(teksCari)) return true;
 
@@ -844,7 +844,7 @@
         expandedId = expandedId == id ? null : id;
     }
 
-    private List<LaporanStokBahanBakuKelompok> Tampil
+    private List<LaporanPersediaanKelompok> Tampil
         => data.Where(Cocok).OrderBy(g => g.Id, StringComparer.Ordinal).ToList();
 
     // =====================================================

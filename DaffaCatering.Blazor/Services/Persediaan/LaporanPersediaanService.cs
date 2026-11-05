@@ -4,14 +4,14 @@ using System.Net.Http.Json;
 
 namespace DaffaCatering.Blazor.Services.Persediaan
 {
-    public class LaporanStokBahanBakuService : ApiServiceBase
+    public class LaporanPersediaanService : ApiServiceBase
     {
-        public LaporanStokBahanBakuService(IHttpClientFactory factory, JwtAuthStateProvider auth)
+        public LaporanPersediaanService(IHttpClientFactory factory, JwtAuthStateProvider auth)
             : base(factory, auth) { }
 
         // dari & sampai null = semua periode
         // status hanya dipakai jenis kadaluwarsa (sudah | 7hari | 30hari)
-        public async Task<(List<LaporanStokBahanBakuKelompok>? Data, string Error)> AmbilAsync(
+        public async Task<(List<LaporanPersediaanKelompok>? Data, string Error)> AmbilAsync(
             string jenis, DateOnly? dari, DateOnly? sampai, string? status = null)
         {
             await SiapkanTokenAsync();
@@ -34,7 +34,7 @@ namespace DaffaCatering.Blazor.Services.Persediaan
                     : pesan);
             }
 
-            var data = await response.Content.ReadFromJsonAsync<List<LaporanStokBahanBakuKelompok>>() ?? new();
+            var data = await response.Content.ReadFromJsonAsync<List<LaporanPersediaanKelompok>>() ?? new();
             return (data, "");
         }
     }
