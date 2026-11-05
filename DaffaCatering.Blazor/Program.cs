@@ -48,7 +48,7 @@ builder.Services.AddScoped<PembelianService>();
 builder.Services.AddScoped<PenerimaanBahanBakuService>();
 
 // PERSEDIAAN //
-builder.Services.AddScoped<PenggunaanService>();
+builder.Services.AddScoped<PenggunaanBahanBakuService>();
 builder.Services.AddScoped<PenyesuaianBahanBakuService>();
 
 // LAPORAN //
