@@ -442,7 +442,7 @@
     }
 
     // --- data ---
-    private List<PenggunaanModels> daftarPenggunaan = new();
+    private List<PenggunaanBahanBakuModels> daftarPenggunaan = new();
     private List<BahanBakuModels> daftarBahanBaku = new();
     private List<SatuanBahanBakuModels> daftarSatuan = new();
 
@@ -527,7 +527,7 @@
     // =====================================================
     // 4. DAFTAR PENGGUNAAN: PENCARIAN & ACCORDION
     // =====================================================
-    private IEnumerable<PenggunaanModels> Filtered => daftarPenggunaan
+    private IEnumerable<PenggunaanBahanBakuModels> Filtered => daftarPenggunaan
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
             || (p.IdPenggunaan ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
             || p.Details.Any(d => (d.NamaBahanBaku ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)))
@@ -542,7 +542,7 @@
     // 5. MODAL FORM: BUKA / TUTUP
     // =====================================================
     // ID otomatis: PBP + 7 digit
-    private static string BuatIdBerikutnya(IEnumerable<PenggunaanModels> data)
+    private static string BuatIdBerikutnya(IEnumerable<PenggunaanBahanBakuModels> data)
     {
         const string prefix = "PBP";
 
@@ -754,11 +754,11 @@
         sedangSimpan = true;
         try
         {
-            var model = new PenggunaanModels
+            var model = new PenggunaanBahanBakuModels
             {
                 IdPenggunaan = kodePenggunaan,
                 TglPenggunaan = tgl,
-                Details = items.Select(i => new DetailPenggunaanModel
+                Details = items.Select(i => new DetailPenggunaanBahanBakuModel
                 {
                     IdBahanBaku = i.IdBahanBaku,
                     TglKadaluwarsa = i.Tgl,
