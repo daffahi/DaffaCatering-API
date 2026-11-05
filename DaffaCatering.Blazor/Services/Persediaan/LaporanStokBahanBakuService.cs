@@ -39,5 +39,3 @@ namespace DaffaCatering.Blazor.Services.Persediaan
         }
     }
 }
-
-// feat(laporan): add LaporanPersediaan model and service on Blazor
