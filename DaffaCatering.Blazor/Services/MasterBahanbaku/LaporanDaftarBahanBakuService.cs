@@ -1,6 +1,7 @@
 ﻿using DaffaCatering.Blazor.Models.MasterBahanBaku;
+using System.Net.Http.Json;
 
-namespace DaffaCatering.Blazor.Services.MasterBahanbaku
+namespace DaffaCatering.Blazor.Services.MasterBahanBaku
 {
     public class LaporanDaftarBahanBakuService : ApiServiceBase
     {
