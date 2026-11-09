@@ -25,11 +25,13 @@ namespace DaffaCatering.API.Controllers.Persediaan
 
         // jenis: stok | kadaluwarsa | penggunaan | penyesuaian
         // dari & sampai kosong = semua periode
-        [HttpGet] // Stok bahan baku (kartu stok per bahan baku)
+        // status hanya dipakai jenis kadaluwarsa: sudah | 7hari | 30hari
+        [HttpGet]
         public async Task<IActionResult> Get(
             [FromQuery] string jenis,
             [FromQuery] DateOnly? dari,
-            [FromQuery] DateOnly? sampai)
+            [FromQuery] DateOnly? sampai,
+            [FromQuery] string? status)
         {
             if (dari.HasValue != sampai.HasValue)
                 return BadRequest("Tanggal awal dan akhir harus diisi bersamaan");
@@ -43,9 +45,15 @@ namespace DaffaCatering.API.Controllers.Persediaan
                     return Ok(await LaporanStok(dari, sampai));
 
                 case "kadaluwarsa":
+                    if (status is not ("sudah" or "7hari" or "30hari"))
+                        return BadRequest("Status kadaluwarsa tidak valid");
+                    return Ok(await LaporanKadaluwarsa(status));
+
                 case "penggunaan":
+                    return Ok(await LaporanPenggunaan(dari, sampai));
+
                 case "penyesuaian":
-                    return StatusCode(StatusCodes.Status501NotImplemented, "Laporan ini belum tersedia");
+                    return Ok(await LaporanPenyesuaian(dari, sampai));
 
                 default:
                     return BadRequest("Jenis laporan tidak valid");
@@ -228,6 +236,184 @@ namespace DaffaCatering.API.Controllers.Persediaan
                 kelompok.TotalKeluar = dalamPeriode.Sum(g => g.Keluar);
                 kelompok.StokAkhir = saldo;
 
+                hasil.Add(kelompok);
+            }
+
+            return hasil;
+        }
+
+        // =====================================================
+        // LAPORAN BAHAN BAKU KADALUWARSA
+        // =====================================================
+        private async Task<List<LaporanPersediaanKelompokDto>> LaporanKadaluwarsa(string status)
+        {
+            var hariIni = DateOnly.FromDateTime(DateTime.Today);
+
+            // 1. Semua batch (sama seperti WinForms: SELECT * FROM DetailBahanBaku)
+            var batch = await _context.DetailBahanBakus.AsNoTracking()
+                .Select(d => new
+                {
+                    d.IdBahanBaku,
+                    d.IdSatuan,
+                    d.TglKadaluwarsa,
+                    SisaStok = d.SisaStok ?? 0m
+                })
+                .ToListAsync();
+
+            // 2. Sisa hari: negatif = sudah lewat
+            var dihitung = batch.Select(b => new
+            {
+                b.IdBahanBaku,
+                b.IdSatuan,
+                b.TglKadaluwarsa,
+                b.SisaStok,
+                SisaHari = b.TglKadaluwarsa.DayNumber - hariIni.DayNumber
+            });
+
+            // 3. Filter status
+            dihitung = status switch
+            {
+                "sudah" => dihitung.Where(b => b.SisaHari < 0),
+                "7hari" => dihitung.Where(b => b.SisaHari >= 0 && b.SisaHari <= 7),
+                _ => dihitung.Where(b => b.SisaHari >= 0 && b.SisaHari <= 30)
+            };
+
+            // 4. Kelompokkan per bahan baku, batch diurutkan dari yang paling dulu kadaluwarsa
+            var hasil = new List<LaporanPersediaanKelompokDto>();
+
+            foreach (var g in dihitung
+                .GroupBy(b => b.IdBahanBaku)
+                .OrderBy(g => g.Key, StringComparer.Ordinal))
+            {
+                var kelompok = new LaporanPersediaanKelompokDto
+                {
+                    Id = g.Key,
+                    IdSatuan = g.Min(b => b.IdSatuan)
+                };
+
+                foreach (var b in g.OrderBy(b => b.TglKadaluwarsa))
+                {
+                    kelompok.Baris.Add(new LaporanPersediaanBarisDto
+                    {
+                        TglKadaluwarsa = b.TglKadaluwarsa,
+                        SisaHari = b.SisaHari,
+                        Jumlah = b.SisaStok
+                    });
+                }
+
+                kelompok.JumlahTransaksi = kelompok.Baris.Count;
+                hasil.Add(kelompok);
+            }
+
+            return hasil;
+        }
+
+        // =====================================================
+        // LAPORAN PENGGUNAAN BAHAN BAKU
+        // =====================================================
+        private async Task<List<LaporanPersediaanKelompokDto>> LaporanPenggunaan(DateOnly? dari, DateOnly? sampai)
+        {
+            // 1. Detail penggunaan + tanggal dari header (filter periode seperti WinForms)
+            var data = await (
+                from d in _context.DetailPenggunaans.AsNoTracking()
+                join h in _context.HeaderPenggunaans.AsNoTracking() on d.IdPenggunaan equals h.IdPenggunaan
+                where (!dari.HasValue || h.TglPenggunaan >= dari.Value)
+                   && (!sampai.HasValue || h.TglPenggunaan <= sampai.Value)
+                select new
+                {
+                    d.IdBahanBaku,
+                    d.IdSatuan,
+                    d.IdPenggunaan,
+                    h.TglPenggunaan,
+                    d.TglKadaluwarsa,
+                    d.JumlahPenggunaan
+                }).ToListAsync();
+
+            // 2. Kelompokkan per bahan baku
+            var hasil = new List<LaporanPersediaanKelompokDto>();
+
+            foreach (var g in data
+                .GroupBy(x => x.IdBahanBaku)
+                .OrderBy(g => g.Key, StringComparer.Ordinal))
+            {
+                var kelompok = new LaporanPersediaanKelompokDto
+                {
+                    Id = g.Key,
+                    IdSatuan = g.Min(x => x.IdSatuan)
+                };
+
+                foreach (var x in g
+                    .OrderBy(x => x.TglPenggunaan)
+                    .ThenBy(x => x.IdPenggunaan, StringComparer.Ordinal)
+                    .ThenBy(x => x.TglKadaluwarsa))
+                {
+                    kelompok.Baris.Add(new LaporanPersediaanBarisDto
+                    {
+                        IdTransaksi = x.IdPenggunaan,
+                        Tanggal = x.TglPenggunaan,
+                        TglKadaluwarsa = x.TglKadaluwarsa,
+                        Jumlah = x.JumlahPenggunaan
+                    });
+                }
+
+                kelompok.JumlahTransaksi = kelompok.Baris.Select(b => b.IdTransaksi).Distinct().Count();
+                hasil.Add(kelompok);
+            }
+
+            return hasil;
+        }
+
+        // =====================================================
+        // LAPORAN PENYESUAIAN BAHAN BAKU
+        // =====================================================
+        private async Task<List<LaporanPersediaanKelompokDto>> LaporanPenyesuaian(DateOnly? dari, DateOnly? sampai)
+        {
+            var data = await (
+                from d in _context.DetailPenyesuaians.AsNoTracking()
+                join h in _context.HeaderPenyesuaians.AsNoTracking() on d.IdPenyesuaian equals h.IdPenyesuaian
+                where (!dari.HasValue || h.TglPenyesuaian >= dari.Value)
+                   && (!sampai.HasValue || h.TglPenyesuaian <= sampai.Value)
+                select new
+                {
+                    d.IdBahanBaku,
+                    d.IdSatuan,
+                    d.IdPenyesuaian,
+                    h.TglPenyesuaian,
+                    d.TglKadaluwarsa,
+                    d.Keterangan,
+                    d.StokFisik,
+                    d.SelisihStok
+                }).ToListAsync();
+
+            var hasil = new List<LaporanPersediaanKelompokDto>();
+
+            foreach (var g in data
+                .GroupBy(x => x.IdBahanBaku)
+                .OrderBy(g => g.Key, StringComparer.Ordinal))
+            {
+                var kelompok = new LaporanPersediaanKelompokDto
+                {
+                    Id = g.Key,
+                    IdSatuan = g.Min(x => x.IdSatuan)
+                };
+
+                foreach (var x in g
+                    .OrderBy(x => x.TglPenyesuaian)
+                    .ThenBy(x => x.IdPenyesuaian, StringComparer.Ordinal)
+                    .ThenBy(x => x.TglKadaluwarsa))
+                {
+                    kelompok.Baris.Add(new LaporanPersediaanBarisDto
+                    {
+                        IdTransaksi = x.IdPenyesuaian,
+                        Tanggal = x.TglPenyesuaian,
+                        TglKadaluwarsa = x.TglKadaluwarsa,
+                        Alasan = x.Keterangan,
+                        StokFisik = x.StokFisik,
+                        Selisih = x.SelisihStok
+                    });
+                }
+
+                kelompok.JumlahTransaksi = kelompok.Baris.Select(b => b.IdTransaksi).Distinct().Count();
                 hasil.Add(kelompok);
             }
 

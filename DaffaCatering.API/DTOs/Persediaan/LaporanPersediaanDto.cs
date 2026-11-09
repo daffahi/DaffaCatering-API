@@ -34,6 +34,7 @@
 
             // Penyesuaian
             public decimal Selisih { get; set; }
+            public decimal StokFisik { get; set; }
             public string? Alasan { get; set; }
         }
     }
