@@ -298,6 +298,7 @@
                                     <td colspan="@jmlKolom">
                                         <div class="usage-detail">
                                             <table class="usage-detail-table">
+                                                @* Stok Bahan Baku *@
                                                 @if (stok)
                                                 {
                                                     <thead>
@@ -329,11 +330,13 @@
                                                         }
                                                     </tbody>
                                                 }
+                                                @* Kadaluwarsa *@
                                                 else if (kdl)
                                                 {
+                                                    var no = 0;
                                                     <thead>
                                                         <tr>
-                                                            <th>No. Penerimaan</th>
+                                                            <th>No.</th>
                                                             <th>Tgl Kadaluwarsa</th>
                                                             <th class="num">Sisa Stok</th>
                                                             <th>Status</th>
@@ -343,7 +346,7 @@
                                                         @foreach (var b in g.Baris)
                                                         {
                                                             <tr>
-                                                                <td class="mono">@b.IdTransaksi</td>
+                                                                <td class="mono">@(++no)</td>
                                                                 <td>@Tgl(b.TglKadaluwarsa)</td>
                                                                 <td class="num mono">@FormatAngka(b.Jumlah) @satuan</td>
                                                                 <td>
@@ -353,12 +356,14 @@
                                                         }
                                                     </tbody>
                                                 }
+                                                @* Penggunaan *@
                                                 else if (pakai)
                                                 {
                                                     <thead>
                                                         <tr>
                                                             <th>Tanggal</th>
                                                             <th>No. Penggunaan</th>
+                                                            <th>Tgl Kadaluwarsa</th>
                                                             <th class="num">Jumlah</th>
                                                         </tr>
                                                     </thead>
@@ -368,19 +373,23 @@
                                                             <tr>
                                                                 <td>@Tgl(b.Tanggal)</td>
                                                                 <td class="mono">@b.IdTransaksi</td>
+                                                                <td>@Tgl(b.TglKadaluwarsa)</td>
                                                                 <td class="num mono">@FormatAngka(b.Jumlah) @satuan</td>
                                                             </tr>
                                                         }
                                                     </tbody>
                                                 }
-                                                else
+                                                @* Penyesuaian *@
+                                                else 
                                                 {
                                                     <thead>
                                                         <tr>
                                                             <th>Tanggal</th>
                                                             <th>No. Penyesuaian</th>
+                                                            <th>Tgl Kadaluwarsa</th>
+                                                            <th class="num">Stok Fisik</th>
                                                             <th class="num">Selisih</th>
-                                                            <th>Alasan</th>
+                                                            <th>Keterangan</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -389,6 +398,8 @@
                                                             <tr>
                                                                 <td>@Tgl(b.Tanggal)</td>
                                                                 <td class="mono">@b.IdTransaksi</td>
+                                                                <td>@Tgl(b.TglKadaluwarsa)</td>
+                                                                <td class="num mono">@FormatAngka(b.StokFisik) @satuan</td>
                                                                 <td class="num mono">@(b.Selisih > 0 ? "+" : "")@FormatAngka(b.Selisih) @satuan</td>
                                                                 <td>@(string.IsNullOrWhiteSpace(b.Alasan) ? "-" : b.Alasan)</td>
                                                             </tr>
@@ -482,7 +493,7 @@
                             <td>@satuan</td>
                         </tr>
                     </table>
-
+                    @* Stok Bahan Baku *@
                     @if (stok)
                     {
                         <table class="doc-tabel">
@@ -523,22 +534,21 @@
                             </tbody>
                         </table>
                     }
+                    @* Kadaluwarsa *@       
                     else if (kdl)
                     {
                         <table class="doc-tabel">
                             <colgroup>
                                 <col style="width:44px" />
-                                <col style="width:130px" />
-                                <col style="width:120px" />
+                                <col style="width:140px" />
                                 <col style="width:110px" />
                                 <col />
                             </colgroup>
                             <thead>
                                 <tr>
                                     <th>No.</th>
-                                    <th>No. Penerimaan</th>
                                     <th>Tgl Kadaluwarsa</th>
-                                    <th>Sisa Stok</th>
+                                    <th>Jumlah</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -547,7 +557,6 @@
                                 {
                                     <tr>
                                         <td class="c">@(++nomor)</td>
-                                        <td class="c">@b.IdTransaksi</td>
                                         <td class="c">@Tgl(b.TglKadaluwarsa)</td>
                                         <td class="c">@FormatAngka(b.Jumlah)</td>
                                         <td class="c">@LabelKdl(b.SisaHari)</td>
@@ -556,21 +565,24 @@
                             </tbody>
                         </table>
                     }
+                    @* Penggunaan *@
                     else if (pakai)
                     {
                         <table class="doc-tabel">
                             <colgroup>
                                 <col style="width:44px" />
+                                <col style="width:120px" />
                                 <col style="width:110px" />
+                                <col style="width:120px" />
                                 <col />
-                                <col style="width:110px" />
                             </colgroup>
                             <thead>
                                 <tr>
                                     <th>No.</th>
-                                    <th>Tanggal</th>
                                     <th>No. Penggunaan</th>
-                                    <th>Jumlah</th>
+                                    <th>Tgl Penggunaan</th>
+                                    <th>Tgl Kadaluwarsa</th>
+                                    <th>Jumlah Penggunaan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -578,37 +590,43 @@
                                 {
                                     <tr>
                                         <td class="c">@(++nomor)</td>
-                                        <td class="c">@Tgl(b.Tanggal)</td>
                                         <td class="c">@b.IdTransaksi</td>
+                                        <td class="c">@Tgl(b.Tanggal)</td>
+                                        <td class="c">@Tgl(b.TglKadaluwarsa)</td>
                                         <td class="c">@FormatAngka(b.Jumlah)</td>
                                     </tr>
                                 }
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="3" class="r"><b>Total</b></td>
+                                    <td colspan="4" class="r"><b>Total</b></td>
                                     <td class="c">@FormatAngka(g.Baris.Sum(x => x.Jumlah))</td>
                                 </tr>
                             </tfoot>
                         </table>
                     }
+                    @* Penyesuaian *@
                     else
                     {
                         <table class="doc-tabel">
                             <colgroup>
                                 <col style="width:44px" />
                                 <col style="width:110px" />
-                                <col style="width:130px" />
-                                <col style="width:90px" />
+                                <col style="width:100px" />
+                                <col style="width:100px" />
                                 <col />
+                                <col style="width:80px" />
+                                <col style="width:80px" />
                             </colgroup>
                             <thead>
                                 <tr>
                                     <th>No.</th>
-                                    <th>Tanggal</th>
                                     <th>No. Penyesuaian</th>
-                                    <th>Selisih</th>
-                                    <th>Alasan</th>
+                                    <th>Tgl Penyesuaian</th>
+                                    <th>Tgl Kadaluwarsa</th>
+                                    <th>Keterangan</th>
+                                    <th>Stok Fisik</th>
+                                    <th>Selisih Stok</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -616,10 +634,12 @@
                                 {
                                     <tr>
                                         <td class="c">@(++nomor)</td>
-                                        <td class="c">@Tgl(b.Tanggal)</td>
                                         <td class="c">@b.IdTransaksi</td>
-                                        <td class="c">@(b.Selisih > 0 ? "+" : "")@FormatAngka(b.Selisih)</td>
+                                        <td class="c">@Tgl(b.Tanggal)</td>
+                                        <td class="c">@Tgl(b.TglKadaluwarsa)</td>
                                         <td>@(string.IsNullOrWhiteSpace(b.Alasan) ? "-" : b.Alasan)</td>
+                                        <td class="c">@FormatAngka(b.StokFisik)</td>
+                                        <td class="c">@(b.Selisih > 0 ? "+" : "")@FormatAngka(b.Selisih)</td>
                                     </tr>
                                 }
                             </tbody>
@@ -629,7 +649,6 @@
             }
         </div>
     }
-
 </div>
 
 @code {
@@ -643,7 +662,7 @@
     private enum StatusKadaluwarsa { Sudah, TujuhHari, TigaPuluhHari }
 
     // Jenis yang backend-nya sudah dibuat. Tambahkan jenis baru di sini setiap endpoint-nya selesai
-    private static readonly HashSet<JenisLaporan> JenisSiap = new() { JenisLaporan.Stok };
+    private static readonly HashSet<JenisLaporan> JenisSiap = new() { JenisLaporan.Stok, JenisLaporan.Kadaluwarsa, JenisLaporan.Penggunaan, JenisLaporan.Penyesuaian };
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
