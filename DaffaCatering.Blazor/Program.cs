@@ -57,6 +57,7 @@ builder.Services.AddScoped<LaporanPembelianService>();
 builder.Services.AddScoped<DaftarPelangganService>();
 builder.Services.AddScoped<DaftarPemasokService>();
 builder.Services.AddScoped<LaporanPersediaanService>();
+builder.Services.AddScoped<LaporanMenuMakananService>();
 
 var cultureInfo = new CultureInfo("id-ID");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
