@@ -28,6 +28,7 @@
         public int? SisaHari { get; set; }
         public decimal Jumlah { get; set; }
         public decimal Selisih { get; set; }
+        public decimal StokFisik { get; set; }
         public string? Alasan { get; set; }
     }
 }

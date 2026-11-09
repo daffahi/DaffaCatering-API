@@ -16,7 +16,7 @@ namespace DaffaCatering.Blazor.Services.Persediaan
         {
             await SiapkanTokenAsync();
 
-            var url = $"api/LaporanStokBahanBaku?jenis={jenis}";
+            var url = $"api/LaporanPersediaan?jenis={jenis}";
 
             if (dari is not null && sampai is not null)
                 url += $"&dari={dari.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}"
