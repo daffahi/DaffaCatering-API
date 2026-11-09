@@ -23,7 +23,7 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
         public async Task<IActionResult> Get()
         {
             var bahanBaku = await _context.HeaderBahanBakus.AsNoTracking()
-                .OrderBy(h => h.Jenis)
+                .OrderByDescending(h => h.Jenis)
                 .ThenBy(h => h.IdBahanBaku)
                 .Select(h => new { h.IdBahanBaku, h.NamaBahanBaku, h.Jenis })
                 .ToListAsync();
@@ -41,8 +41,7 @@ namespace DaffaCatering.API.Controllers.MasterBahanBaku
             {
                 IdBahanBaku = b.IdBahanBaku,
                 NamaBahanBaku = b.NamaBahanBaku,
-                // bit jenis: false = Persediaan, true = Bahan Habis Pakai (tukar kalau kebalikan)
-                Jenis = b.Jenis ? "Bahan Habis Pakai" : "Persediaan",
+                Jenis = b.Jenis ? "Persediaan" : "Bahan Habis Pakai",
                 NamaSatuan = satuanBahan.TryGetValue(b.IdBahanBaku, out var idSatuan)
                              && namaSatuan.TryGetValue(idSatuan, out var nama)
                     ? nama
