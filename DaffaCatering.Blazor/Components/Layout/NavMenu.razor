@@ -173,6 +173,11 @@
                                 <i class="fa-solid fa-circle-dot fa-fw"></i> Menu Makanan
                             </NavLink>
                         </AuthorizeView>
+                        <AuthorizeView Roles="@AppRoles.AdminPersediaan">
+                            <NavLink class="nav-link submenu-link" href="laporan/bahan-baku">
+                                <i class="fa-solid fa-circle-dot fa-fw"></i> Bahan Baku
+                            </NavLink>
+                        </AuthorizeView>
                         <AuthorizeView Roles="@AppRoles.AdminPenjualan">
                             <NavLink class="nav-link submenu-link" href="laporan/pelanggan">
                                 <i class="fa-solid fa-circle-dot fa-fw"></i> Pelanggan
