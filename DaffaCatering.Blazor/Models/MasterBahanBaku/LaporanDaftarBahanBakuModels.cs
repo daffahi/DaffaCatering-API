@@ -1,6 +1,6 @@
 ﻿namespace DaffaCatering.Blazor.Models.MasterBahanBaku
 {
-    public class LaporanBahanBakuModels
+    public class LaporanDaftarBahanBakuModels
     {
         public string IdBahanBaku { get; set; } = "";
         public string NamaBahanBaku { get; set; } = "";
