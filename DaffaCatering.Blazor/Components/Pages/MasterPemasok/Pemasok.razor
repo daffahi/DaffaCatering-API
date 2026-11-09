@@ -4,7 +4,13 @@
 @inject PemasokService PemasokService
 
 @{
-    var view = Filtered.ToList();
+    var hasil = Filtered.ToList();
+    var totalHalaman = Math.Max(1, (int)Math.Ceiling(hasil.Count / (double)UkuranHalaman));
+    if (halaman > totalHalaman) halaman = totalHalaman;
+
+    var view = hasil.Skip((halaman - 1) * UkuranHalaman).Take(UkuranHalaman).ToList();
+    var awal = hasil.Count == 0 ? 0 : (halaman - 1) * UkuranHalaman + 1;
+    var akhir = awal == 0 ? 0 : awal + view.Count - 1;
 }
 
 <div class="pemasok-page">
@@ -126,7 +132,25 @@
             </div>
 
             <div class="panel-foot">
-                Menampilkan <b>@view.Count</b> dari <b>@daftarPemasok.Count</b> pemasok
+                <span>Menampilkan <b>@awal–@akhir</b> dari <b>@hasil.Count</b> pemasok</span>
+
+                <div class="pager">
+                    @if (halaman > 1)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman--">
+                            <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                        </button>
+                    }
+
+                    <span class="pg-info">Halaman <b>@halaman</b> / @totalHalaman</span>
+
+                    @if (halaman < totalHalaman)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman++">
+                            Berikutnya <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
             </div>
         }
     </section>
@@ -232,8 +256,22 @@
     // --- filter & pencarian ---
     private enum FilterStatus { Semua, Aktif, NonAktif }
 
-    private string teksCari = "";
-    private FilterStatus filterStatus = FilterStatus.Semua;
+    private const int UkuranHalaman = 10;
+    private int halaman = 1;
+
+    private string _teksCari = "";
+    private string teksCari
+    {
+        get => _teksCari;
+        set { _teksCari = value; halaman = 1; }
+    }
+
+    private FilterStatus _filterStatus = FilterStatus.Semua;
+    private FilterStatus filterStatus
+    {
+        get => _filterStatus;
+        set { _filterStatus = value; halaman = 1; }
+    }
 
     private int JumlahAktif => daftarPemasok.Count(c => c.Status);
 
