@@ -4,10 +4,10 @@ namespace DaffaCatering.Blazor.Models
 {
     public class LoginRequest
     {
-        [Required(ErrorMessage = "User ID is required")]
-        public string IdUser { get; set; } = "";
+        [Required(ErrorMessage = "Username wajib diisi")]
+        public string Username { get; set; } = "";
 
-        [Required(ErrorMessage = "Password is required")]
+        [Required(ErrorMessage = "Kata sandi wajib diisi")]
         public string Password { get; set; } = "";
     }
 

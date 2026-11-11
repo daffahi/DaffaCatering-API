@@ -17,9 +17,9 @@
             <DataAnnotationsValidator />
 
             <div class="mb-3">
-                <label class="form-label">ID Pengguna</label>
-                <InputText class="form-control" @bind-Value="model.IdUser" />
-                <ValidationMessage For="() => model.IdUser" />
+                <label class="form-label">Username</label>
+                <InputText class="form-control" @bind-Value="model.Username" autocomplete="username" />
+                <ValidationMessage For="() => model.Username" />
             </div>
 
             <div class="mb-3">
@@ -83,7 +83,7 @@
             }
             else
             {
-                // Pesan dari API, misalnya "ID User atau Password salah"
+                // Pesan dari API, misalnya "Username atau password salah"
                 pesanError = await response.Content.ReadAsStringAsync();
             }
         }

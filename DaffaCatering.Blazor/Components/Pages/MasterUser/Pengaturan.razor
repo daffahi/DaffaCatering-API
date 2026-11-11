@@ -182,8 +182,9 @@
                         </div>
 
                         <div class="field">
-                            <label>Nama Lengkap <b class="req">*</b></label>
+                            <label>Username <b class="req">*</b></label>
                             <InputText @bind-Value="formModel.NamaUser" />
+                            <span class="hint">Dipakai untuk login dan harus unik</span>
                             <ValidationMessage For="() => formModel.NamaUser" />
                         </div>
 
