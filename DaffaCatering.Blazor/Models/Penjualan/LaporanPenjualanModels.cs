@@ -23,5 +23,6 @@
         public decimal Subtotal { get; set; }
         public decimal? UangMuka { get; set; }
         public decimal TotalTransaksi { get; set; }
+        public DateOnly? TglPengambilan { get; set; }
     }
 }

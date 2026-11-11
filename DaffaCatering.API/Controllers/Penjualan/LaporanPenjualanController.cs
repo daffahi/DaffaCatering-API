@@ -115,6 +115,7 @@ namespace DaffaCatering.API.Controllers.Penjualan
             {
                 IdTransaksi = h.IdPesanan,
                 Tanggal = h.TglPesanan,
+                TglPengambilan = h.TglPengambilan,
                 IdPelanggan = h.IdPelanggan,
                 IdMenu = d.IdMenu,
                 IdSatuan = d.IdSatuan,

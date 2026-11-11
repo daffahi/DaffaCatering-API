@@ -157,12 +157,13 @@
                                 <ul class="pesanan-list">
                                     @foreach (var p in pesananPending)
                                     {
-                                        var telat = p.Trx.Tanggal < hariIni;
+                                        var tglAmbil = TglAmbil(p.Trx);
+                                        var telat = tglAmbil < hariIni;
 
                                         <li class="pesanan @(telat ? "telat" : "")">
                                             <div class="p-waktu">
-                                                <strong>@Selisih(p.Trx.Tanggal)</strong>
-                                                <span>@p.Trx.Tanggal.ToString("dd MMM yyyy", IdCulture)</span>
+                                                <strong>@Selisih(tglAmbil)</strong>
+                                                <span>@tglAmbil.ToString("dd MMM yyyy", IdCulture)</span>
                                             </div>
                                             <div class="p-siapa">
                                                 <strong>@NamaPelanggan(p.IdPelanggan)</strong>
@@ -364,12 +365,12 @@
 
         var daftarPending = (pending ?? new())
             .SelectMany(g => g.Baris.GroupBy(b => b.IdTransaksi).Select(t => (IdPelanggan: g.Id, Trx: t.First())))
-            .OrderBy(x => x.Trx.Tanggal)
+            .OrderBy(x => TglAmbil(x.Trx))
             .ToList();
 
         jmlPending = daftarPending.Count;
-        jmlTelat = daftarPending.Count(x => x.Trx.Tanggal < hariIni);
-        jmlHariIni = daftarPending.Count(x => x.Trx.Tanggal == hariIni);
+        jmlTelat = daftarPending.Count(x => TglAmbil(x.Trx) < hariIni);
+        jmlHariIni = daftarPending.Count(x => TglAmbil(x.Trx) == hariIni);
         nilaiPending = daftarPending.Sum(x => x.Trx.TotalTransaksi);
         pesananPending = daftarPending.Take(5).ToList();
     }
@@ -448,6 +449,7 @@
     // HELPER
     // =====================================================
     private static string FormatRupiah(decimal v) => v.ToString("C0", IdCulture);
+    private static DateOnly TglAmbil(LaporanBaris b) => b.TglPengambilan ?? b.Tanggal;
 
     // AppRoles.* berisi daftar role dipisah koma (format atribut [Authorize(Roles = ...)])
     private static bool PunyaPeran(ClaimsPrincipal user, string daftarPeran)

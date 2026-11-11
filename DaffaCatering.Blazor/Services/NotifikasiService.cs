@@ -75,8 +75,8 @@ namespace DaffaCatering.Blazor.Services
                     .Select(t => t.First())
                     .ToList();
 
-                var telat = pending.Count(t => t.Tanggal < hariIni);
-                var hariIniJml = pending.Count(t => t.Tanggal == hariIni);
+                var telat = pending.Count(t => (t.TglPengambilan ?? t.Tanggal) < hariIni);
+                var hariIniJml = pending.Count(t => (t.TglPengambilan ?? t.Tanggal) == hariIni);
 
                 if (telat > 0)
                     item.Add(new(Mendesak, telat, "pesanan sudah lewat tanggalnya",
