@@ -255,8 +255,8 @@
 @code {
 
     private static readonly CultureInfo IdCulture = new("id-ID");
-    private const decimal BatasStok = 10;
-    private const int HariPeringatan = 7;           // batas peringatan kadaluwarsa
+    private const decimal BatasStok = NotifikasiService.BatasStok;
+    private const int HariPeringatan = NotifikasiService.HariKadaluwarsa; // batas peringatan kadaluwarsa
     private const int RentangPembelian = 90;        // berapa hari ke belakang pembelian dicek
     private const string StatusMenunggu = "Pending"; // status pembelian yang belum diterima
 

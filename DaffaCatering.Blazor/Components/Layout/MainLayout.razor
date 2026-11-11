@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @inject JwtAuthStateProvider AuthProvider
 @inject NavigationManager Nav
+@inject NotifikasiService NotifService
 
 <AuthorizeView>
     <Authorized>
@@ -17,12 +19,51 @@
 
                     <div class="ms-auto d-flex align-items-center gap-2">
                         <div class="dropdown">
-                            <button class="btn btn-icon position-relative" data-bs-toggle="dropdown">
+                            <button class="btn btn-icon position-relative" data-bs-toggle="dropdown"
+                                    title="Notifikasi" aria-label="@LabelLonceng" @onclick="SegarkanNotifikasi">
                                 <i class="fa-solid fa-bell"></i>
+                                @if (notifikasi.Count > 0)
+                                {
+                                    <span class="notif-badge @(AdaMendesak ? "mendesak" : "")">
+                                        @(notifikasi.Count > 9 ? "9+" : notifikasi.Count.ToString())
+                                    </span>
+                                }
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><h6 class="dropdown-header">Notifikasi</h6></li>
-                                <li><a class="dropdown-item" href="#">Belum ada notifikasi baru</a></li>
+
+                            <ul class="dropdown-menu dropdown-menu-end notif-menu">
+                                <li class="notif-kepala">
+                                    <span>Notifikasi</span>
+                                    @if (!string.IsNullOrEmpty(WaktuMuat))
+                                    {
+                                        <small>Diperbarui @WaktuMuat</small>
+                                    }
+                                </li>
+
+                                @if (notifikasi.Count == 0)
+                                {
+                                    <li class="notif-kosong">
+                                        @(notifGagal
+                                            ? "Notifikasi tidak dapat dimuat. Buka kembali untuk mencoba lagi."
+                                            : "Tidak ada yang perlu ditindaklanjuti.")
+                                    </li>
+                                }
+                                else
+                                {
+                                    @foreach (var n in notifikasi)
+                                    {
+                                        <li class="notif-li">
+                                            <a class="notif-baris @n.Tingkat" href="@n.Tautan">
+                                                <span class="notif-teks"><strong>@n.Jumlah</strong> @n.Teks</span>
+                                                <span class="notif-tujuan">@n.Tujuan</span>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (notifGagal)
+                                    {
+                                        <li class="notif-kosong">Sebagian notifikasi tidak dapat dimuat.</li>
+                                    }
+                                }
                             </ul>
                         </div>
 
@@ -60,16 +101,84 @@
 </div>
 
 @code {
+    private static readonly TimeSpan JedaMinimal = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan JedaOtomatis = TimeSpan.FromMinutes(5);
+
     private bool sidebarCollapsed = false;
     private string namaUserSaatIni = "";
 
+    // --- notifikasi ---
+    private List<NotifikasiItem> notifikasi = new();
+    private bool notifGagal;
+    private bool sedangMuatNotif;
+    private DateTime terakhirBerhasil = DateTime.MinValue;   // dasar jeda minimal
+    private DateTime terakhirCoba = DateTime.MinValue;       // ditampilkan di header
+    private Timer? penyegarNotif;
+
     private string InisialNama => string.IsNullOrEmpty(namaUserSaatIni) ? "?" : namaUserSaatIni.Substring(0, 1).ToUpper();
+
+    private bool AdaMendesak => notifikasi.Any(n => n.Tingkat == NotifikasiService.Mendesak);
+
+    private string WaktuMuat => terakhirCoba == DateTime.MinValue
+        ? ""
+        : terakhirCoba.ToLocalTime().ToString("HH.mm");
+
+    private string LabelLonceng => notifikasi.Count == 0
+        ? "Notifikasi, tidak ada yang perlu ditindaklanjuti"
+        : $"Notifikasi, {notifikasi.Count} perlu ditindaklanjuti";
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthProvider.GetAuthenticationStateAsync();
         namaUserSaatIni = authState.User.Identity?.Name ?? "";
     }
+
+    // Token tersimpan di browser, jadi baru bisa dibaca setelah render pertama
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await MuatNotifikasi(paksa: true);
+
+        Nav.LocationChanged += SaatPindahHalaman;
+        penyegarNotif = new Timer(
+            _ => _ = InvokeAsync(() => MuatNotifikasi(paksa: true)),
+            null, JedaOtomatis, JedaOtomatis);
+    }
+
+    private async Task MuatNotifikasi(bool paksa)
+    {
+        if (sedangMuatNotif) return;
+        if (!paksa && DateTime.UtcNow - terakhirBerhasil < JedaMinimal) return;
+
+        sedangMuatNotif = true;
+        try
+        {
+            var (item, gagal) = await NotifService.AmbilAsync();
+            notifikasi = item;
+            notifGagal = gagal;
+            terakhirCoba = DateTime.UtcNow;
+
+            // jika gagal, pembukaan berikutnya langsung mencoba lagi
+            if (!gagal) terakhirBerhasil = terakhirCoba;
+        }
+        catch (Exception)
+        {
+            notifGagal = true;
+            terakhirCoba = DateTime.UtcNow;
+        }
+        finally
+        {
+            sedangMuatNotif = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private Task SegarkanNotifikasi() => MuatNotifikasi(paksa: false);
+
+    private void SaatPindahHalaman(object? sender, LocationChangedEventArgs e)
+        => _ = InvokeAsync(() => MuatNotifikasi(paksa: false));
 
     private void ToggleSidebar()
     {
@@ -80,5 +189,11 @@
     {
         await AuthProvider.KeluarAsync();
         Nav.NavigateTo("/login");
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= SaatPindahHalaman;
+        penyegarNotif?.Dispose();
     }
 }

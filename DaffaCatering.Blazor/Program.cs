@@ -60,6 +60,9 @@ builder.Services.AddScoped<LaporanPersediaanService>();
 builder.Services.AddScoped<LaporanMenuMakananService>();
 builder.Services.AddScoped<LaporanDaftarBahanBakuService>();
 
+// NOTIFIKASI //
+builder.Services.AddScoped<NotifikasiService>();
+
 var cultureInfo = new CultureInfo("id-ID");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;

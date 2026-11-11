@@ -201,3 +201,96 @@ main {
 .sidebar-collapsed .sidebar {
     width: 4.5rem;
 }
+
+.notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background-color: #0f4c42;
+    box-shadow: 0 0 0 2px #FBF7F2;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    pointer-events: none;
+}
+
+    .notif-badge.mendesak {
+        background-color: #d64550;
+    }
+
+.notif-menu {
+    width: 340px;
+    padding: 0.4rem 0;
+}
+
+.notif-kepala {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.35rem 1rem 0.6rem;
+    border-bottom: 1px solid #ece8e0;
+}
+
+    .notif-kepala span {
+        font-family: 'Merriweather Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1d2b25;
+    }
+
+    .notif-kepala small {
+        font-size: 0.75rem;
+        color: #71827a;
+    }
+
+.notif-li + .notif-li {
+    border-top: 1px solid #f1eee8;
+}
+
+.notif-menu ::deep a.notif-baris {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-left: 0 !important;
+    padding: 0.7rem 1rem 0.7rem calc(1rem - 3px);
+    border-left: 3px solid transparent;
+    color: #1d2b25;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    text-decoration: none !important;
+}
+
+    .notif-menu ::deep a.notif-baris.mendesak {
+        border-left-color: #d64550;
+    }
+
+    .notif-menu ::deep a.notif-baris:hover {
+        background-color: rgba(15, 76, 66, 0.08);
+    }
+
+.notif-teks {
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+    .notif-teks strong {
+        font-weight: 700;
+    }
+
+.notif-tujuan {
+    font-size: 0.78rem;
+    color: #71827a;
+}
+
+.notif-kosong {
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #71827a;
+}
