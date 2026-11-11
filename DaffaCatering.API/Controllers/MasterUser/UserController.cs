@@ -68,13 +68,18 @@ namespace DaffaCatering.API.Controllers.User
             if (!await _context.Roles.AnyAsync(r => r.IdRole == input.IdRole))
                 return BadRequest("Role tidak ditemukan");
 
+            // NamaUser dipakai sebagai username login, jadi harus unik
+            var nama = input.NamaUser.Trim();
+            if (await _context.Users.AnyAsync(u => u.NamaUser == nama))
+                return Conflict("Username tersebut sudah dipakai. Silakan gunakan yang lain");
+
             try
             {
                 var entity = new Models.User
                 {
                     IdUser = input.IdUser,
                     IdRole = input.IdRole,
-                    NamaUser = input.NamaUser.Trim(),
+                    NamaUser = nama,
                     Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
                     Status = input.Status
                 };
@@ -104,8 +109,13 @@ namespace DaffaCatering.API.Controllers.User
             if (id == IdSaya && (!input.Status || input.IdRole != existing.IdRole))
                 return BadRequest("Akun yang sedang dipakai tidak bisa dinonaktifkan atau diubah rolenya");
 
+            // NamaUser dipakai sebagai username login, jadi harus unik
+            var nama = input.NamaUser.Trim();
+            if (await _context.Users.AnyAsync(u => u.NamaUser == nama && u.IdUser != id))
+                return Conflict("Username tersebut sudah dipakai. Silakan gunakan yang lain");
+
             existing.IdRole = input.IdRole;
-            existing.NamaUser = input.NamaUser.Trim();
+            existing.NamaUser = nama;
             existing.Status = input.Status;
 
             await _context.SaveChangesAsync();
@@ -124,24 +134,15 @@ namespace DaffaCatering.API.Controllers.User
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var existing = await _context.Users.FindAsync(id);
-            if (existing == null) return NotFound();
-            _context.Users.Remove(existing);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDto input)
         {
-            var user = await _context.Users.FindAsync(input.IdUser);
+            var username = input.Username.Trim();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.NamaUser == username);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(input.Password, user.Password))
-                return Unauthorized("ID User atau Password salah");
+                return Unauthorized("Username atau password salah");
 
             if (!user.Status)
                 return Unauthorized("Akun ini tidak aktif");
