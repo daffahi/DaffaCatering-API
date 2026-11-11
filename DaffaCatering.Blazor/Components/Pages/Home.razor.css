@@ -212,6 +212,12 @@
     color: var(--muted);
 }
 
+.kolom {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 /* =====================================================
    5. PESANAN MENUNGGU
    ===================================================== */
