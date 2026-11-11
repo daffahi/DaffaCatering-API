@@ -51,54 +51,109 @@
 }
 
 /* =====================================================
-   3. ANGKA UTAMA
+   3. KARTU
    ===================================================== */
-.ringkas {
+.kpi {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    margin-top: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.ringkasan {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.kartu {
+    padding: 18px 20px;
     background: #fff;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 10px;
 }
 
-.fig {
-    padding: 16px 20px;
+.kartu-atas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    min-height: 20px;
 }
 
-    .fig + .fig {
-        border-left: 1px solid var(--line);
-    }
-
-.fig-label {
+.kartu-label {
     font-size: 13px;
     color: var(--muted);
 }
 
-.fig-value {
-    margin-top: 2px;
+.kartu.lebar .kartu-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.kartu-nilai {
+    margin-top: 6px;
     font-family: 'Merriweather Sans', sans-serif;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
 
-.fig-note {
+.kartu-ket {
     margin-top: 4px;
     font-size: 12px;
     color: var(--muted);
 }
 
-    .fig-note.naik {
-        color: var(--naik);
+    .kartu-ket.telat {
+        color: var(--telat);
     }
 
-    .fig-note.turun {
+.badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+    .badge.naik {
+        color: var(--naik);
+        background: #e4f2ea;
+    }
+
+    .badge.turun {
+        color: var(--telat);
+        background: #f7e5e1;
+    }
+
+.garis {
+    margin: 14px 0;
+    border-top: 1px solid var(--line);
+}
+
+.sub-label {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.sub-nilai {
+    margin-top: 2px;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--brand);
+}
+
+    .sub-nilai.telat {
         color: var(--telat);
     }
 
 /* =====================================================
-   4. TATA LETAK
+   4. TATA LETAK BAWAH
    ===================================================== */
 .dash-body {
     display: grid;
@@ -108,42 +163,45 @@
     align-items: start;
 }
 
-    /* kalau hanya ada satu kolom (peran Persediaan) */
+    /* kalau hanya ada satu panel (peran Persediaan) */
     .dash-body > :only-child {
         grid-column: 1 / -1;
     }
-
-.kolom {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
 
 .panel {
     padding: 18px 20px;
     background: #fff;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 10px;
 }
 
-    .panel h2 {
-        margin: 0 0 12px;
+.panel-kepala {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+    .panel-kepala h2 {
+        margin: 0;
         font-family: 'Merriweather Sans', sans-serif;
         font-size: 15px;
         font-weight: 700;
     }
 
-        .panel h2 small {
-            margin-left: 6px;
-            font-family: 'Roboto', sans-serif;
-            font-size: 12px;
-            font-weight: 400;
-            color: var(--muted);
+    .panel-kepala a {
+        font-size: 13px;
+        color: var(--brand);
+        text-decoration: none;
+    }
+
+        .panel-kepala a:hover {
+            text-decoration: underline;
         }
 
 .kosong {
     margin: 0;
-    padding: 12px 0 4px;
+    padding: 4px 0;
     font-size: 13px;
     color: var(--muted);
 }
@@ -158,6 +216,9 @@
    5. PESANAN MENUNGGU
    ===================================================== */
 .pesanan-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -168,14 +229,10 @@
     grid-template-columns: 110px 1fr auto;
     align-items: baseline;
     gap: 16px;
-    padding: 11px 0;
-    border-top: 1px solid var(--line);
+    padding: 11px 14px;
+    background: #faf8f3;
+    border-radius: 8px;
 }
-
-    .pesanan:first-child {
-        border-top: 0;
-        padding-top: 2px;
-    }
 
     .pesanan strong {
         display: block;
@@ -200,116 +257,39 @@
 }
 
 /* =====================================================
-   6. GRAFIK HARIAN
+   6. AKSES CEPAT
    ===================================================== */
-.tren {
+.aksi-list {
     display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    height: 84px;
-    border-bottom: 1px solid var(--line);
+    flex-direction: column;
+    gap: 6px;
 }
 
-.tren-bar {
-    flex: 1;
-    background: #b8cfc4;
+.aksi {
+    display: block;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
 }
 
-    .tren-bar:hover {
-        background: #86ad9b;
+    .aksi:hover {
+        background: #f3f1ea;
     }
 
-    .tren-bar.hari-ini {
+    .aksi.utama {
+        color: #fff;
         background: var(--brand);
     }
 
-.tren-sumbu {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-size: 11px;
-    color: var(--muted);
-}
-
-/* =====================================================
-   7. MENU TERLARIS & STOK
-   ===================================================== */
-.peringkat {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    counter-reset: urut;
-}
-
-    .peringkat li {
-        counter-increment: urut;
-        display: grid;
-        grid-template-columns: 18px 1fr auto;
-        gap: 2px 8px;
-        padding: 9px 0;
-        border-top: 1px solid var(--line);
-        font-size: 14px;
-    }
-
-        .peringkat li:first-child {
-            border-top: 0;
-            padding-top: 2px;
-        }
-
-        .peringkat li::before {
-            content: counter(urut);
-            grid-row: 1 / span 2;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-.pr-nama {
-    font-weight: 500;
-}
-
-.pr-nilai {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-.pr-porsi {
-    grid-column: 2 / -1;
-    font-size: 12px;
-    color: var(--muted);
-}
-
-.stok-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-    .stok-list li {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 9px 0;
-        border-top: 1px solid var(--line);
-        font-size: 14px;
-    }
-
-        .stok-list li:first-child {
-            border-top: 0;
-            padding-top: 2px;
-        }
-
-    .stok-list strong {
-        font-weight: 600;
-        font-variant-numeric: tabular-nums;
-        color: var(--tipis);
-    }
-
-        .stok-list strong.habis {
-            color: var(--telat);
+        .aksi.utama:hover {
+            background: #0f4838;
         }
 
 /* =====================================================
-   8. RESPONSIVE
+   7. RESPONSIVE
    ===================================================== */
 @media (max-width: 900px) {
     .dash-body {
@@ -326,20 +306,12 @@
             font-size: 21px;
         }
 
-    .ringkas {
+    .kpi {
         grid-template-columns: 1fr 1fr;
     }
 
-    .fig + .fig {
-        border-left: 0;
-    }
-
-    .fig:nth-child(even) {
-        border-left: 1px solid var(--line);
-    }
-
-    .fig:nth-child(n+3) {
-        border-top: 1px solid var(--line);
+    .ringkasan {
+        grid-template-columns: 1fr;
     }
 
     .pesanan {
