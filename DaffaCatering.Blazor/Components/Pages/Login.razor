@@ -13,6 +13,8 @@
         <h4 class="text-center mb-1 login-title">Daffa Katering</h4>
         <p class="text-center text-muted mb-4">Silahkan login</p>
 
+        <NotifBanner @bind-Pesan="pesanError" Class="mt-0 mb-3" />
+
         <EditForm Model="model" OnValidSubmit="ProsesLogin">
             <DataAnnotationsValidator />
 
@@ -32,11 +34,6 @@
                 </div>
                 <ValidationMessage For="() => model.Password" />
             </div>
-
-            @if (pesanError != "")
-            {
-                <div class="alert alert-danger py-2">@pesanError</div>
-            }
 
             <button type="submit" class="btn btn-login w-100" disabled="@sedangProses">
                 @if (sedangProses)

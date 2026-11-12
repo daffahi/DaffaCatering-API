@@ -1,0 +1,45 @@
+/* CSS for NotifBanner component */
+.banner {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-top: 1rem;
+    padding: .8rem 1rem;
+    border-radius: 12px;
+    color: #212529;
+    background: #fdf3f3;
+    border: 1px solid #f3cfd2;
+    font-size: .9rem;
+    line-height: 1.4;
+}
+
+    .banner > i {
+        flex-shrink: 0;
+        font-size: 1.05rem;
+        color: #c9353f;
+    }
+
+    .banner span {
+        flex: 1;
+    }
+
+    .banner.ok {
+        background: #eef7f2;
+        border-color: #bfe3d0;
+    }
+
+        .banner.ok > i {
+            color: #1f7a56;
+        }
+
+.banner-close {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+    .banner-close:hover {
+        color: #212529;
+    }
