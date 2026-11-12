@@ -133,7 +133,7 @@ dotnet run
 
 ## Testing
 
-The API has **100+ automated integration tests** (xUnit) that run the real API in memory against a real SQL Server database. Each test class creates its own temporary database and deletes it afterwards, so your `DaffaCateringDB` is never touched.
+The API has **102 automated integration tests** (xUnit) that run the real API in memory against a real SQL Server database. Each test class creates its own temporary database and deletes it afterwards, so your `DaffaCateringDB` is never touched.
 
 What is covered:
 - **Role-based authorization:** every role against every protected endpoint, requests without a token, and write operations that a role must not be allowed to perform
