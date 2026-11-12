@@ -15,7 +15,7 @@
 
 <div class="pelanggan-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Pelanggan</h1>
@@ -26,11 +26,11 @@
         </button>
     </header>
 
-    @* ================= 2. NOTIFIKASI ================= *@
+    @* ================= NOTIFIKASI ================= *@
     <NotifBanner Sukses @bind-Pesan="pesanSukses" />
     <NotifBanner @bind-Pesan="pesanError" />
 
-    @* ================= 3. TOOLBAR: SEARCH + FILTER ================= *@
+    @* ================= TOOLBAR: SEARCH + FILTER ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -53,7 +53,7 @@
         </div>
     </section>
 
-    @* ================= 4. TABEL PELANGGAN ================= *@
+    @* ================= TABEL PELANGGAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -147,7 +147,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM PELANGGAN ================= *@
+    @* ================= MODAL FORM PELANGGAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
