@@ -26,17 +26,9 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= 2. NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
     @* ================= 3. TOOLBAR: SEARCH + FILTER ================= *@
     <section class="toolbar-card">
@@ -214,10 +206,7 @@
 
                         @if (!string.IsNullOrEmpty(modalError))
                         {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@modalError</span>
-                            </div>
+                            <NotifBanner @bind-Pesan="modalError" />
                         }
                     </div>
 
@@ -245,6 +234,7 @@
 @code {
     private List<PelangganModels> daftarPelanggan = new();
     private bool isLoading = true;
+    private string pesanSukses = "";
     private string pesanError = "";
 
     private bool modalTampil = false;
@@ -365,6 +355,7 @@
 
     private void BukaModalEdit(PelangganModels item)
     {
+        pesanSukses = "";
         formModel = new PelangganModels
         {
             IdPelanggan = item.IdPelanggan,
@@ -381,6 +372,7 @@
 
     private void TutupModal()
     {
+        pesanSukses = "";
         modalTampil = false;
     }
 
@@ -395,6 +387,8 @@
 
         if (success)
         {
+            pesanSukses = $"Pelanggan {formModel.NamaPelanggan} dengan kode {formModel.IdPelanggan} berhasil "
+                        + (isEditMode ? "diperbarui." : "ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
