@@ -86,7 +86,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Tidak bisa terhubung ke server: " + ex.Message;
+            pesanError = $"Tidak bisa terhubung ke server: {ex.Message.TrimEnd('.')}.";
         }
 
         sedangProses = false;
