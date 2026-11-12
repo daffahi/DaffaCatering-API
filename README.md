@@ -1,3 +1,4 @@
+![Tes](https://github.com/daffahi/DaffaCatering-API/actions/workflows/tes.yml/badge.svg)
 # DaffaCatering
 
 A catering business management system rebuilt from a legacy desktop application (WinForms / .NET Framework) into a modern web architecture: an **ASP.NET Core Web API** backend with a **Blazor** frontend.
