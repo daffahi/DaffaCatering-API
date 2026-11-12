@@ -12,23 +12,23 @@ Originally developed as my Information Systems thesis project, this is an advanc
 
 | Dashboard | Customers |
 |---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Customers](docs/screenshots/pelanggan.png) |
+| ![Dashboard](docs/screenshots/dashboard-page.png) | ![Customers](docs/screenshots/customer-master-page.png) |
 
-| Raw Materials | Recipes |
+| Receipt of Raw Materials | Sales Roles Page |
 |---|---|
-| ![Raw Materials](docs/screenshots/bahan-baku.png) | ![Recipes](docs/screenshots/resep.png) |
+| ![Receipt_of_Raw_Materials](docs/screenshots/raw-materials-receiving-page.png) | | ![Sales_Roles_Page](docs/screenshots/raw-materials-receiving-page.png) |
 
-| Purchasing | Sales |
+| Sales order | Sales |
 |---|---|
-| ![Purchasing](docs/screenshots/pembelian.png) | ![Sales](docs/screenshots/penjualan.png) |
+| ![sales_order_page](docs/screenshots/sales-order-page.png) | ![Sales_page](docs/screenshots/sales-page.png) |
 
-| New Sale | Stock Usage |
+| Use of Raw Materials | Raw Material Adjustments |
 |---|---|
-| ![New Sale](docs/screenshots/tambah_penjualan.png) | ![Stock Usage](docs/screenshots/penggunaan_bahan_baku.png) |
+| ![Use_of_Raw_Materials](docs/screenshots/raw-materials-use-page.png) | ![Raw_Material_Adjustments](docs/screenshots/raw-materials-adjustment-page.png) |
 
-| Stock Adjustment | Stock Report |
+| Sales Report | Stock Report |
 |---|---|
-| ![Stock Adjustment](docs/screenshots/penyesuaian_bahan_baku.png) | ![Stock Report](docs/screenshots/stok_bahan_baku.png) |
+| ![Sales_Repor](docs/screenshots/sales-report-page.png) | ![Stock_Report](docs/screenshots/raw-materials-inventory-report-page.png) |
 
 ## Features
 
