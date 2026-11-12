@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="DaffaCatering.API/DaffaCatering.API.csproj" />
   <Project Path="DaffaCatering.Blazor/DaffaCatering.Blazor.csproj" Id="d83fe0fe-d1b0-42a7-845e-01bdb711cc4b" />
+  <Project Path="DaffaCatering.Tests/DaffaCatering.Tests.csproj" />
 </Solution>
