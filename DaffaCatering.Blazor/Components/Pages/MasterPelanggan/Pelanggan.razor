@@ -323,7 +323,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal memuat data: " + ex.Message;
+            pesanError = $"Gagal memuat data pelanggan: {ex.Message.TrimEnd('.')}.";
         }
         isLoading = false;
     }
@@ -347,7 +347,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            pesanError = $"Gagal menghasilkan ID: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
