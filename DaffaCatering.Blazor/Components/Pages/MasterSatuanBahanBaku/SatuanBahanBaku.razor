@@ -15,7 +15,7 @@
 
 <div class="satuan-bahan-baku-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Satuan Bahan Baku</h1>
@@ -26,19 +26,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    @* ================= TOOLBAR: SEARCH ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -47,7 +39,7 @@
         </label>
     </section>
 
-    @* ================= 4. TABEL SATUAN BAHAN BAKU ================= *@
+    @* ================= TABEL SATUAN BAHAN BAKU ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -129,7 +121,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM SATUAN BAHAN BAKU ================= *@
+    @* ================= MODAL FORM SATUAN BAHAN BAKU ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -193,11 +185,12 @@
 
 @code {
     // =====================================================
-    // 1. STATE
+    // STATE
     // =====================================================
     // --- data & halaman utama ---
     private List<SatuanBahanBakuModels> daftarSatuan = new();
     private bool isLoading = true;
+    private string pesanSukses = "";
     private string pesanError = "";
 
     // --- pagination & pencarian ---
@@ -219,7 +212,7 @@
     private SatuanBahanBakuModels formModel = new();
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -237,7 +230,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal memuat data: " + ex.Message;
+            pesanError = $"Gagal memuat data satuan bahan baku: {ex.Message.TrimEnd('.')}.";
         }
 
         isLoading = false;
@@ -299,7 +292,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            pesanError = $"Gagal menghasilkan ID: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -337,6 +330,7 @@
 
         if (success)
         {
+            pesanSukses = $"Satuan Bahan Baku {formModel.NamaSatuan} dengan kode {formModel.IdSatuan} berhasil " + (isEditMode ? "diperbarui." : "ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
