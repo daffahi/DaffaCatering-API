@@ -16,7 +16,7 @@ Originally developed as my Information Systems thesis project, this is an advanc
 
 | Receipt of Raw Materials | Sales Roles Page |
 |---|---|
-| ![Receipt_of_Raw_Materials](docs/screenshots/raw-materials-receiving-page.png) | | ![Sales_Roles_Page](docs/screenshots/page-sales-role.png) |
+| ![Receipt_of_Raw_Materials](docs/screenshots/raw-materials-receiving-page.png) | ![Sales_Roles_Page](docs/screenshots/page-sales-role.png)
 
 | Sales order | Sales |
 |---|---|
