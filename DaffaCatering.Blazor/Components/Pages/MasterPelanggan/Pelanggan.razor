@@ -330,6 +330,7 @@
 
     private async Task BukaModalTambah()
     {
+        pesanSukses = "";
         formModel = new PelangganModels
         {
             TglBergabung = DateOnly.FromDateTime(DateTime.Now),
@@ -387,8 +388,7 @@
 
         if (success)
         {
-            pesanSukses = $"Pelanggan {formModel.NamaPelanggan} dengan kode {formModel.IdPelanggan} berhasil "
-                        + (isEditMode ? "diperbarui." : "ditambahkan.");
+            pesanSukses = $"Pelanggan {formModel.NamaPelanggan} dengan kode {formModel.IdPelanggan} berhasil " + (isEditMode ? "diperbarui." : "ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
