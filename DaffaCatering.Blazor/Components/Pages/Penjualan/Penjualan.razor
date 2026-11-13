@@ -17,7 +17,7 @@
 
 <div class="penjualan-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Penjualan</h1>
@@ -28,30 +28,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER SUKSES & ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanSukses))
-    {
-        <div class="banner ok">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>@pesanSukses</span>
-            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
-
-    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    @* ================= TOOLBAR: SEARCH ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -60,7 +41,7 @@
         </label>
     </section>
 
-    @* ================= 4. TABEL PENJUALAN ================= *@
+    @* ================= TABEL PENJUALAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -144,7 +125,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM PENJUALAN ================= *@
+    @* ================= MODAL FORM PENJUALAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -260,14 +241,8 @@
                                 <input type="text" disabled value="@SubtotalInput" />
                             </div>
                         </div>
-
-                        @if (!string.IsNullOrEmpty(detailError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@detailError</span>
-                            </div>
-                        }
+                        
+                        <NotifBanner @bind-Pesan="detailError" />
 
                         <div class="detail-actions">
                             @if (indeksEdit >= 0)
@@ -348,13 +323,7 @@
                         <input type="text" disabled placeholder="-" value="@SisaPembayaranText" />
                     </div>
 
-                    @if (!string.IsNullOrEmpty(modalError))
-                    {
-                        <div class="banner in-dialog">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            <span>@modalError</span>
-                        </div>
-                    }
+                    <NotifBanner @bind-Pesan="modalError" />
                 </div>
 
                 @* ---------- Footer modal ---------- *@
@@ -375,7 +344,7 @@
         </div>
     }
 
-    @* ================= 6. MODAL CARI PESANAN ================= *@
+    @* ================= MODAL CARI PESANAN ================= *@
     @if (cariPesananTampil)
     {
         var pesananView = DaftarPesananPending.ToList();
@@ -442,7 +411,7 @@
         </div>
     }
 
-    @* ================= 7. MODAL CARI PELANGGAN ================= *@
+    @* ================= MODAL CARI PELANGGAN ================= *@
     @if (cariPelangganTampil)
     {
         var pelangganView = DaftarPelangganAktif.ToList();
@@ -503,7 +472,7 @@
         </div>
     }
 
-    @* ================= 8. MODAL CARI MENU MAKANAN ================= *@
+    @* ================= MODAL CARI MENU MAKANAN ================= *@
     @if (cariMenuMakananTampil)
     {
         var menuView = DaftarMenuMakananAktif.ToList();
@@ -566,7 +535,7 @@
         </div>
     }
 
-    @* ================= 9. FAKTUR CETAK ================= *@
+    @* ================= FAKTUR CETAK ================= *@
     @if (fakturCetak is not null)
     {
         var f = fakturCetak;
@@ -714,7 +683,7 @@
 
 @code {
     // =====================================================
-    // 1. STATE & MODEL
+    // STATE & MODEL
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
@@ -788,7 +757,7 @@
     private IJSObjectReference? modulCetak;
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -804,26 +773,26 @@
         var galat = new List<string>();
 
         try { daftarPenjualan = await PenjualanService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat transaksi penjualan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat transaksi penjualan: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarPesananPenjualan = await PesananPenjualanService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat pesanan penjualan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat pesanan penjualan: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarPelanggan = await PelangganService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat pelanggan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat pelanggan: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarMenuMakanan = await MenuMakananService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat menu makanan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat menu makanan: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan: {ex.Message.TrimEnd('.')}."); }
 
         pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
     // =====================================================
-    // 3. HELPER UMUM (format & lookup nama)
+    // HELPER UMUM (format & lookup nama)
     // =====================================================
     private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
@@ -851,7 +820,7 @@
         => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
 
     // =====================================================
-    // 4. DAFTAR PENJUALAN: PENCARIAN
+    // DAFTAR PENJUALAN: PENCARIAN
     // =====================================================
     private IEnumerable<PenjualanModels> Filtered => daftarPenjualan
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
@@ -863,7 +832,7 @@
         => string.Equals(p.Status, "Close", StringComparison.OrdinalIgnoreCase);
 
     // =====================================================
-    // 5. MODAL FORM: BUKA / TUTUP / RESET
+    // MODAL FORM: BUKA / TUTUP / RESET
     // =====================================================
     // Header terkunci selama ada item atau saat mode edit
     private bool HeaderTerkunci => isEditMode || items.Count > 0;
@@ -887,6 +856,7 @@
 
     private async Task BukaModalTambah()
     {
+        pesanSukses = "";
         ResetForm();
         isEditMode = false;
 
@@ -900,7 +870,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menyiapkan form: " + ex.Message;
+            pesanError = $"Gagal menyiapkan form: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -910,6 +880,7 @@
 
     private async Task BukaModalEdit(PenjualanModels item)
     {
+        pesanSukses = "";
         ResetForm();
 
         // Daftar penjualan bisa saja tidak membawa detail, jadi ambil data lengkap per ID
@@ -977,7 +948,7 @@
     }
 
     // =====================================================
-    // 6. MODAL CARI: PESANAN
+    // MODAL CARI: PESANAN
     // =====================================================
     private IEnumerable<PesananPenjualanModels> DaftarPesananPending => daftarPesananPenjualan
         .Where(p => string.Equals(p.Status, "Pending", StringComparison.OrdinalIgnoreCase))
@@ -1009,7 +980,7 @@
             catch (Exception ex)
             {
                 cariPesananTampil = false;
-                modalError = "Gagal memuat detail pesanan: " + ex.Message;
+                modalError = $"Gagal memuat detail pesanan: {ex.Message.TrimEnd('.')}.";
                 return;
             }
         }
@@ -1044,7 +1015,7 @@
     }
 
     // =====================================================
-    // 7. MODAL CARI: PELANGGAN
+    // MODAL CARI: PELANGGAN
     // =====================================================
     private IEnumerable<PelangganRow> DaftarPelangganAktif => daftarPelanggan
         .Where(p => p.Status)
@@ -1069,7 +1040,7 @@
     }
 
     // =====================================================
-    // 8. MODAL CARI: MENU MAKANAN
+    // MODAL CARI: MENU MAKANAN
     // =====================================================
     private IEnumerable<MenuMakananRow> DaftarMenuMakananAktif => daftarMenuMakanan
         .Where(m => m.Status)
@@ -1149,49 +1120,49 @@
 
         if (pelangganDipilih is null)
         {
-            detailError = "Harap pilih pelanggan terlebih dahulu";
+            detailError = "Harap pilih pelanggan terlebih dahulu.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(metodePembayaranInput))
         {
-            detailError = "Harap pilih metode pembayaran";
+            detailError = "Harap pilih metode pembayaran.";
             return;
         }
 
         if (menuMakananDipilih is null)
         {
-            detailError = "Harap pilih menu terlebih dahulu";
+            detailError = "Harap pilih menu terlebih dahulu.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(jumlahInput))
         {
-            detailError = "Harap masukkan jumlah pesanan";
+            detailError = "Harap masukkan jumlah pesanan.";
             return;
         }
 
         if (!TryParseAngka(jumlahInput, out var jumlah) || jumlah != decimal.Truncate(jumlah))
         {
-            detailError = "Jumlah menu harus berupa angka bulat lebih dari 0";
+            detailError = "Jumlah menu harus berupa angka bulat lebih dari 0.";
             return;
         }
 
         if (jumlah > 999)
         {
-            detailError = "Jumlah menu maksimal 3 digit";
+            detailError = "Jumlah menu maksimal 3 digit.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(idSatuanInput))
         {
-            detailError = "Menu yang dipilih belum memiliki satuan";
+            detailError = "Menu yang dipilih belum memiliki satuan.";
             return;
         }
 
         if (!TryParseAngka(hargaInput, out var harga))
         {
-            detailError = "Harga menu tidak valid";
+            detailError = "Harga menu tidak valid.";
             return;
         }
 
@@ -1202,7 +1173,7 @@
 
         if (kembar)
         {
-            detailError = $"Menu {menuMakananDipilih.NamaMenuMakanan} sudah ada di daftar penjualan";
+            detailError = $"Menu {menuMakananDipilih.NamaMenuMakanan} sudah ada di daftar penjualan.";
             return;
         }
 
@@ -1230,7 +1201,7 @@
     }
 
     // =====================================================
-    // 10. MODAL FORM: SIMPAN
+    // MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
@@ -1238,32 +1209,31 @@
 
         if (string.IsNullOrWhiteSpace(kodePenjualan))
         {
-            modalError = "No. Penjualan belum ter-generate, coba buka form kembali";
+            modalError = "No. Penjualan belum ter-generate, coba buka form kembali.";
             return;
         }
 
         if (pelangganDipilih is null)
         {
-            modalError = "Harap pilih pelanggan terlebih dahulu";
+            modalError = "Harap pilih pelanggan terlebih dahulu.";
             return;
         }
 
-        if (!DateOnly.TryParseExact(tglPenjualanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.None, out var tglPenjualan))
+        if (!DateOnly.TryParseExact(tglPenjualanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tglPenjualan))
         {
-            modalError = "Harap isi tanggal penjualan";
+            modalError = "Harap isi tanggal penjualan.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(metodePembayaranInput))
         {
-            modalError = "Harap pilih metode pembayaran";
+            modalError = "Harap pilih metode pembayaran.";
             return;
         }
 
         if (items.Count == 0)
         {
-            modalError = $"Harap tambahkan minimal satu menu untuk penjualan {kodePenjualan}";
+            modalError = $"Harap tambahkan minimal satu menu untuk penjualan {kodePenjualan}.";
             return;
         }
 
@@ -1296,7 +1266,7 @@
 
             if (success)
             {
-                pesanSukses = $"No. Penjualan {kodePenjualan} atas nama {pelangganDipilih.NamaPelanggan} berhasil {(isEditMode ? "diperbarui" : "ditambahkan")}";
+                pesanSukses = $"No. Penjualan {kodePenjualan} atas nama {pelangganDipilih.NamaPelanggan} berhasil {(isEditMode ? "diperbarui." : "ditambahkan.")}";
                 modalTampil = false;
                 await MuatData();
             }
@@ -1307,7 +1277,7 @@
         }
         catch (Exception ex)
         {
-            modalError = "Gagal menyimpan: " + ex.Message;
+            modalError = $"Gagal menyimpan: {ex.Message.TrimEnd('.')}.";
         }
         finally
         {

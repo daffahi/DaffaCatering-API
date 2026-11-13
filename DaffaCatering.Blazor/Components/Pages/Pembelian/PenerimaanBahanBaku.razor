@@ -777,8 +777,7 @@
             return;
         }
 
-        if (!DateOnly.TryParseExact(tglKadaluwarsaInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.None, out var tgl))
+        if (!DateOnly.TryParseExact(tglKadaluwarsaInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tgl))
         {
             detailError = "Harap isi tanggal kadaluwarsa.";
             return;
@@ -870,8 +869,7 @@
             return;
         }
 
-        if (!DateOnly.TryParseExact(tglPenerimaanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.None, out var tgl))
+        if (!DateOnly.TryParseExact(tglPenerimaanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tgl))
         {
             modalError = "Harap isi tanggal penerimaan.";
             return;
@@ -924,7 +922,7 @@
         }
         catch (Exception ex)
         {
-            modalError = "Gagal menyimpan: " + ex.Message;
+            modalError = $"Gagal menyimpan: {ex.Message.TrimEnd('.')}.";
         }
         finally
         {
