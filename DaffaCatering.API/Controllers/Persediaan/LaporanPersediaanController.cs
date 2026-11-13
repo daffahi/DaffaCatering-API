@@ -16,7 +16,7 @@ namespace DaffaCatering.API.Controllers.Persediaan
         private readonly DaffaCateringContext _context;
 
         // hanya penerimaan dengan statusBahanBaku = 'False' yang menambah stok
-        private const string StatusPenerimaanMasuk = "False";
+        private static readonly string[] StatusPenerimaanMasuk = { "False", "Diterima" };
 
         public LaporanPersediaanController(DaffaCateringContext context)
         {
@@ -92,7 +92,7 @@ namespace DaffaCatering.API.Controllers.Persediaan
             var penerimaan = await (
                 from d in _context.DetailPenerimaans.AsNoTracking()
                 join h in _context.HeaderPenerimaans.AsNoTracking() on d.IdPenerimaan equals h.IdPenerimaan
-                where d.StatusBahanBaku == StatusPenerimaanMasuk
+                where StatusPenerimaanMasuk.Contains(d.StatusBahanBaku)
                 select new Gerak
                 {
                     IdBahanBaku = d.IdBahanBaku,
