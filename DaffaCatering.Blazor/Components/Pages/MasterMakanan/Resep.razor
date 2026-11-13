@@ -12,7 +12,7 @@
 
 <div class="resep-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Resep</h1>
@@ -23,19 +23,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @* ================= 3. TOOLBAR: SEARCH + FILTER ================= *@
+    @* ================= TOOLBAR: SEARCH + FILTER ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -58,7 +50,7 @@
         </div>
     </section>
 
-    @* ================= 4. TABEL RESEP ================= *@
+    @* ================= TABEL RESEP ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -130,7 +122,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM RESEP ================= *@
+    @* ================= MODAL FORM RESEP ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -213,13 +205,7 @@
                                 </div>
                             </div>
 
-                            @if (!string.IsNullOrEmpty(itemError))
-                            {
-                                <div class="banner in-dialog">
-                                    <i class="fa-solid fa-circle-exclamation"></i>
-                                    <span>@itemError</span>
-                                </div>
-                            }
+                            <NotifBanner @bind-Pesan="itemError" />
 
                             <div class="detail-actions">
                                 @if (editingIndex >= 0)
@@ -273,13 +259,7 @@
                             }
                         </div>
 
-                        @if (!string.IsNullOrEmpty(modalError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@modalError</span>
-                            </div>
-                        }
+                        <NotifBanner @bind-Pesan="modalError" />
                     </div>
 
                     @* ---------- Footer modal ---------- *@
@@ -305,7 +285,7 @@
 
 @code {
     // =====================================================
-    // 1. STATE
+    // STATE
     // =====================================================
     private enum FilterStatus { Semua, Aktif, NonAktif }
     private decimal? inputJumlah;
@@ -318,6 +298,7 @@
 
     // --- halaman utama ---
     private bool isLoading = true;
+    private string pesanSukses = "";
     private string pesanError = "";
     private string teksCari = "";
     private FilterStatus filterStatus = FilterStatus.Semua;
@@ -336,7 +317,7 @@
     private string itemError = "";
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -349,23 +330,23 @@
         var galat = new List<string>();
 
         try { daftarResep = await ResepService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat resep: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat resep: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarMenu = await MenuMakananService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat menu: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat menu makanan: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
     // =====================================================
-    // 3. HELPER UMUM (lookup nama)
+    // HELPER UMUM (lookup nama)
     // =====================================================
     // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
@@ -380,7 +361,7 @@
         => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
 
     // =====================================================
-    // 4. DAFTAR: FILTER & PENCARIAN
+    // DAFTAR: FILTER & PENCARIAN
     // =====================================================
     private int JumlahAktif => daftarResep.Count(c => c.Status);
 
@@ -419,6 +400,7 @@
 
     private async Task BukaModalTambah()
     {
+        pesanSukses = "";
         formModel = new ResepModel { Status = true };
         isEditMode = false;
         modalError = "";
@@ -432,7 +414,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            pesanError = $"Gagal menghasilkan ID: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -441,6 +423,7 @@
 
     private async Task BukaModalEdit(ResepModel item)
     {
+        pesanSukses = "";
         modalError = "";
         pesanError = "";
         ResetStagingItem();
@@ -464,7 +447,7 @@
     }
 
     // =====================================================
-    // 6. MODAL FORM: KOMPOSISI BAHAN BAKU
+    // MODAL FORM: KOMPOSISI BAHAN BAKU
     // =====================================================
     private void ResetStagingItem()
     {
@@ -492,19 +475,19 @@
 
         if (string.IsNullOrEmpty(pilihBahanBaku))
         {
-            itemError = "Pilih bahan baku terlebih dahulu";
+            itemError = "Pilih bahan baku terlebih dahulu.";
             return;
         }
 
         if (string.IsNullOrEmpty(pilihSatuan))
         {
-            itemError = "Pilih satuan bahan baku";
+            itemError = "Pilih satuan bahan baku.";
             return;
         }
 
         if (inputJumlah is not > 0)
         {
-            itemError = "Jumlah harus lebih dari 0";
+            itemError = "Jumlah harus lebih dari 0.";
             return;
         }
 
@@ -515,7 +498,7 @@
 
         if (duplikat)
         {
-            itemError = $"Bahan baku {NamaBahanBaku(pilihBahanBaku)} sudah ada dalam resep";
+            itemError = $"Bahan baku {NamaBahanBaku(pilihBahanBaku)} sudah ada dalam resep.";
             return;
         }
 
@@ -541,7 +524,7 @@
     }
 
     // =====================================================
-    // 7. MODAL FORM: SIMPAN
+    // MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
@@ -561,6 +544,7 @@
 
         if (success)
         {
+            pesanSukses = $"Resep menu {NamaMenu(formModel.IdMenu)} dengan kode {formModel.IdResep} " + (isEditMode ? "berhasil diperbarui." : "berhasil ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
