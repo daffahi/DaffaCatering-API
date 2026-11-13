@@ -11,7 +11,7 @@
 
 <div class="konversi-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Konversi Satuan</h1>
@@ -22,30 +22,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER SUKSES & ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanSukses))
-    {
-        <div class="banner ok">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>@pesanSukses</span>
-            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
-
-    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    @* ================= TOOLBAR: SEARCH ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -54,7 +35,7 @@
         </label>
     </section>
 
-    @* ================= 4. TABEL KONVERSI SATUAN ================= *@
+    @* ================= TABEL KONVERSI SATUAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -128,7 +109,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM KONVERSI SATUAN ================= *@
+    @* ================= MODAL FORM KONVERSI SATUAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -188,10 +169,7 @@
 
                         @if (!string.IsNullOrEmpty(modalError))
                         {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@modalError</span>
-                            </div>
+                            <NotifBanner @bind-Pesan="modalError" />
                         }
                     </div>
 
@@ -218,7 +196,7 @@
 
 @code {
     // =====================================================
-    // 1. STATE
+    // STATE
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
@@ -241,7 +219,7 @@
     private string nilaiInput = "";
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -254,17 +232,17 @@
         var galat = new List<string>();
 
         try { daftarKonversi = await KonversiSatuanService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat konversi satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat konversi satuan: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan: {ex.Message.TrimEnd('.')}."); }
 
         pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
     // =====================================================
-    // 3. HELPER UMUM (format & lookup)
+    // HELPER UMUM (format & lookup)
     // =====================================================
     private static string Inisial(string? nama)
     {
@@ -333,7 +311,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            pesanError = $"Gagal menghasilkan ID: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -362,7 +340,7 @@
     }
 
     // =====================================================
-    // 6. MODAL FORM: SIMPAN
+    // MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
@@ -440,7 +418,7 @@
         }
         catch (Exception ex)
         {
-            modalError = "Gagal menyimpan: " + ex.Message;
+            modalError = $"Gagal menyimpan: {ex.Message.TrimEnd('.')}.";
         }
         finally
         {
