@@ -14,7 +14,7 @@
 
 <div class="penyesuaian-bahan-baku-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Penyesuaian Bahan Baku</h1>
@@ -25,30 +25,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER SUKSES & ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanSukses))
-    {
-        <div class="banner ok">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>@pesanSukses</span>
-            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
-
-    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    @* ================= TOOLBAR: SEARCH ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -57,7 +38,7 @@
         </label>
     </section>
 
-    @* ================= 4. TABEL PENYESUAIAN ================= *@
+    @* ================= TABEL PENYESUAIAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -185,7 +166,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM PENYESUAIAN ================= *@
+    @* ================= MODAL FORM PENYESUAIAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -298,13 +279,7 @@
                                       @bind="keteranganInput" @bind:event="oninput"></textarea>
                         </div>
 
-                        @if (!string.IsNullOrEmpty(detailError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@detailError</span>
-                            </div>
-                        }
+                        <NotifBanner @bind-Pesan="detailError" />
 
                         <div class="detail-actions">
                             @if (indeksEdit >= 0)
@@ -373,13 +348,7 @@
                         }
                     </div>
 
-                    @if (!string.IsNullOrEmpty(modalError))
-                    {
-                        <div class="banner in-dialog">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            <span>@modalError</span>
-                        </div>
-                    }
+                    <NotifBanner @bind-Pesan="modalError" />
                 </div>
 
                 @* ---------- Footer modal ---------- *@
@@ -400,7 +369,7 @@
         </div>
     }
 
-    @* ================= 6. MODAL CARI BAHAN BAKU ================= *@
+    @* ================= MODAL CARI BAHAN BAKU ================= *@
     @if (cariTampil)
     {
         var bahanView = DaftarBahanCari.ToList();
@@ -471,7 +440,7 @@
 
 @code {
     // =====================================================
-    // 1. STATE & MODEL
+    // STATE & MODEL
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
@@ -522,7 +491,7 @@
     private string teksCariBahan = "";
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -535,20 +504,20 @@
         var galat = new List<string>();
 
         try { daftarPenyesuaian = await PenyesuaianService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat penyesuaian: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat penyesuaian: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
     // =====================================================
-    // 3. HELPER UMUM (format & lookup)
+    // HELPER UMUM (format & lookup)
     // =====================================================
     private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
 
@@ -641,7 +610,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menyiapkan form: " + ex.Message;
+            pesanError = $"Gagal menyiapkan form: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -656,7 +625,7 @@
     }
 
     // =====================================================
-    // 6. MODAL CARI: PILIH BAHAN BAKU
+    // MODAL CARI: PILIH BAHAN BAKU
     // =====================================================
     private IEnumerable<BahanBakuModels> DaftarBahanCari => daftarBahanBaku
         .Where(b => b.Status)
@@ -700,16 +669,13 @@
     }
 
     // =====================================================
-    // 7. MODAL FORM: BATCH & SELISIH
+    // MODAL FORM: BATCH & SELISIH
     // =====================================================
     private bool TryTglKadaluwarsa(out DateOnly tgl)
-        => DateOnly.TryParseExact(tglKadaluwarsaInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                                  DateTimeStyles.None, out tgl);
+        => DateOnly.TryParseExact(tglKadaluwarsaInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out tgl);
 
     // Batch yang cocok dengan tanggal kadaluwarsa terpilih, null jika belum ada
-    private DetailBahanBakuModel? BatchSaatIni => adaBahan && TryTglKadaluwarsa(out var tgl)
-        ? DetailBahan(bahanDipilih).FirstOrDefault(d => d.TglKadaluwarsa == tgl)
-        : null;
+    private DetailBahanBakuModel? BatchSaatIni => adaBahan && TryTglKadaluwarsa(out var tgl) ? DetailBahan(bahanDipilih).FirstOrDefault(d => d.TglKadaluwarsa == tgl) : null;
 
     private bool IsBatchBaru => adaBahan && TryTglKadaluwarsa(out _) && BatchSaatIni is null;
 
@@ -746,7 +712,7 @@
             if (!TryParseStok(stokFisikInput, out var fisik))
                 return "Isi stok fisik untuk melihat selisih.";
 
-            return $"Selisih stok {FormatSelisih(fisik - StokSistemSaatIni)} {NamaSatuan(satuanInput)}";
+            return $"Selisih stok {FormatSelisih(fisik - StokSistemSaatIni)} {NamaSatuan(satuanInput)}.";
         }
     }
 
@@ -756,9 +722,7 @@
         {
             if (IsBatchBaru) return "info";
 
-            return TryTglKadaluwarsa(out _) && TryParseStok(stokFisikInput, out var fisik)
-                ? KelasSelisih(fisik - StokSistemSaatIni)
-                : "";
+            return TryTglKadaluwarsa(out _) && TryParseStok(stokFisikInput, out var fisik) ? KelasSelisih(fisik - StokSistemSaatIni) : "";
         }
     }
 
@@ -777,7 +741,7 @@
     }
 
     // =====================================================
-    // 8. MODAL FORM: DETAIL (ITEM PENYESUAIAN)
+    // MODAL FORM: DETAIL (ITEM PENYESUAIAN)
     // =====================================================
     private void KosongkanInputDetail()
     {
@@ -900,14 +864,13 @@
     }
 
     // =====================================================
-    // 9. MODAL FORM: SIMPAN
+    // MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
         modalError = "";
 
-        if (!DateOnly.TryParseExact(tglPenyesuaianInput, "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.None, out var tgl))
+        if (!DateOnly.TryParseExact(tglPenyesuaianInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tgl))
         {
             modalError = "Harap isi tanggal penyesuaian.";
             return;
@@ -947,7 +910,7 @@
 
             if (success)
             {
-                pesanSukses = $"No. Penyesuaian {kodePenyesuaian} berhasil ditambahkan.";
+                pesanSukses = $"No. Penyesuaian Bahan Baku {kodePenyesuaian} berhasil ditambahkan.";
                 modalTampil = false;
                 await MuatData();
             }
@@ -958,7 +921,7 @@
         }
         catch (Exception ex)
         {
-            modalError = "Gagal menyimpan: " + ex.Message;
+            modalError = $"Gagal menyimpan: {ex.Message.TrimEnd('.')}.";
         }
         finally
         {
