@@ -1286,7 +1286,7 @@
     }
 
     // =====================================================
-    // 11. FAKTUR
+    // FAKTUR
     // =====================================================
     private string NamaUsaha => Config["Usaha:Nama"] ?? "";
 
@@ -1323,7 +1323,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menyiapkan faktur: " + ex.Message;
+            pesanError = $"Gagal menyiapkan faktur: {ex.Message.TrimEnd('.')}.";
         }
         finally
         {
