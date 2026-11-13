@@ -1,5 +1,5 @@
 /* =====================================================
-   1. VARIABEL & WRAPPER HALAMAN
+   VARIABEL & WRAPPER HALAMAN
    ===================================================== */
 .menu-makanan-page {
     --brand-950: #0c3b2e;
@@ -26,7 +26,7 @@
     }
 
 /* =====================================================
-   2. HEADER HALAMAN (judul + tombol tambah)
+   HEADER HALAMAN (judul + tombol tambah)
    ===================================================== */
 .page-head {
     display: flex;
@@ -75,44 +75,9 @@
         transform: translateY(0);
     }
 
-/* =====================================================
-   3. BANNER ERROR
-   ===================================================== */
-.banner {
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-    margin-top: 1rem;
-    padding: .75rem 1rem;
-    border-radius: 12px;
-    color: #9b2c33;
-    background: #fdeced;
-    border: 1px solid #f6c9cc;
-    font-size: .9rem;
-}
-
-    .banner span {
-        flex: 1;
-    }
-
-    .banner.in-dialog {
-        margin-top: 1rem;
-    }
-
-.banner-close {
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    opacity: .7;
-}
-
-    .banner-close:hover {
-        opacity: 1;
-    }
 
 /* =====================================================
-   4. TOOLBAR: SEARCH + FILTER STATUS
+   TOOLBAR: SEARCH + FILTER STATUS
    ===================================================== */
 .toolbar-card {
     display: flex;
@@ -214,7 +179,7 @@
         }
 
 /* =====================================================
-   5. PANEL TABEL
+   PANEL TABEL
    ===================================================== */
 .panel {
     margin-top: 1.25rem;
@@ -398,7 +363,7 @@ tbody tr {
         }
 
 /* =====================================================
-   6. EMPTY STATE, FOOTER PANEL, SKELETON
+   EMPTY STATE, FOOTER PANEL, SKELETON
    ===================================================== */
 .empty {
     display: grid;
@@ -480,7 +445,7 @@ tbody tr {
 }
 
 /* =====================================================
-   7. MODAL: OVERLAY & DIALOG
+   MODAL: OVERLAY & DIALOG
    ===================================================== */
 .overlay {
     position: fixed;
@@ -589,7 +554,7 @@ tbody tr {
 }
 
 /* =====================================================
-   8. MODAL: FIELD FORM & STATUS
+   MODAL: FIELD FORM & STATUS
    ===================================================== */
 .row2 {
     display: grid;
@@ -723,7 +688,7 @@ tbody tr {
 }
 
 /* =====================================================
-   9. MODAL: KOMPOSISI BAHAN BAKU
+   MODAL: KOMPOSISI BAHAN BAKU
    ===================================================== */
 .section-head {
     display: flex;
@@ -853,7 +818,7 @@ tbody tr {
 }
 
 /* =====================================================
-   10. MODAL: FOOTER & TOMBOL
+   MODAL: FOOTER & TOMBOL
    ===================================================== */
 .dialog-foot {
     flex-shrink: 0;
@@ -901,7 +866,7 @@ tbody tr {
     }
 
 /* =====================================================
-   11. RESPONSIVE & ACCESSIBILITY
+   RESPONSIVE & ACCESSIBILITY
    ===================================================== */
 @media (max-width: 720px) {
     .page-head h1 {

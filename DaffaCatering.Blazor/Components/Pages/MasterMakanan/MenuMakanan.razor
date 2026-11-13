@@ -10,7 +10,7 @@
 
 <div class="menu-makanan-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     
     <header class="page-head">
         <div>
@@ -22,19 +22,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @* ================= 3. TOOLBAR: SEARCH + FILTER ================= *@
+    @* ================= TOOLBAR: SEARCH + FILTER ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -57,7 +49,7 @@
         </div>
     </section>
 
-    @* ================= 4. TABEL RESEP ================= *@
+    @* ================= TABEL RESEP ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -133,7 +125,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM RESEP ================= *@
+    @* ================= MODAL FORM RESEP ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -202,10 +194,7 @@
 
                         @if (!string.IsNullOrEmpty(modalError))
                         {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@modalError</span>
-                            </div>
+                            <NotifBanner @bind-Pesan="modalError" />
                         }
                     </div>
 
@@ -234,6 +223,7 @@
     private List<MenuMakananModels> daftarMenuMakanan = new();
     private List<SatuanBahanBakuModels> daftarSatuan = new();
     private bool isLoading = true;
+    private string pesanSukses = "";
     private string pesanError = "";
 
     private bool modalTampil = false;
@@ -293,8 +283,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await MuatSatuan();
         await MuatData();
+        await MuatSatuan();
     }
 
     private async Task MuatData()
@@ -307,7 +297,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal memuat data: " + ex.Message;
+            pesanError = $"Gagal memuat menu makanan: {ex.Message.TrimEnd('.')}.";
         }
         isLoading = false;
     }
@@ -322,12 +312,13 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal memuat satuan: " + ex.Message;
+            pesanError = $"Gagal satuan bahan baku: {ex.Message.TrimEnd('.')}.";
         }
     }
 
     private async Task BukaModalTambah()
     {
+        pesanSukses = "";
         formModel = new MenuMakananModels { Status = true, Jumlah = 1 };
         isEditMode = false;
         modalError = "";
@@ -339,7 +330,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            pesanError = $"Gagal menghasilkan ID: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -348,6 +339,7 @@
 
     private void BukaModalEdit(MenuMakananModels item)
     {
+        pesanSukses = "";
         formModel = new MenuMakananModels
         {
             IdMenu = item.IdMenu,
@@ -402,6 +394,7 @@
 
         if (success)
         {
+            pesanSukses = $"Menu makanan {formModel.NamaMenu} dengan kode {formModel.IdMenu} " + (isEditMode ? "berhasil diperbarui." : "berhasil ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
