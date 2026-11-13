@@ -14,7 +14,7 @@
 
 <div class="penerimaan-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Penerimaan Bahan Baku</h1>
@@ -25,30 +25,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER SUKSES & ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanSukses))
-    {
-        <div class="banner ok">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>@pesanSukses</span>
-            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
-
-    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    @* ================= TOOLBAR: SEARCH ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -57,7 +38,7 @@
         </label>
     </section>
 
-    @* ================= 4. TABEL PENERIMAAN ================= *@
+    @* ================= TABEL PENERIMAAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -125,7 +106,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM PENERIMAAN ================= *@
+    @* ================= MODAL FORM PENERIMAAN ================= *@
     @if (modalTampil)
     {
         var detailPembelianView = DaftarDetailPembelian.ToList();
@@ -297,13 +278,7 @@
 
                         <span class="hint">Aktifkan "Tutup Bahan Baku" bila sisa bahan baku ini tidak akan diterima lagi.</span>
 
-                        @if (!string.IsNullOrEmpty(detailError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@detailError</span>
-                            </div>
-                        }
+                        <NotifBanner @bind-Pesan="detailError" />
 
                         <div class="detail-actions">
                             @if (indeksEdit >= 0)
@@ -370,13 +345,7 @@
                         }
                     </div>
 
-                    @if (!string.IsNullOrEmpty(modalError))
-                    {
-                        <div class="banner in-dialog">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            <span>@modalError</span>
-                        </div>
-                    }
+                    <NotifBanner @bind-Pesan="modalError" />
                 </div>
 
                 @* ---------- Footer modal ---------- *@
@@ -397,7 +366,7 @@
         </div>
     }
 
-    @* ================= 6. MODAL CARI PEMBELIAN ================= *@
+    @* ================= MODAL CARI PEMBELIAN ================= *@
     @if (cariPembelianTampil)
     {
         var pembelianView = DaftarPembelianAktif.ToList();
@@ -464,7 +433,7 @@
 
 @code {
     // =====================================================
-    // 1. STATE & MODEL
+    // STATE & MODEL
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
@@ -522,7 +491,7 @@
     private string teksCariPembelian = "";
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -535,26 +504,26 @@
         var galat = new List<string>();
 
         try { daftarPenerimaan = await PenerimaanService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat penerimaan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat transaksi penerimaan bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarPembelian = await PembelianService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat pembelian: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat transaksi pembelian: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarPemasok = await PemasokService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat pemasok: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat pemasok: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
     // =====================================================
-    // 3. HELPER UMUM (format & lookup nama)
+    // HELPER UMUM (format & lookup nama)
     // =====================================================
     private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
 
@@ -584,7 +553,7 @@
         => daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == id)?.NamaBahanBaku ?? (id ?? "-");
 
     // =====================================================
-    // 4. DAFTAR PENERIMAAN: PENCARIAN
+    // DAFTAR PENERIMAAN: PENCARIAN
     // =====================================================
     private IEnumerable<PenerimaanBahanBakuModels> Filtered => daftarPenerimaan
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
@@ -596,7 +565,7 @@
         => string.Equals(p.Status, "Close", StringComparison.OrdinalIgnoreCase);
 
     // =====================================================
-    // 5. MODAL FORM: BUKA / TUTUP / RESET
+    // MODAL FORM: BUKA / TUTUP / RESET
     // =====================================================
     // ID otomatis: PNM + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<PenerimaanBahanBakuModels> data)
@@ -617,6 +586,7 @@
 
     private async Task BukaModalTambah()
     {
+        pesanSukses = "";
         ResetForm();
 
         try
@@ -630,7 +600,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menyiapkan form: " + ex.Message;
+            pesanError = $"Gagal menyiapkan form: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -656,7 +626,7 @@
     }
 
     // =====================================================
-    // 6. MODAL CARI: PEMBELIAN
+    // MODAL CARI: PEMBELIAN
     // =====================================================
     private IEnumerable<PembelianRow> DaftarPembelianAktif => daftarPembelian
         .Where(p => p.Status == "Pending")
@@ -682,7 +652,7 @@
     }
 
     // =====================================================
-    // 7. MODAL FORM: DATA PEMBELIAN
+    // MODAL FORM: DATA PEMBELIAN
     // =====================================================
     // Total yang sudah diterima untuk pembelian + bahan baku ini
     private decimal SudahDiterima(string idPembelian, string idBahanBaku)
@@ -746,7 +716,7 @@
     }
 
     // =====================================================
-    // 8. MODAL FORM: DETAIL (ITEM PENERIMAAN)
+    // MODAL FORM: DETAIL (ITEM PENERIMAAN)
     // =====================================================
     private void KosongkanInputDetail()
     {
@@ -864,7 +834,7 @@
     }
 
     // =====================================================
-    // 9. MODAL FORM: STATUS & SIMPAN
+    // MODAL FORM: STATUS & SIMPAN
     // =====================================================
     // Pending kalau masih ada bahan baku yang belum terpenuhi dan belum ditutup
     private string HitungStatus()
