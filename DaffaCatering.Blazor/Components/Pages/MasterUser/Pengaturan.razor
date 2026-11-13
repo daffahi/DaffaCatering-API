@@ -10,7 +10,7 @@
 
 <div class="set-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Pengaturan</h1>
@@ -21,30 +21,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER ERROR & SUKSES ================= *@
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @if (!string.IsNullOrEmpty(pesanSukses))
-    {
-        <div class="banner ok">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>@pesanSukses</span>
-            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
-
-    @* ================= 3. TOOLBAR: SEARCH + FILTER ================= *@
+    @* ================= TOOLBAR: SEARCH + FILTER ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -67,7 +48,7 @@
         </div>
     </section>
 
-    @* ================= 4. TABEL PENGGUNA ================= *@
+    @* ================= TABEL PENGGUNA ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -142,7 +123,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM PENGGUNA ================= *@
+    @* ================= MODAL FORM PENGGUNA ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -211,13 +192,7 @@
                             <p class="hint">Ini akun yang sedang Anda pakai, jadi role dan status tidak bisa diubah</p>
                         }
 
-                        @if (!string.IsNullOrEmpty(modalError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@modalError</span>
-                            </div>
-                        }
+                        <NotifBanner @bind-Pesan="modalError" />
                     </div>
 
                     @* ---------- Footer modal ---------- *@
@@ -239,7 +214,7 @@
         </div>
     }
 
-    @* ================= 6. MODAL RESET PASSWORD ================= *@
+    @* ================= MODAL RESET PASSWORD ================= *@
     @if (resetTampil)
     {
         <div class="overlay" @onclick="TutupReset">
@@ -270,13 +245,7 @@
                             <ValidationMessage For="() => resetModel.KonfirmasiPassword" />
                         </div>
 
-                        @if (!string.IsNullOrEmpty(resetError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@resetError</span>
-                            </div>
-                        }
+                        <NotifBanner @bind-Pesan="resetError" />
                     </div>
 
                     <footer class="dialog-foot">
@@ -307,8 +276,8 @@
     private List<RoleModels> daftarRole = new();
     private string idSaya = "";
     private bool isLoading = true;
-    private string pesanError = "";
     private string pesanSukses = "";
+    private string pesanError = "";
 
     // --- modal form pengguna ---
     private bool modalTampil = false;
@@ -397,13 +366,14 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal memuat data: " + ex.Message;
+            pesanError = $"Gagal memuat data pengguna: {ex.Message.TrimEnd('.')}.";
         }
         isLoading = false;
     }
 
     private async Task BukaModalTambah()
     {
+        pesanSukses = "";
         formModel = new UserModels { Status = true };
         isEditMode = false;
         modalError = "";
@@ -416,7 +386,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menghasilkan ID: " + ex.Message;
+            pesanError = $"Gagal menghasilkan ID: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -425,6 +395,7 @@
 
     private void BukaModalEdit(UserModels item)
     {
+        pesanSukses = "";
         formModel = new UserModels
         {
             IdUser = item.IdUser,
@@ -461,6 +432,7 @@
 
         if (success)
         {
+            pesanSukses = $"Pengguna {formModel.NamaUser} dengan kode {formModel.IdUser} berhasil " + (isEditMode ? "diperbarui." : "ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
