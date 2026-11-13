@@ -1,5 +1,5 @@
 /* =====================================================
-   1. VARIABEL & WRAPPER HALAMAN
+   VARIABEL & WRAPPER HALAMAN
    ===================================================== */
 .pembelian-page {
     --brand-950: #0c3b2e;
@@ -26,7 +26,7 @@
     }
 
 /* =====================================================
-   2. HEADER HALAMAN (judul + tombol tambah)
+   HEADER HALAMAN (judul + tombol tambah)
    ===================================================== */
 .page-head {
     display: flex;
@@ -76,49 +76,7 @@
     }
 
 /* =====================================================
-   3. BANNER SUKSES & ERROR
-   ===================================================== */
-.banner {
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-    margin-top: 1rem;
-    padding: .75rem 1rem;
-    border-radius: 12px;
-    color: #9b2c33;
-    background: #fdeced;
-    border: 1px solid #f6c9cc;
-    font-size: .9rem;
-}
-
-    .banner span {
-        flex: 1;
-    }
-
-    .banner.in-dialog {
-        margin-top: 1rem;
-    }
-
-    .banner.ok {
-        color: var(--brand-800);
-        background: var(--brand-100);
-        border-color: #bfe3d0;
-    }
-
-.banner-close {
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    opacity: .7;
-}
-
-    .banner-close:hover {
-        opacity: 1;
-    }
-
-/* =====================================================
-   4. TOOLBAR: SEARCH
+   TOOLBAR: SEARCH
    ===================================================== */
 .toolbar-card {
     display: flex;
@@ -163,7 +121,7 @@
         }
 
 /* =====================================================
-   5. PANEL TABEL
+   PANEL TABEL
    ===================================================== */
 .panel {
     margin-top: 1.25rem;
@@ -353,7 +311,7 @@ tbody tr {
         }
 
 /* =====================================================
-   6. EMPTY STATE, FOOTER PANEL, SKELETON
+   EMPTY STATE, FOOTER PANEL, SKELETON
    ===================================================== */
 .empty {
     display: grid;
@@ -435,7 +393,7 @@ tbody tr {
 }
 
 /* =====================================================
-   7. MODAL: OVERLAY & DIALOG
+   MODAL: OVERLAY & DIALOG
    ===================================================== */
 .overlay {
     position: fixed;
@@ -541,7 +499,7 @@ tbody tr {
 }
 
 /* =====================================================
-   8. MODAL: FIELD FORM
+   MODAL: FIELD FORM
    ===================================================== */
 .row2 {
     display: grid;
@@ -618,7 +576,7 @@ tbody tr {
     }
 
 /* =====================================================
-   9. MODAL: DATA DETAIL
+   MODAL: DATA DETAIL
    ===================================================== */
 .section-head {
     display: flex;
@@ -787,7 +745,7 @@ tbody tr {
 }
 
 /* =====================================================
-   10. MODAL: FOOTER & TOMBOL
+   MODAL: FOOTER & TOMBOL
    ===================================================== */
 .dialog-foot {
     flex-shrink: 0;
@@ -835,7 +793,7 @@ tbody tr {
     }
 
 /* =====================================================
-   11. RESPONSIVE & ACCESSIBILITY
+   RESPONSIVE & ACCESSIBILITY
    ===================================================== */
 @media (max-width: 720px) {
     .page-head h1 {

@@ -13,7 +13,7 @@
 
 <div class="pembelian-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Pembelian</h1>
@@ -24,30 +24,11 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER SUKSES & ERROR ================= *@
-    @if (!string.IsNullOrEmpty(pesanSukses))
-    {
-        <div class="banner ok">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>@pesanSukses</span>
-            <button class="banner-close" @onclick="() => pesanSukses = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner Sukses @bind-Pesan="pesanSukses" />
+    <NotifBanner @bind-Pesan="pesanError" />
 
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@pesanError</span>
-            <button class="banner-close" @onclick="() => pesanError = string.Empty">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
-
-    @* ================= 3. TOOLBAR: SEARCH ================= *@
+    @* ================= TOOLBAR: SEARCH ================= *@
     <section class="toolbar-card">
         <label class="search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -56,7 +37,7 @@
         </label>
     </section>
 
-    @* ================= 4. TABEL PEMBELIAN ================= *@
+    @* ================= TABEL PEMBELIAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -135,7 +116,7 @@
         }
     </section>
 
-    @* ================= 5. MODAL FORM PEMBELIAN ================= *@
+    @* ================= MODAL FORM PEMBELIAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -233,13 +214,7 @@
                             </div>
                         </div>
 
-                        @if (!string.IsNullOrEmpty(detailError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@detailError</span>
-                            </div>
-                        }
+                        <NotifBanner @bind-Pesan="detailError" />
 
                         <div class="detail-actions">
                             @if (indeksEdit >= 0)
@@ -307,13 +282,7 @@
                         <strong>@FormatAngka(TotalHarga)</strong>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(modalError))
-                    {
-                        <div class="banner in-dialog">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            <span>@modalError</span>
-                        </div>
-                    }
+                    <NotifBanner @bind-Pesan="modalError" />
                 </div>
 
                 @* ---------- Footer modal ---------- *@
@@ -334,7 +303,7 @@
         </div>
     }
 
-    @* ================= 6. MODAL CARI PEMASOK ================= *@
+    @* ================= MODAL CARI PEMASOK ================= *@
     @if (cariPemasokTampil)
     {
         var pemasokView = DaftarPemasokAktif.ToList();
@@ -395,7 +364,7 @@
         </div>
     }
 
-    @* ================= 7. MODAL CARI BAHAN BAKU ================= *@
+    @* ================= MODAL CARI BAHAN BAKU ================= *@
     @if (cariBahanTampil)
     {
         var bahanView = DaftarBahanAktif.ToList();
@@ -460,7 +429,7 @@
 
 @code {
     // =====================================================
-    // 1. STATE & MODEL
+    // STATE & MODEL
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
@@ -516,7 +485,7 @@
     private string teksCariBahan = "";
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -529,23 +498,23 @@
         var galat = new List<string>();
 
         try { daftarPembelian = await PembelianService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat transaksi pembelian: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat transaksi pembelian: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarPemasok = await PemasokService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat pemasok: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat pemasok: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         pesanError = string.Join(" ", galat);
         isLoading = false;
     }
 
     // =====================================================
-    // 3. HELPER UMUM (format & lookup nama)
+    // HELPER UMUM (format & lookup nama)
     // =====================================================
     private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
 
@@ -575,7 +544,7 @@
         => daftarBahanBaku.FirstOrDefault(b => b.IdBahanBaku == id)?.NamaBahanBaku ?? (id ?? "-");
 
     // =====================================================
-    // 4. DAFTAR PEMBELIAN: PENCARIAN
+    // DAFTAR PEMBELIAN: PENCARIAN
     // =====================================================
     private IEnumerable<PembelianModels> Filtered => daftarPembelian
         .Where(p => string.IsNullOrWhiteSpace(teksCari)
@@ -587,7 +556,7 @@
         => string.Equals(p.Status, "Close", StringComparison.OrdinalIgnoreCase);
 
     // =====================================================
-    // 5. MODAL FORM: BUKA / TUTUP / RESET
+    // MODAL FORM: BUKA / TUTUP / RESET
     // =====================================================
     // ID otomatis: PB + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<PembelianModels> data)
@@ -608,6 +577,7 @@
 
     private async Task BukaModalTambah()
     {
+        pesanSukses = "";
         ResetForm();
         isEditMode = false;
         statusEdit = "";
@@ -621,7 +591,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = "Gagal menyiapkan form: " + ex.Message;
+            pesanError = $"Gagal menghasilkan ID: {ex.Message.TrimEnd('.')}.";
             return;
         }
 
@@ -631,6 +601,7 @@
 
     private void BukaModalEdit(PembelianModels item)
     {
+        pesanSukses = "";
         if (IsClose(item)) return;
 
         ResetForm();
@@ -675,7 +646,7 @@
     }
 
     // =====================================================
-    // 6. MODAL CARI: PEMASOK
+    // MODAL CARI: PEMASOK
     // =====================================================
     private IEnumerable<PemasokRow> DaftarPemasokAktif => daftarPemasok
         .Where(p => p.Status)
@@ -700,7 +671,7 @@
     }
 
     // =====================================================
-    // 7. MODAL CARI: BAHAN BAKU
+    // MODAL CARI: BAHAN BAKU
     // =====================================================
     private IEnumerable<BahanRow> DaftarBahanAktif => daftarBahanBaku
         .Where(b => b.Status)
@@ -726,7 +697,7 @@
     }
 
     // =====================================================
-    // 8. MODAL FORM: DETAIL (ITEM PEMBELIAN)
+    // MODAL FORM: DETAIL (ITEM PEMBELIAN)
     // =====================================================
     private string SubtotalInput
         => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
@@ -844,7 +815,7 @@
     }
 
     // =====================================================
-    // 9. MODAL FORM: SIMPAN
+    // MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
