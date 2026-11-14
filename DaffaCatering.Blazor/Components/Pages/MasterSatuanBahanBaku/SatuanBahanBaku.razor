@@ -237,7 +237,7 @@
     }
 
     // =====================================================
-    // 3. HELPER TAMPILAN
+    // HELPER TAMPILAN
     // =====================================================
     private static string Inisial(string? nama)
     {
@@ -251,7 +251,7 @@
     private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
 
     // =====================================================
-    // 4. DAFTAR: PENCARIAN
+    // DAFTAR: PENCARIAN
     // =====================================================
     private IEnumerable<SatuanBahanBakuModels> Filtered => daftarSatuan
         .Where(c => string.IsNullOrWhiteSpace(teksCari)
@@ -317,7 +317,7 @@
     }
 
     // =====================================================
-    // 6. MODAL FORM: SIMPAN
+    // MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
