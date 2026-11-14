@@ -331,6 +331,11 @@ tbody tr {
     }
 
 .panel-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem 1rem;
+    flex-wrap: wrap;
     padding: .8rem 1.25rem;
     border-top: 1px solid var(--line);
     font-size: .82rem;
@@ -338,6 +343,54 @@ tbody tr {
     background: #fcfbf8;
 }
 
+    .panel-foot b {
+        color: var(--ink);
+    }
+
+/* ---------- Pagination ---------- */
+.pager {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.pg-info {
+    min-width: 110px;
+    text-align: center;
+}
+
+.pg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .9rem;
+    border: 1px solid #d9d5cb;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+    .pg-btn:hover:not(:disabled) {
+        background: var(--brand-50);
+        border-color: var(--brand-500);
+        color: var(--brand-800);
+    }
+
+    .pg-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(34, 160, 107, .25);
+    }
+
+    .pg-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+/* ---------- Skeleton ---------- */
 .skeleton {
     padding: .5rem 1.25rem 1rem;
 }
@@ -506,6 +559,10 @@ tbody tr {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
+
+    .row2.row-total {
+        margin-top: 20px;
+    }
 
 .row4 {
     display: grid;
@@ -808,6 +865,16 @@ tbody tr {
 @media (max-width: 520px) {
     .row2, .row4 {
         grid-template-columns: 1fr;
+    }
+
+    .panel-foot {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .pager {
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
