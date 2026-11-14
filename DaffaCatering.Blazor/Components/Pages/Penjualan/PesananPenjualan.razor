@@ -11,7 +11,13 @@
 @inject SatuanBahanBakuService SatuanBahanBakuService
 
 @{
-    var view = Filtered.ToList();
+    var hasil = Filtered.ToList();
+    var totalHalaman = Math.Max(1, (int)Math.Ceiling(hasil.Count / (double)UkuranHalaman));
+    if (halaman > totalHalaman) halaman = totalHalaman;
+
+    var view = hasil.Skip((halaman - 1) * UkuranHalaman).Take(UkuranHalaman).ToList();
+    var awal = hasil.Count == 0 ? 0 : (halaman - 1) * UkuranHalaman + 1;
+    var akhir = awal == 0 ? 0 : awal + view.Count - 1;
 }
 
 <div class="pesanan-penjualan-page">
@@ -119,7 +125,25 @@
             </div>
 
             <div class="panel-foot">
-                Menampilkan <b>@view.Count</b> dari <b>@daftarPesananPenjualan.Count</b> pesanan penjualan
+                <span>Menampilkan <b>@awal–@akhir</b> dari <b>@hasil.Count</b> pesanan penjualan</span>
+
+                <div class="pager">
+                    @if (halaman > 1)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman--">
+                            <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                        </button>
+                    }
+
+                    <span class="pg-info">Halaman <b>@halaman</b> / @totalHalaman</span>
+
+                    @if (halaman < totalHalaman)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman++">
+                            Berikutnya <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
             </div>
         }
     </section>
@@ -227,11 +251,11 @@
                             </div>
                             <div class="field">
                                 <label>Harga</label>
-                                <input type="text" disabled placeholder="0" value="@HargaInput" />
+                                <input type="text" disabled placeholder="0" value="@HargaTampil" />
                             </div>
                             <div class="field">
                                 <label>Subtotal</label>
-                                <input type="text" disabled value="@SubtotalInput" />
+                                <input type="text" disabled value="@SubtotalTampil" />
                             </div>
                         </div>
 
@@ -299,7 +323,7 @@
                     </div>
 
                     @* ---------- Uang muka & total ---------- *@
-                    <div class="row2" style="margin-top: 20px;">
+                    <div class="row2 row-total">
                         <div class="field">
                             <label>Uang Muka <b class="req">*</b></label>
                             <input type="number" step="1" min="0" placeholder="0"
@@ -587,6 +611,9 @@
         public decimal Harga { get; set; }
     }
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
     // --- data ---
     private List<PesananPenjualanModels> daftarPesananPenjualan = new();
     private List<PelangganModels> daftarPelanggan = new();
@@ -597,7 +624,17 @@
     private bool isLoading = true;
     private string pesanSukses = "";
     private string pesanError = "";
-    private string teksCari = "";
+
+    // --- pagination & pencarian ---
+    private const int UkuranHalaman = 10;
+    private int halaman = 1;
+
+    private string _teksCari = "";
+    private string teksCari
+    {
+        get => _teksCari;
+        set { _teksCari = value; halaman = 1; }
+    }
 
     // --- modal form: header ---
     private bool modalTampil = false;
@@ -669,7 +706,7 @@
     }
 
     // =====================================================
-    // HELPER UMUM (format & lookup nama)
+    // HELPER UMUM (format, parsing & lookup nama)
     // =====================================================
     private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
 
@@ -680,23 +717,17 @@
     // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
 
-    private static bool TryParseAngka(string? teks, out decimal hasil)
-    {
-        hasil = 0;
-        var t = (teks ?? "").Trim().Replace(',', '.');
-        return t.Length > 0
-               && decimal.TryParse(t, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out hasil)
-               && hasil > 0;
-    }
+    private static bool TryParseTgl(string? teks, out DateOnly hasil)
+        => DateOnly.TryParseExact(teks, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out hasil);
 
-    // Uang muka boleh 0, tetapi tidak boleh negatif
-    private static bool TryParseUangMuka(string? teks, out decimal hasil)
+    // Angka harus lebih dari 0, kecuali izinNol (mis. uang muka boleh 0)
+    private static bool TryParseAngka(string? teks, out decimal hasil, bool izinNol = false)
     {
         hasil = 0;
         var t = (teks ?? "").Trim().Replace(',', '.');
         return t.Length > 0
                && decimal.TryParse(t, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out hasil)
-               && hasil >= 0;
+               && (izinNol ? hasil >= 0 : hasil > 0);
     }
 
     private string NamaPelanggan(string? id)
@@ -707,6 +738,14 @@
 
     private string NamaSatuan(string? id)
         => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
+
+    // Daftar pesanan bisa saja tidak membawa detail, jadi ambil data lengkap per ID
+    private async Task<PesananPenjualanModels> AmbilLengkapAsync(PesananPenjualanModels item)
+    {
+        if (item.Details != null && item.Details.Any()) return item;
+
+        return await PesananPenjualanService.GetByIdAsync(item.IdPesanan) ?? item;
+    }
 
     // =====================================================
     // DAFTAR PESANAN PENJUALAN: PENCARIAN
@@ -742,13 +781,12 @@
 
     private async Task BukaModalTambah()
     {
-        pesanSukses = "";
         ResetForm();
         isEditMode = false;
 
         try
         {
-            // data terbaru supaya nomor urut tidak basi
+            // data terbaru supaya nomor urut dan harga menu tidak basi
             var terbaru = await PesananPenjualanService.GetAllAsync();
             daftarMenuMakanan = await MenuMakananService.GetAllAsync();
             kodePesananPenjualan = BuatIdBerikutnya(terbaru);
@@ -766,24 +804,19 @@
 
     private async Task BukaModalEdit(PesananPenjualanModels item)
     {
-        pesanSukses = "";
         if (IsClose(item)) return;
 
         ResetForm();
 
-        // Daftar pesanan bisa saja tidak membawa detail, jadi ambil data lengkap per ID
-        var lengkap = item;
-        if (item.Details == null || !item.Details.Any())
+        PesananPenjualanModels lengkap;
+        try
         {
-            try
-            {
-                lengkap = await PesananPenjualanService.GetByIdAsync(item.IdPesanan) ?? item;
-            }
-            catch (Exception ex)
-            {
-                pesanError = "Gagal memuat detail pesanan penjualan: " + ex.Message;
-                return;
-            }
+            lengkap = await AmbilLengkapAsync(item);
+        }
+        catch (Exception ex)
+        {
+            pesanError = $"Gagal memuat detail pesanan penjualan: {ex.Message.TrimEnd('.')}.";
+            return;
         }
 
         isEditMode = true;
@@ -837,8 +870,8 @@
     {
         tglPesananInput = e.Value?.ToString() ?? string.Empty;
 
-        if (DateOnly.TryParseExact(tglPesananInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var pesan)
-            && DateOnly.TryParseExact(tglPengambilanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var ambil)
+        if (TryParseTgl(tglPesananInput, out var pesan)
+            && TryParseTgl(tglPengambilanInput, out var ambil)
             && ambil < pesan)
         {
             tglPengambilanInput = tglPesananInput;
@@ -902,10 +935,10 @@
     // =====================================================
     // MODAL FORM: DETAIL (ITEM PESANAN)
     // =====================================================
-    private string HargaInput
+    private string HargaTampil
         => TryParseAngka(hargaInput, out var h) ? FormatAngka(h) : "";
 
-    private string SubtotalInput
+    private string SubtotalTampil
         => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
             ? FormatAngka(j * h)
             : "";
@@ -986,7 +1019,7 @@
             return;
         }
 
-        // Duplikat = menu yang sama
+        // duplikat = menu yang sama (kecuali baris yang sedang diubah)
         var kembar = items
             .Where((it, i) => i != indeksEdit)
             .Any(it => it.IdMenu == menuMakananDipilih.IdMenuMakanan);
@@ -1021,7 +1054,7 @@
     }
 
     // =====================================================
-    // 9. MODAL FORM: SIMPAN
+    // MODAL FORM: SIMPAN
     // =====================================================
     private async Task SimpanData()
     {
@@ -1039,7 +1072,7 @@
             return;
         }
 
-        if (!DateOnly.TryParseExact(tglPesananInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tglPesanan))
+        if (!TryParseTgl(tglPesananInput, out var tglPesanan))
         {
             modalError = "Harap isi tanggal pesanan.";
             return;
@@ -1051,7 +1084,7 @@
             return;
         }
 
-        if (!DateOnly.TryParseExact(tglPengambilanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tglPengambilan))
+        if (!TryParseTgl(tglPengambilanInput, out var tglPengambilan))
         {
             modalError = "Harap isi tanggal pengambilan.";
             return;
@@ -1075,7 +1108,7 @@
             return;
         }
 
-        if (!TryParseUangMuka(uangMukaInput, out var uangMuka) || uangMuka != decimal.Truncate(uangMuka))
+        if (!TryParseAngka(uangMukaInput, out var uangMuka, izinNol: true) || uangMuka != decimal.Truncate(uangMuka))
         {
             modalError = "Uang muka harus berupa angka bulat.";
             return;
@@ -1124,7 +1157,8 @@
 
             if (success)
             {
-                pesanSukses = $"No. Pesanan {kodePesananPenjualan} atas nama {pelangganDipilih.NamaPelanggan} berhasil {(isEditMode ? "diperbarui." : "ditambahkan.")}";
+                pesanSukses = $"No. Pesanan {kodePesananPenjualan} atas nama {pelangganDipilih.NamaPelanggan} berhasil "
+                            + (isEditMode ? "diperbarui." : "ditambahkan.");
                 modalTampil = false;
                 await MuatData();
             }
@@ -1146,9 +1180,6 @@
     // =====================================================
     // BUKTI PESANAN (CETAK)
     // =====================================================
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthState { get; set; }
-
     private PesananPenjualanModels? buktiCetak;
     private bool perluCetak;
     private bool sedangCetak;
@@ -1168,10 +1199,7 @@
 
         try
         {
-            // Daftar pesanan bisa saja tidak membawa detail, jadi ambil data lengkap per ID
-            var lengkap = item;
-            if (item.Details == null || !item.Details.Any())
-                lengkap = await PesananPenjualanService.GetByIdAsync(item.IdPesanan) ?? item;
+            var lengkap = await AmbilLengkapAsync(item);
 
             if (lengkap.Details == null || !lengkap.Details.Any())
             {
@@ -1184,7 +1212,7 @@
         }
         catch (Exception ex)
         {
-            pesanError = $"Gagal menyimpan bukti pesanan: {ex.Message.TrimEnd('.')}.";
+            pesanError = $"Gagal mencetak bukti pesanan: {ex.Message.TrimEnd('.')}.";
         }
         finally
         {

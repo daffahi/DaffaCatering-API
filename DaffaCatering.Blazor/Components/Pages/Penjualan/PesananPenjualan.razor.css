@@ -18,10 +18,10 @@
     padding-bottom: 2rem;
 }
 
-    .pembelian-page button,
-    .pembelian-page input,
-    .pembelian-page select,
-    .pembelian-page textarea {
+    .pesanan-penjualan-page button,
+    .pesanan-penjualan-page input,
+    .pesanan-penjualan-page select,
+    .pesanan-penjualan-page textarea {
         font-family: inherit;
     }
 
@@ -189,7 +189,7 @@ tbody tr {
     }
 }
 
-/* ---------- Kolom pembelian (avatar + nomor) ---------- */
+/* ---------- Kolom pesanan penjualan (avatar + nomor) ---------- */
 .who {
     display: flex;
     align-items: center;
@@ -331,6 +331,11 @@ tbody tr {
     }
 
 .panel-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem 1rem;
+    flex-wrap: wrap;
     padding: .8rem 1.25rem;
     border-top: 1px solid var(--line);
     font-size: .82rem;
@@ -338,6 +343,54 @@ tbody tr {
     background: #fcfbf8;
 }
 
+    .panel-foot b {
+        color: var(--ink);
+    }
+
+/* ---------- Pagination ---------- */
+.pager {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.pg-info {
+    min-width: 110px;
+    text-align: center;
+}
+
+.pg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .9rem;
+    border: 1px solid #d9d5cb;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+    .pg-btn:hover:not(:disabled) {
+        background: var(--brand-50);
+        border-color: var(--brand-500);
+        color: var(--brand-800);
+    }
+
+    .pg-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(34, 160, 107, .25);
+    }
+
+    .pg-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+/* ---------- Skeleton ---------- */
 .skeleton {
     padding: .5rem 1.25rem 1rem;
 }
@@ -507,6 +560,10 @@ tbody tr {
     gap: 1rem;
 }
 
+    .row2.row-total {
+        margin-top: 20px;
+    }
+
 .row4 {
     display: grid;
     grid-template-columns: 1.3fr 1.2fr 1fr 1fr;
@@ -532,7 +589,7 @@ tbody tr {
             color: var(--muted);
         }
 
-    .field input, .field select {
+    .field input, .field select, .field textarea {
         width: 100%;
         padding: .6rem .8rem;
         border: 1px solid #d9d5cb;
@@ -543,7 +600,7 @@ tbody tr {
         transition: border-color .15s, box-shadow .15s;
     }
 
-        .field input:focus, .field select:focus {
+        .field input:focus, .field select:focus, .field textarea:focus {
             border-color: var(--brand-600);
             box-shadow: 0 0 0 3px rgba(34, 160, 107, .18);
         }
@@ -553,6 +610,10 @@ tbody tr {
             color: var(--muted);
             cursor: not-allowed;
         }
+
+    .field textarea {
+        resize: vertical;
+    }
 
 .req {
     color: var(--danger);
@@ -564,7 +625,7 @@ tbody tr {
     color: var(--muted);
 }
 
-/* ---------- Pilih pemasok / bahan baku (input + tombol cari) ---------- */
+/* ---------- Pilih pelanggan / menu makanan (input + tombol cari) ---------- */
 .pick-row {
     display: flex;
     gap: .5rem;
@@ -704,27 +765,7 @@ tbody tr {
     color: var(--muted);
 }
 
-/* ---------- Total harga ---------- */
-.total-row {
-    display: flex;
-    justify-content: flex-end;
-    align-items: baseline;
-    gap: .8rem;
-    margin-top: 1rem;
-}
-
-    .total-row span {
-        font-size: .85rem;
-        font-weight: 600;
-        color: var(--muted);
-    }
-
-    .total-row strong {
-        font-size: 1.2rem;
-        color: var(--brand-800);
-    }
-
-/* ---------- Modal cari: tabel pemasok & bahan baku ---------- */
+/* ---------- Modal cari: tabel pelanggan & menu makanan ---------- */
 .batch-toolbar {
     display: flex;
     align-items: center;
@@ -808,6 +849,16 @@ tbody tr {
 @media (max-width: 520px) {
     .row2, .row4 {
         grid-template-columns: 1fr;
+    }
+
+    .panel-foot {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .pager {
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
