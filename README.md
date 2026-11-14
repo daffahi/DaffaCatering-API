@@ -156,7 +156,7 @@ To use a different SQL Server, set the `TEST_DB_SERVER_CONNECTION` environment v
 - [x] Blazor: Sales, Purchasing, and Inventory transaction pages
 - [x] Operational reports
 - [x] Automated tests (xUnit) and continuous integration
-- [ ] Online deployment
+- [] Online deployment
 
 ## Author
 **Daffa Shiddiq Hidayat**, Information Systems graduate.
