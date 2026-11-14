@@ -2,9 +2,9 @@
 @attribute [Authorize(Roles = AppRoles.AdminPenjualan)]
 @implements IAsyncDisposable
 
+@using System.Globalization
 @inject IConfiguration Config
 @inject IJSRuntime JS
-@using System.Globalization
 @inject PenjualanService PenjualanService
 @inject PesananPenjualanService PesananPenjualanService
 @inject PelangganService PelangganService
@@ -12,7 +12,13 @@
 @inject SatuanBahanBakuService SatuanBahanBakuService
 
 @{
-    var view = Filtered.ToList();
+    var hasil = Filtered.ToList();
+    var totalHalaman = Math.Max(1, (int)Math.Ceiling(hasil.Count / (double)UkuranHalaman));
+    if (halaman > totalHalaman) halaman = totalHalaman;
+
+    var view = hasil.Skip((halaman - 1) * UkuranHalaman).Take(UkuranHalaman).ToList();
+    var awal = hasil.Count == 0 ? 0 : (halaman - 1) * UkuranHalaman + 1;
+    var akhir = awal == 0 ? 0 : awal + view.Count - 1;
 }
 
 <div class="penjualan-page">
@@ -73,6 +79,8 @@
                     <tbody>
                         @foreach (var (item, i) in view.Select((item, i) => (item, i)))
                         {
+                            var tutup = IsClose(item);
+
                             <tr @key="item.IdPenjualan" style="--i:@Math.Min(i, 12)">
                                 <td>
                                     <div class="who">
@@ -87,14 +95,14 @@
                                 <td>@NamaPelanggan(item.IdPelanggan)</td>
                                 <td class="mono">@FormatAngka(item.Total)</td>
                                 <td>
-                                    <span class="pill @(IsClose(item) ? "closed" : "pending")">
+                                    <span class="pill @(tutup ? "closed" : "pending")">
                                         <i></i>@(string.IsNullOrWhiteSpace(item.Status) ? "-" : item.Status)
                                     </span>
                                 </td>
                                 <td class="actions">
                                     <button class="icon-btn"
-                                            title="@(IsClose(item) ? "Penjualan sudah ditutup" : "Edit")"
-                                            disabled="@IsClose(item)"
+                                            title="@(tutup ? "Penjualan sudah ditutup" : "Edit")"
+                                            disabled="@tutup"
                                             @onclick="() => BukaModalEdit(item)">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
@@ -120,7 +128,25 @@
             </div>
 
             <div class="panel-foot">
-                Menampilkan <b>@view.Count</b> dari <b>@daftarPenjualan.Count</b> penjualan
+                <span>Menampilkan <b>@awal–@akhir</b> dari <b>@hasil.Count</b> penjualan</span>
+
+                <div class="pager">
+                    @if (halaman > 1)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman--">
+                            <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                        </button>
+                    }
+
+                    <span class="pg-info">Halaman <b>@halaman</b> / @totalHalaman</span>
+
+                    @if (halaman < totalHalaman)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman++">
+                            Berikutnya <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
             </div>
         }
     </section>
@@ -234,14 +260,14 @@
                             </div>
                             <div class="field">
                                 <label>Harga</label>
-                                <input type="text" disabled placeholder="0" value="@HargaInput" />
+                                <input type="text" disabled placeholder="0" value="@HargaTampil" />
                             </div>
                             <div class="field">
                                 <label>Subtotal</label>
-                                <input type="text" disabled value="@SubtotalInput" />
+                                <input type="text" disabled value="@SubtotalTampil" />
                             </div>
                         </div>
-                        
+
                         <NotifBanner @bind-Pesan="detailError" />
 
                         <div class="detail-actions">
@@ -306,7 +332,7 @@
                     </div>
 
                     @* ---------- Uang muka, sisa pembayaran & total ---------- *@
-                    <div class="row2" style="margin-top: 20px;">
+                    <div class="row2 row-total">
                         <div class="field">
                             <label>Uang Muka</label>
                             <input type="text" disabled placeholder="0"
@@ -561,7 +587,7 @@
 
             <div class="faktur-meta">
                 <span>Dicetak oleh: <b>@namaPencetak</b></span>
-                <span>Tanggal Cetak: <b>@Tgl(DateOnly.FromDateTime(DateTime.Today))</b></span>
+                <span>Tanggal Cetak: <b>@Tgl(HariIni)</b></span>
             </div>
 
             <div class="faktur-info">
@@ -710,7 +736,17 @@
     private bool isLoading = true;
     private string pesanSukses = "";
     private string pesanError = "";
-    private string teksCari = "";
+
+    // --- pagination & pencarian ---
+    private const int UkuranHalaman = 10;
+    private int halaman = 1;
+
+    private string _teksCari = "";
+    private string teksCari
+    {
+        get => _teksCari;
+        set { _teksCari = value; halaman = 1; }
+    }
 
     // --- modal form: header ---
     private bool modalTampil = false;
@@ -792,14 +828,19 @@
     }
 
     // =====================================================
-    // HELPER UMUM (format & lookup nama)
+    // HELPER UMUM (format, parsing & lookup nama)
     // =====================================================
+    private static DateOnly HariIni => DateOnly.FromDateTime(DateTime.Today);
+
     private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
     private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
 
     // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
+
+    private static bool TryParseTgl(string? teks, out DateOnly hasil)
+        => DateOnly.TryParseExact(teks, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out hasil);
 
     private static bool TryParseAngka(string? teks, out decimal hasil)
     {
@@ -818,6 +859,21 @@
 
     private string NamaSatuan(string? id)
         => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
+
+    // Daftar bisa saja tidak membawa detail, jadi ambil data lengkap per ID
+    private async Task<PenjualanModels> AmbilPenjualanLengkapAsync(PenjualanModels item)
+    {
+        if (item.Details != null && item.Details.Any()) return item;
+
+        return await PenjualanService.GetByIdAsync(item.IdPenjualan) ?? item;
+    }
+
+    private async Task<PesananPenjualanModels> AmbilPesananLengkapAsync(PesananPenjualanModels item)
+    {
+        if (item.Details != null && item.Details.Any()) return item;
+
+        return await PesananPenjualanService.GetByIdAsync(item.IdPesanan) ?? item;
+    }
 
     // =====================================================
     // DAFTAR PENJUALAN: PENCARIAN
@@ -856,7 +912,6 @@
 
     private async Task BukaModalTambah()
     {
-        pesanSukses = "";
         ResetForm();
         isEditMode = false;
 
@@ -874,28 +929,23 @@
             return;
         }
 
-        tglPenjualanInput = Iso(DateOnly.FromDateTime(DateTime.Today));
+        tglPenjualanInput = Iso(HariIni);
         modalTampil = true;
     }
 
     private async Task BukaModalEdit(PenjualanModels item)
     {
-        pesanSukses = "";
         ResetForm();
 
-        // Daftar penjualan bisa saja tidak membawa detail, jadi ambil data lengkap per ID
-        var lengkap = item;
-        if (item.Details == null || !item.Details.Any())
+        PenjualanModels lengkap;
+        try
         {
-            try
-            {
-                lengkap = await PenjualanService.GetByIdAsync(item.IdPenjualan) ?? item;
-            }
-            catch (Exception ex)
-            {
-                pesanError = "Gagal memuat detail penjualan: " + ex.Message;
-                return;
-            }
+            lengkap = await AmbilPenjualanLengkapAsync(item);
+        }
+        catch (Exception ex)
+        {
+            pesanError = $"Gagal memuat detail penjualan: {ex.Message.TrimEnd('.')}.";
+            return;
         }
 
         isEditMode = true;
@@ -970,25 +1020,22 @@
     {
         modalError = "";
 
-        var lengkap = r;
-        if (r.Details == null || !r.Details.Any())
+        PesananPenjualanModels lengkap;
+        try
         {
-            try
-            {
-                lengkap = await PesananPenjualanService.GetByIdAsync(r.IdPesanan) ?? r;
-            }
-            catch (Exception ex)
-            {
-                cariPesananTampil = false;
-                modalError = $"Gagal memuat detail pesanan: {ex.Message.TrimEnd('.')}.";
-                return;
-            }
+            lengkap = await AmbilPesananLengkapAsync(r);
+        }
+        catch (Exception ex)
+        {
+            cariPesananTampil = false;
+            modalError = $"Gagal memuat detail pesanan: {ex.Message.TrimEnd('.')}.";
+            return;
         }
 
         if (lengkap.Details == null || !lengkap.Details.Any())
         {
             cariPesananTampil = false;
-            modalError = $"Pesanan {r.IdPesanan} tidak memiliki detail menu";
+            modalError = $"Pesanan {r.IdPesanan} tidak memiliki detail menu.";
             return;
         }
 
@@ -1069,12 +1116,12 @@
     }
 
     // =====================================================
-    // 9. MODAL FORM: DETAIL (ITEM PENJUALAN)
+    // MODAL FORM: DETAIL (ITEM PENJUALAN)
     // =====================================================
-    private string HargaInput
+    private string HargaTampil
         => TryParseAngka(hargaInput, out var h) ? FormatAngka(h) : "";
 
-    private string SubtotalInput
+    private string SubtotalTampil
         => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
             ? FormatAngka(j * h)
             : "";
@@ -1166,7 +1213,7 @@
             return;
         }
 
-        // Duplikat = menu yang sama
+        // duplikat = menu yang sama (kecuali baris yang sedang diubah)
         var kembar = items
             .Where((it, i) => i != indeksEdit)
             .Any(it => it.IdMenu == menuMakananDipilih.IdMenuMakanan);
@@ -1219,7 +1266,7 @@
             return;
         }
 
-        if (!DateOnly.TryParseExact(tglPenjualanInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tglPenjualan))
+        if (!TryParseTgl(tglPenjualanInput, out var tglPenjualan))
         {
             modalError = "Harap isi tanggal penjualan.";
             return;
@@ -1266,7 +1313,8 @@
 
             if (success)
             {
-                pesanSukses = $"No. Penjualan {kodePenjualan} atas nama {pelangganDipilih.NamaPelanggan} berhasil {(isEditMode ? "diperbarui." : "ditambahkan.")}";
+                pesanSukses = $"No. Penjualan {kodePenjualan} atas nama {pelangganDipilih.NamaPelanggan} berhasil "
+                            + (isEditMode ? "diperbarui." : "ditambahkan.");
                 modalTampil = false;
                 await MuatData();
             }
@@ -1286,7 +1334,7 @@
     }
 
     // =====================================================
-    // FAKTUR
+    // FAKTUR (CETAK)
     // =====================================================
     private string NamaUsaha => Config["Usaha:Nama"] ?? "";
 
@@ -1307,14 +1355,11 @@
 
         try
         {
-            // Daftar penjualan bisa saja tidak membawa detail, jadi ambil data lengkap per ID
-            var lengkap = item;
-            if (item.Details == null || !item.Details.Any())
-                lengkap = await PenjualanService.GetByIdAsync(item.IdPenjualan) ?? item;
+            var lengkap = await AmbilPenjualanLengkapAsync(item);
 
             if (lengkap.Details == null || !lengkap.Details.Any())
             {
-                pesanError = $"Penjualan {item.IdPenjualan} tidak memiliki detail menu";
+                pesanError = $"Penjualan {item.IdPenjualan} tidak memiliki detail menu.";
                 return;
             }
 
