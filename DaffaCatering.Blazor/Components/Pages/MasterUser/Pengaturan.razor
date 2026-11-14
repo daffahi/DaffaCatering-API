@@ -1,11 +1,24 @@
-﻿@page "/settings"
+﻿
+@page "/settings"
 @attribute [Authorize(Roles = AppRoles.Admin)]
 
 @inject UserService UserService
 @inject RoleService RoleService
 
 @{
-    var view = Filtered.ToList();
+    var hasil = Filtered.ToList();
+
+    var totalHalaman = Math.Max(1, (int)Math.Ceiling(hasil.Count / (double)UkuranHalaman));
+
+    if (halaman > totalHalaman)
+        halaman = totalHalaman;
+
+    var view = hasil.Skip((halaman - 1) * UkuranHalaman)
+                    .Take(UkuranHalaman)
+                    .ToList();
+
+    var awal = hasil.Count == 0 ? 0 : (halaman - 1) * UkuranHalaman + 1;
+    var akhir = awal == 0 ? 0 : awal + view.Count - 1;
 }
 
 <div class="set-page">
@@ -35,13 +48,13 @@
 
         <div class="toolbar-right">
             <div class="segmented">
-                <button class="@Seg(FilterStatus.Semua)" @onclick="() => filterStatus = FilterStatus.Semua">
+                <button class="@Seg(FilterStatus.Semua)" @onclick="() => UbahFilter(FilterStatus.Semua)">
                     Semua <span>@daftarUser.Count</span>
                 </button>
-                <button class="@Seg(FilterStatus.Aktif)" @onclick="() => filterStatus = FilterStatus.Aktif">
+                <button class="@Seg(FilterStatus.Aktif)" @onclick="() => UbahFilter(FilterStatus.Aktif)">
                     Aktif <span>@JumlahAktif</span>
                 </button>
-                <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => filterStatus = FilterStatus.NonAktif">
+                <button class="@Seg(FilterStatus.NonAktif)" @onclick="() => UbahFilter(FilterStatus.NonAktif)">
                     Tidak Aktif <span>@(daftarUser.Count - JumlahAktif)</span>
                 </button>
             </div>
@@ -107,7 +120,7 @@
                     </tbody>
                 </table>
 
-                @if (view.Count == 0)
+                @if (hasil.Count == 0)
                 {
                     <div class="empty">
                         <i class="fa-regular fa-face-frown-open"></i>
@@ -118,7 +131,29 @@
             </div>
 
             <div class="panel-foot">
-                Menampilkan <b>@view.Count</b> dari <b>@daftarUser.Count</b> pengguna
+                <span>
+                    Menampilkan <b>@awal–@akhir</b> dari <b>@hasil.Count</b> pengguna
+                </span>
+
+                <div class="pager">
+                    @if (halaman > 1)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman--">
+                            <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                        </button>
+                    }
+
+                    <span class="pg-info">
+                        Halaman <b>@halaman</b> / @totalHalaman
+                    </span>
+
+                    @if (halaman < totalHalaman)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman++">
+                            Berikutnya <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
             </div>
         }
     </section>
@@ -131,7 +166,6 @@
                 <EditForm Model="formModel" OnValidSubmit="SimpanData">
                     <DataAnnotationsValidator />
 
-                    @* ---------- Header modal ---------- *@
                     <header class="dialog-head">
                         <div>
                             <h5>@(isEditMode ? "Ubah" : "Tambah") Pengguna</h5>
@@ -142,7 +176,6 @@
                         </button>
                     </header>
 
-                    @* ---------- Isi form ---------- *@
                     <div class="dialog-body">
                         <div class="row2">
                             <div class="field">
@@ -195,7 +228,6 @@
                         <NotifBanner @bind-Pesan="modalError" />
                     </div>
 
-                    @* ---------- Footer modal ---------- *@
                     <footer class="dialog-foot">
                         <button type="button" class="btn-ghost" @onclick="TutupModal">Batalkan</button>
                         <button type="submit" class="btn-solid" disabled="@sedangSimpan">
@@ -292,10 +324,24 @@
     private UserModels? targetReset;
     private ResetPasswordModel resetModel = new();
 
+    // --- pagination ---
+    private const int UkuranHalaman = 10;
+    private int halaman = 1;
+
     // --- filter & pencarian ---
     private enum FilterStatus { Semua, Aktif, NonAktif }
 
-    private string teksCari = "";
+    private string _teksCari = "";
+    private string teksCari
+    {
+        get => _teksCari;
+        set
+        {
+            _teksCari = value;
+            halaman = 1;
+        }
+    }
+
     private FilterStatus filterStatus = FilterStatus.Semua;
 
     private int JumlahAktif => daftarUser.Count(c => c.Status);
@@ -314,18 +360,27 @@
             || (c.NamaUser ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase)
             || (c.NamaRole ?? "").Contains(teksCari, StringComparison.OrdinalIgnoreCase));
 
-    private string Seg(FilterStatus f) => filterStatus == f ? "seg active" : "seg";
+    private string Seg(FilterStatus f)
+        => filterStatus == f ? "seg active" : "seg";
 
+    private void UbahFilter(FilterStatus filter)
+    {
+        filterStatus = filter;
+        halaman = 1;
+    }
+
+    // --- helper tampilan ---
     private static string Inisial(string? nama)
     {
         var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
         return p.Length == 0 ? "?"
              : p.Length == 1 ? p[0][..1].ToUpper()
              : (p[0][..1] + p[^1][..1]).ToUpper();
     }
 
-    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
-    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
+    private static int Warna(string? nama)
+        => (nama ?? "").Sum(ch => ch) % 5;
 
     // --- ID otomatis: U + 3 digit ---
     private static string BuatIdBerikutnya(IEnumerable<UserModels> data)
@@ -344,6 +399,9 @@
         return $"{prefix}{max + 1:D3}";
     }
 
+    // =====================================================
+    // LIFECYCLE & MUAT DATA
+    // =====================================================
     protected override async Task OnInitializedAsync()
     {
         if (AuthState is not null)
@@ -359,18 +417,26 @@
     {
         isLoading = true;
         pesanError = "";
+
         try
         {
             daftarUser = await UserService.GetAllAsync();
             daftarRole = await RoleService.GetAllAsync();
+
+            if (halaman > Math.Max(1, (int)Math.Ceiling(Filtered.Count() / (double)UkuranHalaman)))
+                halaman = Math.Max(1, (int)Math.Ceiling(Filtered.Count() / (double)UkuranHalaman));
         }
         catch (Exception ex)
         {
             pesanError = $"Gagal memuat data pengguna: {ex.Message.TrimEnd('.')}.";
         }
+
         isLoading = false;
     }
 
+    // =====================================================
+    // MODAL TAMBAH & EDIT PENGGUNA
+    // =====================================================
     private async Task BukaModalTambah()
     {
         pesanSukses = "";
@@ -380,7 +446,6 @@
 
         try
         {
-            // ambil data terbaru supaya nomor urut tidak basi
             var terbaru = await UserService.GetAllAsync();
             formModel.IdUser = BuatIdBerikutnya(terbaru);
         }
@@ -396,6 +461,7 @@
     private void BukaModalEdit(UserModels item)
     {
         pesanSukses = "";
+
         formModel = new UserModels
         {
             IdUser = item.IdUser,
@@ -404,6 +470,7 @@
             NamaUser = item.NamaUser,
             Status = item.Status
         };
+
         isEditMode = true;
         modalError = "";
         modalTampil = true;
@@ -432,7 +499,9 @@
 
         if (success)
         {
-            pesanSukses = $"Pengguna {formModel.NamaUser} dengan kode {formModel.IdUser} berhasil " + (isEditMode ? "diperbarui." : "ditambahkan.");
+            pesanSukses = $"Pengguna {formModel.NamaUser} dengan kode {formModel.IdUser} berhasil " +
+                          (isEditMode ? "diperbarui." : "ditambahkan.");
+
             modalTampil = false;
             await MuatData();
         }
@@ -444,6 +513,9 @@
         sedangSimpan = false;
     }
 
+    // =====================================================
+    // MODAL RESET PASSWORD
+    // =====================================================
     private void BukaModalReset(UserModels item)
     {
         targetReset = item;
@@ -464,7 +536,9 @@
         sedangSimpan = true;
         resetError = "";
 
-        var (success, error) = await UserService.ResetPasswordAsync(targetReset.IdUser, resetModel.PasswordBaru);
+        var (success, error) = await UserService.ResetPasswordAsync(
+            targetReset.IdUser,
+            resetModel.PasswordBaru);
 
         if (success)
         {
