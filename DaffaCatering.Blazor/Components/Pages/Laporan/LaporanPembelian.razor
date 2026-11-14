@@ -20,11 +20,18 @@
     var jmlBahanBaku = tampil.SelectMany(g => g.Baris).Select(b => b.IdBahanBaku).Distinct().Count();
     var totalNilai = tampil.Sum(g => g.Subtotal);
     var jmlKolom = penerimaan ? 4 : perPemasok ? 3 : 6;
+
+    var hasil = tampil;
+    var totalHalaman = Math.Max(1, (int)Math.Ceiling(hasil.Count / (double)UkuranHalaman));
+    if (halaman > totalHalaman) halaman = totalHalaman;
+    var view = hasil.Skip((halaman - 1) * UkuranHalaman).Take(UkuranHalaman).ToList();
+    var awal = hasil.Count == 0 ? 0 : (halaman - 1) * UkuranHalaman + 1;
+    var akhir = awal == 0 ? 0 : awal + view.Count - 1;
 }
 
 <div class="laporan-page">
 
-    @* ================= 1. HEADER HALAMAN ================= *@
+    @* ================= HEADER HALAMAN ================= *@
     <header class="page-head">
         <div>
             <h1>Laporan Pembelian</h1>
@@ -35,19 +42,10 @@
         </button>
     </header>
 
-    @* ================= 2. BANNER ERROR ================= *@
-    @if (!string.IsNullOrEmpty(PesanError))
-    {
-        <div class="banner">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>@PesanError</span>
-            <button class="banner-close" @onclick="TutupError">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    }
+    @* ================= NOTIFIKASI ================= *@
+    <NotifBanner @bind-Pesan="PesanError" />
 
-    @* ================= 3. FILTER LAPORAN ================= *@
+    @* ================= FILTER LAPORAN ================= *@
     <section class="filter-card">
         <div class="filter-row">
 
@@ -107,7 +105,7 @@
         </label>
     </section>
 
-    @* ================= 4. KARTU RINGKASAN ================= *@
+    @* ================= KARTU RINGKASAN ================= *@
     @if (!isLoading)
     {
         <section class="dashboard-cards">
@@ -162,7 +160,7 @@
         </section>
     }
 
-    @* ================= 5. TABEL LAPORAN ================= *@
+    @* ================= TABEL LAPORAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -212,7 +210,7 @@
                         }
                     </thead>
 
-                    @foreach (var g in tampil)
+                    @foreach (var g in view)
                     {
                         var nama = NamaKelompok(g);
                         var pertama = g.Baris[0];
@@ -306,16 +304,29 @@
 
             <div class="panel-foot">
                 <span>
-                    Menampilkan <b>@jmlTransaksi</b> transaksi
-                    @if (!penerimaan)
-                    {
-                        <text> dari <b>@tampil.Count</b> @(perPemasok ? "pemasok" : "bahan baku")</text>
-                    }
+                    Menampilkan <b>@awal–@akhir</b> dari <b>@hasil.Count</b>
+                    @(perPemasok ? "pemasok" : "bahan baku")
                 </span>
-                @if (!penerimaan)
-                {
-                    <span>Total <b>@FormatRupiah(totalNilai)</b></span>
-                }
+
+                <div class="pager">
+                    @if (halaman > 1)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman--">
+                            <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                        </button>
+                    }
+
+                    <span class="pg-info">
+                        Halaman <b>@halaman</b> / @totalHalaman
+                    </span>
+
+                    @if (halaman < totalHalaman)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman++">
+                            Berikutnya <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
             </div>
         }
     </section>
@@ -572,7 +583,7 @@
 
 @code {
     // =====================================================
-    // 1. STATE
+    // STATE
     // =====================================================
     private static readonly CultureInfo IdCulture = new("id-ID");
 
@@ -593,10 +604,20 @@
     private bool isLoading = true;
     private string errorMaster = "";
     private string errorLaporan = "";
-    private string teksCari = "";
     private string namaPencetak = "";
     private int permintaanKe;
     private IJSObjectReference? modulCetak;
+
+    // --- pagination & pencarian ---
+    private const int UkuranHalaman = 10;
+    private int halaman = 1;
+
+    private string _teksCari = "";
+    private string teksCari
+    {
+        get => _teksCari;
+        set { _teksCari = value; halaman = 1; }
+    }
 
     // --- filter ---
     private JenisLaporan jenis = JenisLaporan.Pembelian;
@@ -605,17 +626,21 @@
     private DateOnly dari;
     private DateOnly sampai;
 
-    private string PesanError => string.Join(" ",
-        new[] { errorMaster, errorLaporan }.Where(s => !string.IsNullOrEmpty(s)));
-
-    private void TutupError()
+    // Gabungan error master + laporan; saat banner ditutup (nilai kosong), keduanya dikosongkan
+    private string PesanError
     {
-        errorMaster = "";
-        errorLaporan = "";
+        get => string.Join(" ",
+            new[] { errorMaster, errorLaporan }.Where(s => !string.IsNullOrEmpty(s)));
+        set
+        {
+            if (!string.IsNullOrEmpty(value)) return;
+            errorMaster = "";
+            errorLaporan = "";
+        }
     }
 
     // =====================================================
-    // 2. LIFECYCLE & MUAT DATA
+    // LIFECYCLE & MUAT DATA
     // =====================================================
     protected override async Task OnInitializedAsync()
     {
@@ -644,13 +669,13 @@
         var galat = new List<string>();
 
         try { daftarPemasok = await PemasokService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat pemasok: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat pemasok: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarBahanBaku = await BahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat bahan baku: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         try { daftarSatuan = await SatuanBahanBakuService.GetAllAsync(); }
-        catch (Exception ex) { galat.Add("Gagal memuat satuan: " + ex.Message); }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan bahan baku: {ex.Message.TrimEnd('.')}."); }
 
         errorMaster = string.Join(" ", galat);
     }
@@ -660,10 +685,11 @@
         // permintaan lama yang masih berjalan dibatalkan hasilnya
         var permintaan = ++permintaanKe;
         errorLaporan = "";
+        halaman = 1;
 
         if (dari > sampai)
         {
-            errorLaporan = "Tanggal awal tidak boleh lebih besar dari tanggal akhir";
+            errorLaporan = "Tanggal awal tidak boleh lebih besar dari tanggal akhir.";
             data = new();
             isLoading = false;
             return;
@@ -682,7 +708,7 @@
 
             if (hasilApi is null)
             {
-                errorLaporan = "Gagal memuat laporan: " + error;
+                errorLaporan = $"Gagal memuat laporan pembelian atau penerimaan bahan baku: {error.TrimEnd('.')}";
                 data = new();
             }
             else
@@ -693,7 +719,7 @@
         catch (Exception ex)
         {
             if (permintaan != permintaanKe) return;
-            errorLaporan = "Gagal memuat laporan: " + ex.Message;
+            errorLaporan = $"Gagal memuat laporan pembelian atau penerimaan bahan baku: {ex.Message.TrimEnd('.')}.";
             data = new();
         }
 
@@ -701,7 +727,7 @@
     }
 
     // =====================================================
-    // 3. HELPER UMUM (format & lookup nama)
+    // HELPER UMUM (format & lookup nama)
     // =====================================================
     private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
@@ -746,8 +772,11 @@
         return kelompok == KelompokLaporan.Pemasok ? NamaPemasok(g.Id) : NamaBahanBaku(g.Id);
     }
 
+    private static bool TryParseTgl(string? teks, out DateOnly hasil)
+        => DateOnly.TryParseExact(teks, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out hasil);
+
     // =====================================================
-    // 4. TAMPILAN: PENCARIAN & URUTAN
+    // TAMPILAN: PENCARIAN & URUTAN
     // =====================================================
     private string PlaceholderCari => jenis == JenisLaporan.Penerimaan
         ? "Cari no. penerimaan, no. pembelian, atau pemasok..."
@@ -785,7 +814,7 @@
     }
 
     // =====================================================
-    // 5. FILTER: PERIODE & PILIHAN
+    // FILTER: PERIODE & PILIHAN
     // =====================================================
     private void AturPreset(PresetPeriode p)
     {
@@ -852,7 +881,7 @@
     }
 
     // =====================================================
-    // 6. DOKUMEN CETAK
+    // DOKUMEN CETAK
     // =====================================================
     private string NamaUsaha => Config["Usaha:Nama"] ?? "";
 
