@@ -5,13 +5,18 @@
 @inject SatuanBahanBakuService SatuanBahanBakuService
 
 @{
-    var view = Filtered.ToList();
+    var hasil = Filtered.ToList();
+    var totalHalaman = Math.Max(1, (int)Math.Ceiling(hasil.Count / (double)UkuranHalaman));
+    if (halaman > totalHalaman) halaman = totalHalaman;
+
+    var view = hasil.Skip((halaman - 1) * UkuranHalaman).Take(UkuranHalaman).ToList();
+    var awal = hasil.Count == 0 ? 0 : (halaman - 1) * UkuranHalaman + 1;
+    var akhir = awal == 0 ? 0 : awal + view.Count - 1;
 }
 
 <div class="menu-makanan-page">
 
     @* ================= HEADER HALAMAN ================= *@
-    
     <header class="page-head">
         <div>
             <h1>Menu Makanan</h1>
@@ -49,7 +54,7 @@
         </div>
     </section>
 
-    @* ================= TABEL RESEP ================= *@
+    @* ================= TABEL MENU MAKANAN ================= *@
     <section class="panel">
 
         @if (isLoading)
@@ -120,12 +125,30 @@
             </div>
 
             <div class="panel-foot">
-                Menampilkan <b>@view.Count</b> dari <b>@daftarMenuMakanan.Count</b> menu makanan
+                <span>Menampilkan <b>@awal–@akhir</b> dari <b>@hasil.Count</b> menu makanan</span>
+
+                <div class="pager">
+                    @if (halaman > 1)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman--">
+                            <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                        </button>
+                    }
+
+                    <span class="pg-info">Halaman <b>@halaman</b> / @totalHalaman</span>
+
+                    @if (halaman < totalHalaman)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman++">
+                            Berikutnya <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
             </div>
         }
     </section>
 
-    @* ================= MODAL FORM RESEP ================= *@
+    @* ================= MODAL FORM MENU MAKANAN ================= *@
     @if (modalTampil)
     {
         <div class="overlay" @onclick="TutupModal">
@@ -192,10 +215,7 @@
                             </label>
                         </div>
 
-                        @if (!string.IsNullOrEmpty(modalError))
-                        {
-                            <NotifBanner @bind-Pesan="modalError" />
-                        }
+                        <NotifBanner @bind-Pesan="modalError" />
                     </div>
 
                     @* ---------- Footer modal ---------- *@
@@ -220,23 +240,94 @@
 </div>
 
 @code {
+    // =====================================================
+    // STATE
+    // =====================================================
+    private enum FilterStatus { Semua, Aktif, NonAktif }
+
+    // --- data ---
     private List<MenuMakananModels> daftarMenuMakanan = new();
     private List<SatuanBahanBakuModels> daftarSatuan = new();
+
+    // --- halaman utama ---
     private bool isLoading = true;
     private string pesanSukses = "";
     private string pesanError = "";
 
+    // --- pagination, pencarian & filter ---
+    private const int UkuranHalaman = 10;
+    private int halaman = 1;
+
+    private string _teksCari = "";
+    private string teksCari
+    {
+        get => _teksCari;
+        set { _teksCari = value; halaman = 1; }
+    }
+
+    private FilterStatus _filterStatus = FilterStatus.Semua;
+    private FilterStatus filterStatus
+    {
+        get => _filterStatus;
+        set { _filterStatus = value; halaman = 1; }
+    }
+
+    // --- modal form ---
     private bool modalTampil = false;
     private bool isEditMode = false;
     private bool sedangSimpan = false;
     private string modalError = "";
     private MenuMakananModels formModel = new();
 
-    private enum FilterStatus { Semua, Aktif, NonAktif }
+    // =====================================================
+    // LIFECYCLE & MUAT DATA
+    // =====================================================
+    protected override async Task OnInitializedAsync()
+    {
+        await MuatData();
+    }
 
-    private string teksCari = "";
-    private FilterStatus filterStatus = FilterStatus.Semua;
+    private async Task MuatData()
+    {
+        isLoading = true;
+        var galat = new List<string>();
 
+        try { daftarMenuMakanan = await MenuMakananService.GetAllAsync(); }
+        catch (Exception ex) { galat.Add($"Gagal memuat menu makanan: {ex.Message.TrimEnd('.')}."); }
+
+        try
+        {
+            // hanya satuan jadi yang boleh dipakai untuk menu
+            var diizinkan = new[] { "Bungkus", "Pcs", "Porsi" };
+            var semua = await SatuanBahanBakuService.GetAllAsync();
+            daftarSatuan = semua.Where(s => diizinkan.Contains(s.NamaSatuan)).ToList();
+        }
+        catch (Exception ex) { galat.Add($"Gagal memuat satuan bahan baku: {ex.Message.TrimEnd('.')}."); }
+
+        pesanError = string.Join(" ", galat);
+        isLoading = false;
+    }
+
+    // =====================================================
+    // HELPER UMUM (format & lookup)
+    // =====================================================
+    private static string Inisial(string? nama)
+    {
+        var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return p.Length == 0 ? "?"
+             : p.Length == 1 ? p[0][..1].ToUpper()
+             : (p[0][..1] + p[^1][..1]).ToUpper();
+    }
+
+    // Warna avatar stabil per nama (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
+    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
+
+    private string NamaSatuan(string? id)
+        => daftarSatuan.FirstOrDefault(s => s.IdSatuan == id)?.NamaSatuan ?? (id ?? "-");
+
+    // =====================================================
+    // DAFTAR: FILTER & PENCARIAN
+    // =====================================================
     private int JumlahAktif => daftarMenuMakanan.Count(c => c.Status);
 
     private IEnumerable<MenuMakananModels> Filtered => daftarMenuMakanan
@@ -252,19 +343,10 @@
 
     private string Seg(FilterStatus f) => filterStatus == f ? "seg active" : "seg";
 
-    private static string Inisial(string? nama)
-    {
-        var p = (nama ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return p.Length == 0 ? "?"
-             : p.Length == 1 ? p[0][..1].ToUpper()
-             : (p[0][..1] + p[^1][..1]).ToUpper();
-    }
-
-    private static int Warna(string? nama) => (nama ?? "").Sum(ch => ch) % 5;
-
-    private string NamaSatuan(string idSatuan) =>
-        daftarSatuan.FirstOrDefault(s => s.IdSatuan == idSatuan)?.NamaSatuan ?? idSatuan;
-
+    // =====================================================
+    // MODAL FORM: BUKA / TUTUP
+    // =====================================================
+    // ID otomatis: MN + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<MenuMakananModels> data)
     {
         const string prefix = "MN";
@@ -281,41 +363,6 @@
         return $"{prefix}{max + 1:D7}";
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await MuatData();
-        await MuatSatuan();
-    }
-
-    private async Task MuatData()
-    {
-        isLoading = true;
-        pesanError = "";
-        try
-        {
-            daftarMenuMakanan = await MenuMakananService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            pesanError = $"Gagal memuat menu makanan: {ex.Message.TrimEnd('.')}.";
-        }
-        isLoading = false;
-    }
-
-    private async Task MuatSatuan()
-    {
-        try
-        {
-            var semua = await SatuanBahanBakuService.GetAllAsync();
-            var diizinkan = new[] { "Bungkus", "Pcs", "Porsi" };
-            daftarSatuan = semua.Where(s => diizinkan.Contains(s.NamaSatuan)).ToList();
-        }
-        catch (Exception ex)
-        {
-            pesanError = $"Gagal satuan bahan baku: {ex.Message.TrimEnd('.')}.";
-        }
-    }
-
     private async Task BukaModalTambah()
     {
         pesanSukses = "";
@@ -325,6 +372,7 @@
 
         try
         {
+            // data terbaru supaya nomor urut tidak basi
             var terbaru = await MenuMakananService.GetAllAsync();
             formModel.IdMenu = BuatIdBerikutnya(terbaru);
         }
@@ -359,6 +407,9 @@
         modalTampil = false;
     }
 
+    // =====================================================
+    // MODAL FORM: VALIDASI & SIMPAN
+    // =====================================================
     private void KapitalisasiNamaMenu()
     {
         if (!string.IsNullOrEmpty(formModel.NamaMenu))
@@ -368,11 +419,9 @@
     }
 
     private bool NamaMenuSudahAda()
-    {
-        return daftarMenuMakanan.Any(m =>
-            m.IdMenu != formModel.IdMenu &&
-            m.NamaMenu.Trim().Equals(formModel.NamaMenu.Trim(), StringComparison.OrdinalIgnoreCase));
-    }
+        => daftarMenuMakanan.Any(m =>
+            m.IdMenu != formModel.IdMenu
+            && m.NamaMenu.Trim().Equals(formModel.NamaMenu.Trim(), StringComparison.OrdinalIgnoreCase));
 
     private async Task SimpanData()
     {
@@ -394,7 +443,8 @@
 
         if (success)
         {
-            pesanSukses = $"Menu makanan {formModel.NamaMenu} dengan kode {formModel.IdMenu} " + (isEditMode ? "berhasil diperbarui." : "berhasil ditambahkan.");
+            pesanSukses = $"Menu makanan {formModel.NamaMenu} dengan kode {formModel.IdMenu} "
+                        + (isEditMode ? "berhasil diperbarui." : "berhasil ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
@@ -404,30 +454,5 @@
         }
 
         sedangSimpan = false;
-    }
-
-    private async Task UbahStatus(MenuMakananModels item)
-    {
-        pesanError = "";
-
-        var salinan = new MenuMakananModels
-        {
-            IdMenu = item.IdMenu,
-            IdSatuan = item.IdSatuan,
-            NamaMenu = item.NamaMenu,
-            Jumlah = item.Jumlah,
-            Harga = item.Harga,
-            Status = !item.Status
-        };
-
-        var (success, error) = await MenuMakananService.UpdateAsync(salinan.IdMenu, salinan);
-        if (success)
-        {
-            await MuatData();
-        }
-        else
-        {
-            pesanError = error;
-        }
     }
 }
