@@ -86,7 +86,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>@item.TglPenggunaan.ToString("dd MMMM yyyy", IdCulture)</td>
+                                <td>@item.TglPenggunaan.ToString("dd MMM yyyy", IdCulture)</td>
                                 <td class="col-detail">@item.Details.Count bahan</td>
                                 <td class="usage-total">@FormatAngka(total) item</td>
                                 <td class="actions">
@@ -217,7 +217,7 @@
 
                         <div class="row4">
                             <div class="field">
-                                <label>Tgl Kadaluwarsa</label>
+                                <label>Tgl Kadaluwarsa <b class="req">*</b></label>
                                 <input type="text" disabled
                                        value="@(batchDipilih is null ? "" : FormatTgl(batchDipilih.Tgl))" />
                             </div>
@@ -232,7 +232,7 @@
                                        @bind="jumlahInput" @bind:event="oninput" />
                             </div>
                             <div class="field">
-                                <label>Satuan</label>
+                                <label>Satuan <b class="req">*</b></label>
                                 <input type="text" disabled
                                        value="@(batchDipilih is null ? "" : NamaSatuan(batchDipilih.IdSatuan))" />
                             </div>

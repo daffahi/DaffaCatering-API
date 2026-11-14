@@ -731,7 +731,7 @@
     // =====================================================
     private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    private static string Tgl(DateOnly? d) => d is null ? "-" : d.Value.ToString("dd/MM/yyyy", IdCulture);
+    private static string Tgl(DateOnly? d) => d is null ? "-" : d.Value.ToString("dd MMM yyyy", IdCulture);
 
     private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
 
