@@ -1,8 +1,9 @@
 /* CSS for Login component */
 .login-card {
     font-family: 'Roboto', sans-serif;
-    border: none;
+    border: 1px solid #e6ded1;
     border-radius: 12px;
+    box-shadow: 0 14px 32px -14px rgba(52, 78, 65, .35), 0 2px 6px rgba(52, 78, 65, .08);
 }
 
 .login-title {
