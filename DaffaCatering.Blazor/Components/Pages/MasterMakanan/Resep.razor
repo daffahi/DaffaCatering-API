@@ -7,7 +7,13 @@
 @inject SatuanBahanBakuService SatuanBahanBakuService
 
 @{
-    var view = Filtered.ToList();
+    var hasil = Filtered.ToList();
+    var totalHalaman = Math.Max(1, (int)Math.Ceiling(hasil.Count / (double)UkuranHalaman));
+    if (halaman > totalHalaman) halaman = totalHalaman;
+
+    var view = hasil.Skip((halaman - 1) * UkuranHalaman).Take(UkuranHalaman).ToList();
+    var awal = hasil.Count == 0 ? 0 : (halaman - 1) * UkuranHalaman + 1;
+    var akhir = awal == 0 ? 0 : awal + view.Count - 1;
 }
 
 <div class="resep-page">
@@ -117,7 +123,25 @@
             </div>
 
             <div class="panel-foot">
-                Menampilkan <b>@view.Count</b> dari <b>@daftarResep.Count</b> resep
+                <span>Menampilkan <b>@awal–@akhir</b> dari <b>@hasil.Count</b> resep</span>
+
+                <div class="pager">
+                    @if (halaman > 1)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman--">
+                            <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                        </button>
+                    }
+
+                    <span class="pg-info">Halaman <b>@halaman</b> / @totalHalaman</span>
+
+                    @if (halaman < totalHalaman)
+                    {
+                        <button class="pg-btn" @onclick="() => halaman++">
+                            Berikutnya <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    }
+                </div>
             </div>
         }
     </section>
@@ -288,7 +312,6 @@
     // STATE
     // =====================================================
     private enum FilterStatus { Semua, Aktif, NonAktif }
-    private decimal? inputJumlah;
 
     // --- data ---
     private List<ResepModel> daftarResep = new();
@@ -300,8 +323,24 @@
     private bool isLoading = true;
     private string pesanSukses = "";
     private string pesanError = "";
-    private string teksCari = "";
-    private FilterStatus filterStatus = FilterStatus.Semua;
+
+    // --- pagination, pencarian & filter ---
+    private const int UkuranHalaman = 10;
+    private int halaman = 1;
+
+    private string _teksCari = "";
+    private string teksCari
+    {
+        get => _teksCari;
+        set { _teksCari = value; halaman = 1; }
+    }
+
+    private FilterStatus _filterStatus = FilterStatus.Semua;
+    private FilterStatus filterStatus
+    {
+        get => _filterStatus;
+        set { _filterStatus = value; halaman = 1; }
+    }
 
     // --- modal form ---
     private bool modalTampil = false;
@@ -313,6 +352,7 @@
     // --- input komposisi ---
     private string pilihBahanBaku = "";
     private string pilihSatuan = "";
+    private decimal? inputJumlah;
     private int editingIndex = -1;          // -1 = tambah item, >= 0 = ubah item
     private string itemError = "";
 
@@ -379,7 +419,7 @@
     private string Seg(FilterStatus f) => filterStatus == f ? "seg active" : "seg";
 
     // =====================================================
-    // 5. MODAL FORM: BUKA / TUTUP
+    // MODAL FORM: BUKA / TUTUP
     // =====================================================
     // ID otomatis: RS + 7 digit
     private static string BuatIdBerikutnya(IEnumerable<ResepModel> data)
@@ -424,8 +464,8 @@
     private async Task BukaModalEdit(ResepModel item)
     {
         pesanSukses = "";
-        modalError = "";
         pesanError = "";
+        modalError = "";
         ResetStagingItem();
 
         // daftar tidak membawa Details, jadi ambil ulang data lengkapnya
@@ -544,7 +584,8 @@
 
         if (success)
         {
-            pesanSukses = $"Resep menu {NamaMenu(formModel.IdMenu)} dengan kode {formModel.IdResep} " + (isEditMode ? "berhasil diperbarui." : "berhasil ditambahkan.");
+            pesanSukses = $"Resep menu {NamaMenu(formModel.IdMenu)} dengan kode {formModel.IdResep} "
+                        + (isEditMode ? "berhasil diperbarui." : "berhasil ditambahkan.");
             modalTampil = false;
             await MuatData();
         }
