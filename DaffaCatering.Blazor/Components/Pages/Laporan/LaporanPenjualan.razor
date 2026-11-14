@@ -245,13 +245,13 @@
                                                 <i></i>@(string.IsNullOrWhiteSpace(b.Status) ? "-" : b.Status)
                                             </span>
                                         </td>
-                                        <td class="num mono">@FormatAngka(b.TotalTransaksi)</td>
+                                        <td class="num mono">@FormatRupiah(b.TotalTransaksi)</td>
                                     </tr>
                                 }
 
                                 <tr class="grp-total">
                                     <td colspan="4">Subtotal</td>
-                                    <td class="num mono">@FormatAngka(g.Subtotal)</td>
+                                    <td class="num mono">@FormatRupiah(g.Subtotal)</td>
                                 </tr>
                             }
                             else
@@ -263,8 +263,8 @@
                                         <td>@b.Tanggal.ToString("dd MMM yyyy", IdCulture)</td>
                                         <td>@NamaPelanggan(b.IdPelanggan)</td>
                                         <td class="num mono">@FormatAngka(b.Jumlah) @NamaSatuan(b.IdSatuan)</td>
-                                        <td class="num mono">@FormatAngka(b.Harga)</td>
-                                        <td class="num mono">@FormatAngka(b.Subtotal)</td>
+                                        <td class="num mono">@FormatRupiah(b.Harga)</td>
+                                        <td class="num mono">@FormatRupiah(b.Subtotal)</td>
                                     </tr>
                                 }
 
@@ -272,7 +272,7 @@
                                     <td colspan="3">Subtotal</td>
                                     <td class="num mono">@FormatAngka(g.TotalJumlah)</td>
                                     <td></td>
-                                    <td class="num mono">@FormatAngka(g.Subtotal)</td>
+                                    <td class="num mono">@FormatRupiah(g.Subtotal)</td>
                                 </tr>
                             }
                         </tbody>

@@ -297,8 +297,8 @@
                                         </td>
                                         <td class="mono">@FormatAngka(it.Jumlah)</td>
                                         <td>@NamaSatuan(it.IdSatuan)</td>
-                                        <td class="mono">@FormatAngka(it.Harga)</td>
-                                        <td class="mono">@FormatAngka(it.Jumlah * it.Harga)</td>
+                                        <td class="mono">@FormatRupiah(it.Harga)</td>
+                                        <td class="mono">@FormatRupiah(it.Jumlah * it.Harga)</td>
                                         <td class="actions">
                                             <button type="button" class="icon-btn" title="Ubah item"
                                                     @onclick="() => MulaiUbahDetail(index)">
@@ -331,7 +331,7 @@
                         </div>
                         <div class="field">
                             <label>Total Harga</label>
-                            <input type="text" disabled value="@FormatAngka(TotalHarga)" />
+                            <input type="text" disabled value="@FormatRupiah(TotalHarga)" />
                         </div>
                     </div>
 
@@ -714,6 +714,8 @@
 
     private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
 
+    private static string FormatRupiah(decimal v) => v.ToString("C0", IdCulture);
+
     // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
 
@@ -936,11 +938,11 @@
     // MODAL FORM: DETAIL (ITEM PESANAN)
     // =====================================================
     private string HargaTampil
-        => TryParseAngka(hargaInput, out var h) ? FormatAngka(h) : "";
+        => TryParseAngka(hargaInput, out var h) ? FormatRupiah(h) : "";
 
     private string SubtotalTampil
         => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
-            ? FormatAngka(j * h)
+            ? FormatRupiah(j * h)
             : "";
 
     private decimal TotalHarga => items.Sum(i => i.Jumlah * i.Harga);

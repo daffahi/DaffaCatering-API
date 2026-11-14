@@ -1,6 +1,7 @@
 ﻿@page "/menu-makanan"
 @attribute [Authorize(Roles = AppRoles.AdminPenjualan)]
 
+@using System.Globalization
 @inject MenuMakananService MenuMakananService
 @inject SatuanBahanBakuService SatuanBahanBakuService
 
@@ -98,7 +99,7 @@
                                 </td>
                                 <td class="mono">@NamaSatuan(item.IdSatuan)</td>
                                 <td class="mono">@item.Jumlah</td>
-                                <td class="mono">@item.Harga.ToString("C0")</td>
+                                <td class="mono">@item.Harga.ToString("C0", IdCulture)</td>
                                 <td>
                                     <span class="pill @(item.Status ? "on" : "off")">
                                         <i></i>@(item.Status ? "Aktif" : "Tidak Aktif")
@@ -244,6 +245,7 @@
     // STATE
     // =====================================================
     private enum FilterStatus { Semua, Aktif, NonAktif }
+    private static readonly CultureInfo IdCulture = new("id-ID");
 
     // --- data ---
     private List<MenuMakananModels> daftarMenuMakanan = new();

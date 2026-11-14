@@ -93,7 +93,7 @@
                                 </td>
                                 <td>@item.TglPenjualan.ToString("dd MMM yyyy", IdCulture)</td>
                                 <td>@NamaPelanggan(item.IdPelanggan)</td>
-                                <td class="mono">@FormatAngka(item.Total)</td>
+                                <td class="mono">@FormatRupiah(item.Total)</td>
                                 <td>
                                     <span class="pill @(tutup ? "closed" : "pending")">
                                         <i></i>@(string.IsNullOrWhiteSpace(item.Status) ? "-" : item.Status)
@@ -306,8 +306,8 @@
                                         </td>
                                         <td class="mono">@FormatAngka(it.Jumlah)</td>
                                         <td>@NamaSatuan(it.IdSatuan)</td>
-                                        <td class="mono">@FormatAngka(it.Harga)</td>
-                                        <td class="mono">@FormatAngka(it.Jumlah * it.Harga)</td>
+                                        <td class="mono">@FormatRupiah(it.Harga)</td>
+                                        <td class="mono">@FormatRupiah(it.Jumlah * it.Harga)</td>
                                         <td class="actions">
                                             <button type="button" class="icon-btn" title="Ubah item"
                                                     @onclick="() => MulaiUbahDetail(index)">
@@ -336,11 +336,11 @@
                         <div class="field">
                             <label>Uang Muka</label>
                             <input type="text" disabled placeholder="0"
-                                   value="@(string.IsNullOrEmpty(idPesanan) ? "" : FormatAngka(uangMuka))" />
+                                   value="@(string.IsNullOrEmpty(idPesanan) ? "" : FormatRupiah(uangMuka))" />
                         </div>
                         <div class="field">
                             <label>Total Harga</label>
-                            <input type="text" disabled value="@FormatAngka(TotalHarga)" />
+                            <input type="text" disabled value="@FormatRupiah(TotalHarga)" />
                         </div>
                     </div>
 
@@ -416,8 +416,8 @@
                                         <td class="mono">@row.IdPesanan</td>
                                         <td><div class="name">@NamaPelanggan(row.IdPelanggan)</div></td>
                                         <td>@row.TglPesanan.ToString("dd MMMM yyyy", IdCulture)</td>
-                                        <td class="mono">@FormatAngka(row.UangMuka)</td>
-                                        <td class="mono">@FormatAngka(row.Total)</td>
+                                        <td class="mono">@FormatRupiah(row.UangMuka)</td>
+                                        <td class="mono">@FormatRupiah(row.Total)</td>
                                     </tr>
                                 }
                             </tbody>
@@ -541,7 +541,7 @@
                                     <tr @onclick="() => PilihMenuMakanan(row)">
                                         <td class="mono">@row.IdMenuMakanan</td>
                                         <td><div class="name">@row.NamaMenuMakanan</div></td>
-                                        <td class="mono">@FormatAngka(row.Harga)</td>
+                                        <td class="mono">@FormatRupiah(row.Harga)</td>
                                     </tr>
                                 }
                             </tbody>
@@ -836,6 +836,8 @@
 
     private static string FormatAngka(decimal v) => v.ToString("#,##0.##", IdCulture);
 
+    private static string FormatRupiah(decimal v) => v.ToString("C0", IdCulture);
+
     // Warna avatar stabil per teks (string.GetHashCode() berubah tiap proses, jadi tidak dipakai)
     private static int Warna(string? teks) => (teks ?? "").Sum(ch => ch) % 5;
 
@@ -1119,11 +1121,11 @@
     // MODAL FORM: DETAIL (ITEM PENJUALAN)
     // =====================================================
     private string HargaTampil
-        => TryParseAngka(hargaInput, out var h) ? FormatAngka(h) : "";
+        => TryParseAngka(hargaInput, out var h) ? FormatRupiah(h) : "";
 
     private string SubtotalTampil
         => TryParseAngka(jumlahInput, out var j) && TryParseAngka(hargaInput, out var h)
-            ? FormatAngka(j * h)
+            ? FormatRupiah(j * h)
             : "";
 
     private decimal TotalHarga => items.Sum(i => i.Jumlah * i.Harga);
@@ -1135,7 +1137,7 @@
         {
             if (string.IsNullOrEmpty(idPesanan) || items.Count == 0) return "";
             var sisa = TotalHarga - uangMuka;
-            return sisa >= 0 ? FormatAngka(sisa) : $"({FormatAngka(Math.Abs(sisa))})";
+            return sisa >= 0 ? FormatRupiah(sisa) : $"({FormatRupiah(Math.Abs(sisa))})";
         }
     }
 
