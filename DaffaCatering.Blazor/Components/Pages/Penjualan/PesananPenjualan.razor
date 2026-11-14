@@ -89,7 +89,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>@item.TglPesanan.ToString("dd MMMM yyyy", IdCulture)</td>
+                                <td>@item.TglPesanan.ToString("dd MMM yyyy", IdCulture)</td>
                                 <td>@NamaPelanggan(item.IdPelanggan)</td>
                                 <td>
                                     <span class="pill @(tutup ? "closed" : "pending")">
@@ -1190,7 +1190,7 @@
 
     private string AlamatUsaha => Config["Usaha:Alamat"] ?? "";
 
-    private static string Tgl(DateOnly d) => d.ToString("dd/MM/yyyy", IdCulture);
+    private static string Tgl(DateOnly d) => d.ToString("dd MMM yyyy", IdCulture);
 
     private async Task CetakBukti(PesananPenjualanModels item)
     {

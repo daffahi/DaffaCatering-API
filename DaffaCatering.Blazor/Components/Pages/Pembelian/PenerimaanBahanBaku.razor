@@ -83,7 +83,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>@item.TglPenerimaan.ToString("dd MMMM yyyy", IdCulture)</td>
+                                <td>@item.TglPenerimaan.ToString("dd MMM yyyy", IdCulture)</td>
                                 <td>@NamaPemasok(item.IdPemasok)</td>
                                 <td>
                                     <span class="pill @(IsClose(item) ? "closed" : "pending")">
