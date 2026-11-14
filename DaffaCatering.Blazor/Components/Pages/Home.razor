@@ -21,7 +21,7 @@
 
 <div class="dashboard-page">
 
-    @* ================= 1. BANNER ================= *@
+    @* ================= BANNER ================= *@
     <section class="welcome-banner">
         <AuthorizeView>
             <h1>Selamat datang kembali, @context.User.Identity?.Name</h1>
@@ -29,10 +29,7 @@
         <p>@hariIni.ToString("dddd, dd MMMM yyyy", IdCulture)</p>
     </section>
 
-    @if (!string.IsNullOrEmpty(pesanError))
-    {
-        <p class="galat">@pesanError</p>
-    }
+    <NotifBanner @bind-Pesan="pesanError" />
 
     @if (isLoading)
     {
@@ -46,7 +43,7 @@
     {
         @if (bolehPenjualan)
         {
-            @* ================= 2. KARTU ANGKA ================= *@
+            @* ================= KARTU ANGKA ================= *@
             <section class="kpi">
                 <div class="kartu">
                     <div class="kartu-atas">
@@ -85,7 +82,7 @@
             </section>
         }
 
-        @* ================= 3. KARTU RINGKASAN ================= *@
+        @* ================= KARTU RINGKASAN ================= *@
         <section class="ringkasan">
             @if (bolehPenjualan)
             {
@@ -133,7 +130,7 @@
             }
         </section>
 
-        @* ================= 4. DAFTAR & AKSES CEPAT ================= *@
+        @* ================= DAFTAR & AKSES CEPAT ================= *@
         <section class="dash-body">
 
             @if (bolehPenjualan || bolehPembelian)
@@ -253,13 +250,14 @@
 
 </div>
 
+
 @code {
 
     private static readonly CultureInfo IdCulture = new("id-ID");
     private const decimal BatasStok = NotifikasiService.BatasStok;
-    private const int HariPeringatan = NotifikasiService.HariKadaluwarsa; // batas peringatan kadaluwarsa
-    private const int RentangPembelian = 90;        // berapa hari ke belakang pembelian dicek
-    private const string StatusMenunggu = "Pending"; // status pembelian yang belum diterima
+    private const int HariPeringatan = NotifikasiService.HariKadaluwarsa;
+    private const int RentangPembelian = 90;
+    private const string StatusMenunggu = "Pending";
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
@@ -272,7 +270,7 @@
     private string pesanError = "";
     private DateOnly hariIni;
 
-    // --- master, hanya untuk menampilkan nama ---
+    // --- master ---
     private List<PelangganModels> daftarPelanggan = new();
     private List<PemasokModels> daftarPemasok = new();
 
@@ -306,128 +304,213 @@
     protected override async Task OnInitializedAsync()
     {
         hariIni = DateOnly.FromDateTime(DateTime.Today);
+        pesanError = "";
 
-        if (AuthState is not null)
+        try
         {
-            var user = (await AuthState).User;
-            bolehPenjualan = PunyaPeran(user, AppRoles.AdminPenjualan);
-            bolehPembelian = PunyaPeran(user, AppRoles.AdminPembelian);
-            bolehStok = PunyaPeran(user, AppRoles.AdminPersediaan);
+            if (AuthState is not null)
+            {
+                var user = (await AuthState).User;
+
+                bolehPenjualan = PunyaPeran(user, AppRoles.AdminPenjualan);
+                bolehPembelian = PunyaPeran(user, AppRoles.AdminPembelian);
+                bolehStok = PunyaPeran(user, AppRoles.AdminPersediaan);
+            }
+
+            if (bolehPenjualan)
+                await MuatPenjualan();
+
+            if (bolehPembelian)
+                await MuatPembelian();
+
+            if (bolehStok)
+                await MuatStok();
         }
-
-        var galat = new List<string>();
-
-        if (bolehPenjualan) await MuatPenjualan(galat);
-        if (bolehPembelian) await MuatPembelian(galat);
-        if (bolehStok) await MuatStok(galat);
-
-        pesanError = string.Join(" ", galat);
-        isLoading = false;
+        catch (Exception ex)
+        {
+            TambahPesanError($"Gagal memuat dashboard: {ex.Message.TrimEnd('.')}. ");
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     // =====================================================
-    // MUAT DATA
+    // MUAT DATA PENJUALAN
     // =====================================================
-    private async Task MuatPenjualan(List<string> galat)
+    private async Task MuatPenjualan()
     {
         var awalBulan = new DateOnly(hariIni.Year, hariIni.Month, 1);
         var awalBulanLalu = awalBulan.AddMonths(-1);
 
-        try { daftarPelanggan = await PelangganService.GetAllAsync(); } catch { }
+        try
+        {
+            daftarPelanggan = await PelangganService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            TambahPesanError($"Gagal memuat data pelanggan: {ex.Message.TrimEnd('.')}. ");
+        }
 
-        // Penjualan dari awal bulan lalu sampai hari ini: dipakai untuk angka dan perbandingan
-        var (penjualan, e1) = await LaporanService.AmbilAsync("penjualan", "pelanggan", awalBulanLalu, hariIni, "", "");
-        if (penjualan is null) galat.Add("Gagal memuat penjualan: " + e1);
+        try
+        {
+            // Penjualan dari awal bulan lalu sampai hari ini
+            var (penjualan, e1) = await LaporanService.AmbilAsync(
+                "penjualan", "pelanggan", awalBulanLalu, hariIni, "", "");
 
-        var semuaTrx = (penjualan ?? new())
-            .SelectMany(g => g.Baris)
-            .GroupBy(b => b.IdTransaksi)
-            .Select(t => t.First())
-            .ToList();
+            if (penjualan is null)
+            {
+                TambahPesanError($"Gagal memuat data penjualan: {e1.TrimEnd('.')}. ");
+                return;
+            }
 
-        var bulanIni = semuaTrx.Where(t => t.Tanggal >= awalBulan).ToList();
-        nilaiBulanIni = bulanIni.Sum(t => t.TotalTransaksi);
-        jmlTransaksiBulanIni = bulanIni.Count;
-        rataTransaksi = jmlTransaksiBulanIni == 0 ? 0 : nilaiBulanIni / jmlTransaksiBulanIni;
+            var semuaTrx = penjualan
+                .SelectMany(g => g.Baris)
+                .GroupBy(b => b.IdTransaksi)
+                .Select(t => t.First())
+                .ToList();
 
-        // Pembanding: bulan lalu sampai tanggal yang sama dengan hari ini
-        var hariPembanding = Math.Min(hariIni.Day, DateTime.DaysInMonth(awalBulanLalu.Year, awalBulanLalu.Month));
-        var akhirPembanding = awalBulanLalu.AddDays(hariPembanding - 1);
-        var nilaiLalu = semuaTrx
-            .Where(t => t.Tanggal >= awalBulanLalu && t.Tanggal <= akhirPembanding)
-            .Sum(t => t.TotalTransaksi);
-        deltaPersen = nilaiLalu == 0 ? null : (nilaiBulanIni - nilaiLalu) / nilaiLalu * 100;
+            var bulanIni = semuaTrx
+                .Where(t => t.Tanggal >= awalBulan)
+                .ToList();
 
-        // Pesanan yang masih Pending, 30 hari ke belakang sampai 30 hari ke depan
-        var (pending, e2) = await LaporanService.AmbilAsync("pesanan", "pelanggan",
-            hariIni.AddDays(-30), hariIni.AddDays(30), "", "Pending");
-        if (pending is null) galat.Add("Gagal memuat pesanan: " + e2);
+            nilaiBulanIni = bulanIni.Sum(t => t.TotalTransaksi);
+            jmlTransaksiBulanIni = bulanIni.Count;
 
-        var daftarPending = (pending ?? new())
-            .SelectMany(g => g.Baris.GroupBy(b => b.IdTransaksi).Select(t => (IdPelanggan: g.Id, Trx: t.First())))
-            .OrderBy(x => TglAmbil(x.Trx))
-            .ToList();
+            rataTransaksi = jmlTransaksiBulanIni == 0
+                ? 0
+                : nilaiBulanIni / jmlTransaksiBulanIni;
 
-        jmlPending = daftarPending.Count;
-        jmlTelat = daftarPending.Count(x => TglAmbil(x.Trx) < hariIni);
-        jmlHariIni = daftarPending.Count(x => TglAmbil(x.Trx) == hariIni);
-        nilaiPending = daftarPending.Sum(x => x.Trx.TotalTransaksi);
-        pesananPending = daftarPending.Take(5).ToList();
+            // Pembanding bulan lalu sampai tanggal yang sama
+            var hariPembanding = Math.Min(
+                hariIni.Day,
+                DateTime.DaysInMonth(awalBulanLalu.Year, awalBulanLalu.Month));
+
+            var akhirPembanding = awalBulanLalu.AddDays(hariPembanding - 1);
+
+            var nilaiLalu = semuaTrx
+                .Where(t => t.Tanggal >= awalBulanLalu && t.Tanggal <= akhirPembanding)
+                .Sum(t => t.TotalTransaksi);
+
+            deltaPersen = nilaiLalu == 0
+                ? null
+                : (nilaiBulanIni - nilaiLalu) / nilaiLalu * 100;
+
+            // Pesanan Pending, 30 hari ke belakang sampai 30 hari ke depan
+            var (pending, e2) = await LaporanService.AmbilAsync(
+                "pesanan", "pelanggan",
+                hariIni.AddDays(-30), hariIni.AddDays(30), "", "Pending");
+
+            if (pending is null)
+            {
+                TambahPesanError($"Gagal memuat data pesanan: {e2.TrimEnd('.')}. ");
+                return;
+            }
+
+            var daftarPending = pending
+                .SelectMany(g => g.Baris
+                    .GroupBy(b => b.IdTransaksi)
+                    .Select(t => (IdPelanggan: g.Id, Trx: t.First())))
+                .OrderBy(x => TglAmbil(x.Trx))
+                .ToList();
+
+            jmlPending = daftarPending.Count;
+            jmlTelat = daftarPending.Count(x => TglAmbil(x.Trx) < hariIni);
+            jmlHariIni = daftarPending.Count(x => TglAmbil(x.Trx) == hariIni);
+            nilaiPending = daftarPending.Sum(x => x.Trx.TotalTransaksi);
+
+            pesananPending = daftarPending.Take(5).ToList();
+        }
+        catch (Exception ex)
+        {
+            TambahPesanError($"Gagal memuat ringkasan penjualan: {ex.Message.TrimEnd('.')}. ");
+        }
     }
 
-    private async Task MuatPembelian(List<string> galat)
+    // =====================================================
+    // MUAT DATA PEMBELIAN
+    // =====================================================
+    private async Task MuatPembelian()
     {
         var awalBulan = new DateOnly(hariIni.Year, hariIni.Month, 1);
 
-        try { daftarPemasok = await PemasokService.GetAllAsync(); } catch { }
-
-        var (pembelian, e) = await LaporanPembelian.AmbilAsync("pembelian", "pemasok",
-            hariIni.AddDays(-RentangPembelian), hariIni);
-
-        if (pembelian is null)
+        try
         {
-            galat.Add("Gagal memuat pembelian: " + e);
-            return;
+            daftarPemasok = await PemasokService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            TambahPesanError($"Gagal memuat data pemasok: {ex.Message.TrimEnd('.')}. ");
         }
 
-        var semuaTrx = pembelian
-            .SelectMany(g => g.Baris
-                .GroupBy(b => b.IdTransaksi)
-                .Select(t => (IdPemasok: t.First().IdPemasok ?? g.Id, Trx: t.First())))
-            .ToList();
+        try
+        {
+            var (pembelian, e) = await LaporanPembelian.AmbilAsync(
+                "pembelian", "pemasok",
+                hariIni.AddDays(-RentangPembelian), hariIni);
 
-        nilaiPembelianBulanIni = semuaTrx
-            .Where(x => x.Trx.Tanggal >= awalBulan)
-            .Sum(x => x.Trx.TotalTransaksi);
+            if (pembelian is null)
+            {
+                TambahPesanError($"Gagal memuat data pembelian: {e.TrimEnd('.')}. ");
+                return;
+            }
 
-        // Yang sudah paling lama menunggu tampil paling atas
-        var menunggu = semuaTrx
-            .Where(x => string.Equals(x.Trx.Status, StatusMenunggu, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(x => x.Trx.Tanggal)
-            .ToList();
+            var semuaTrx = pembelian
+                .SelectMany(g => g.Baris
+                    .GroupBy(b => b.IdTransaksi)
+                    .Select(t => (
+                        IdPemasok: t.First().IdPemasok ?? g.Id,
+                        Trx: t.First())))
+                .ToList();
 
-        jmlBelumDiterima = menunggu.Count;
-        nilaiBelumDiterima = menunggu.Sum(x => x.Trx.TotalTransaksi);
-        pembelianMenunggu = menunggu.Take(5).ToList();
+            nilaiPembelianBulanIni = semuaTrx
+                .Where(x => x.Trx.Tanggal >= awalBulan)
+                .Sum(x => x.Trx.TotalTransaksi);
+
+            // Pembelian yang paling lama menunggu ditampilkan lebih dahulu
+            var menunggu = semuaTrx
+                .Where(x => string.Equals(
+                    x.Trx.Status,
+                    StatusMenunggu,
+                    StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.Trx.Tanggal)
+                .ToList();
+
+            jmlBelumDiterima = menunggu.Count;
+            nilaiBelumDiterima = menunggu.Sum(x => x.Trx.TotalTransaksi);
+
+            pembelianMenunggu = menunggu.Take(5).ToList();
+        }
+        catch (Exception ex)
+        {
+            TambahPesanError($"Gagal memuat ringkasan pembelian: {ex.Message.TrimEnd('.')}. ");
+        }
     }
 
-    private async Task MuatStok(List<string> galat)
+    // =====================================================
+    // MUAT DATA STOK
+    // =====================================================
+    private async Task MuatStok()
     {
         try
         {
             var token = await AuthStateProvider.AmbilTokenAsync();
-            var client = HttpClientFactory.CreateClient("API");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var bahanBaku = await client.GetFromJsonAsync<List<BahanBakuResponse>>("api/HeaderBahanBaku")
-                            ?? new();
+            var client = HttpClientFactory.CreateClient("API");
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var bahanBaku = await client.GetFromJsonAsync<List<BahanBakuResponse>>(
+                "api/HeaderBahanBaku") ?? new();
 
             jmlStokMenipis = bahanBaku
                 .Where(x => x.Status && x.Jenis)
                 .Count(x => x.Details.Sum(d => d.SisaStok ?? 0) < BatasStok);
 
-            // Batch yang masih ada isinya dan kadaluwarsa dalam HariPeringatan hari (termasuk yang sudah lewat)
+            // Batch yang masih memiliki stok dan akan/sudah kadaluwarsa
             var batasKadaluwarsa = hariIni.AddDays(HariPeringatan);
+
             var tglBatch = bahanBaku
                 .Where(x => x.Status)
                 .SelectMany(x => x.Details)
@@ -439,19 +522,32 @@
             jmlKadaluwarsa = tglBatch.Count;
             jmlSudahKadaluwarsa = tglBatch.Count(t => t < hariIni);
         }
-        catch (Exception ex) when (ex is HttpRequestException or JsonException)
+        catch (Exception ex)
         {
-            galat.Add("Gagal memuat stok: " + ex.Message);
+            TambahPesanError($"Gagal memuat ringkasan stok: {ex.Message.TrimEnd('.')}. ");
         }
     }
 
     // =====================================================
     // HELPER
     // =====================================================
-    private static string FormatRupiah(decimal v) => v.ToString("C0", IdCulture);
-    private static DateOnly TglAmbil(LaporanBaris b) => b.TglPengambilan ?? b.Tanggal;
+    private void TambahPesanError(string pesan)
+    {
+        if (string.IsNullOrWhiteSpace(pesan))
+            return;
 
-    // AppRoles.* berisi daftar role dipisah koma (format atribut [Authorize(Roles = ...)])
+        pesanError = string.IsNullOrWhiteSpace(pesanError)
+            ? pesan.Trim()
+            : $"{pesanError} {pesan.Trim()}";
+    }
+
+    private static string FormatRupiah(decimal v)
+        => v.ToString("C0", IdCulture);
+
+    private static DateOnly TglAmbil(LaporanBaris b)
+        => b.TglPengambilan ?? b.Tanggal;
+
+    // AppRoles berisi daftar role yang dipisahkan koma
     private static bool PunyaPeran(ClaimsPrincipal user, string daftarPeran)
         => daftarPeran
             .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
@@ -460,6 +556,7 @@
     private string Selisih(DateOnly tgl)
     {
         var n = tgl.DayNumber - hariIni.DayNumber;
+
         return n switch
         {
             0 => "Hari ini",
@@ -473,6 +570,7 @@
     private string LamaMenunggu(DateOnly tgl)
     {
         var n = hariIni.DayNumber - tgl.DayNumber;
+
         return n switch
         {
             <= 0 => "Hari ini",
