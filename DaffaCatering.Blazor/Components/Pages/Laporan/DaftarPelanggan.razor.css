@@ -1,5 +1,5 @@
 /* =====================================================
-   1. VARIABEL & WRAPPER HALAMAN
+   VARIABEL & WRAPPER HALAMAN
    ===================================================== */
 .laporan-page {
     --brand-950: #0c3b2e;
@@ -25,7 +25,7 @@
     }
 
 /* =====================================================
-   2. HEADER HALAMAN (judul + tombol cetak)
+   HEADER HALAMAN (judul + tombol cetak)
    ===================================================== */
 .page-head {
     display: flex;
@@ -81,39 +81,7 @@
     }
 
 /* =====================================================
-   3. BANNER ERROR
-   ===================================================== */
-.banner {
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-    margin-top: 1rem;
-    padding: .75rem 1rem;
-    border-radius: 12px;
-    color: #9b2c33;
-    background: #fdeced;
-    border: 1px solid #f6c9cc;
-    font-size: .9rem;
-}
-
-    .banner span {
-        flex: 1;
-    }
-
-.banner-close {
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    opacity: .7;
-}
-
-    .banner-close:hover {
-        opacity: 1;
-    }
-
-/* =====================================================
-   4. TOOLBAR: SEARCH + FILTER STATUS
+   TOOLBAR: SEARCH + FILTER STATUS
    ===================================================== */
 .toolbar-card {
     display: flex;
@@ -215,7 +183,7 @@
         }
 
 /* =====================================================
-   5. PANEL TABEL
+   PANEL TABEL
    ===================================================== */
 .panel {
     margin-top: 1.25rem;
@@ -375,7 +343,7 @@
     }
 
 /* =====================================================
-   6. EMPTY STATE, FOOTER PANEL, SKELETON
+   EMPTY STATE, FOOTER PANEL, SKELETON
    ===================================================== */
 .empty {
     display: grid;
@@ -395,6 +363,12 @@
     }
 
 .panel-foot {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem 1rem;
+    gap: .5rem;
     padding: .8rem 1.25rem;
     border-top: 1px solid var(--line);
     font-size: .82rem;
@@ -402,6 +376,54 @@
     background: #fcfbf8;
 }
 
+    .panel-foot b {
+        color: var(--ink);
+    }
+
+/* ---------- Pagination ---------- */
+.pager {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.pg-info {
+    min-width: 110px;
+    text-align: center;
+}
+
+.pg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .9rem;
+    border: 1px solid #d9d5cb;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+    .pg-btn:hover:not(:disabled) {
+        background: var(--brand-50);
+        border-color: var(--brand-500);
+        color: var(--brand-800);
+    }
+
+    .pg-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(34, 160, 107, .25);
+    }
+
+    .pg-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+/* ---------- Skeleton ---------- */
 .skeleton {
     padding: .5rem 1.25rem 1rem;
 }
@@ -573,6 +595,18 @@
 
     .page-head h1 {
         font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .panel-foot {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .pager {
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
