@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DaffaCatering.API.DTOs.MasterBahanBaku
+namespace DaffaCatering.API.DTOs.Persediaan
 {
     public class DetailPenyesuaianBahanBakuDto
     {
