@@ -401,3 +401,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Production secrets
+appsettings.Production.json
