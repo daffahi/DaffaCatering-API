@@ -153,13 +153,7 @@
                             <ValidationMessage For="() => formModel.NamaSatuan" />
                         </div>
 
-                        @if (!string.IsNullOrEmpty(modalError))
-                        {
-                            <div class="banner in-dialog">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                <span>@modalError</span>
-                            </div>
-                        }
+                        <NotifBanner @bind-Pesan="modalError" />
                     </div>
 
                     @* ---------- Footer modal ---------- *@
