@@ -1,0 +1,38 @@
+﻿@using DaffaCatering.Blazor.Services
+@implements IDisposable
+@inject JwtAuthStateProvider Auth
+@inject NavigationManager Nav
+
+@code {
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        // Cek masa berlaku token setiap 15 detik
+        _timer = new System.Threading.Timer(
+            _ => _ = CekSesiAsync(), null,
+            TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(15));
+    }
+
+    private async Task CekSesiAsync()
+    {
+        try
+        {
+            await InvokeAsync(async () =>
+            {
+                var state = await Auth.GetAuthenticationStateAsync();
+                if (state.User.Identity?.IsAuthenticated != true)
+                {
+                    await Auth.KeluarAsync();
+                    Nav.NavigateTo("/login", forceLoad: true);
+                }
+            });
+        }
+        catch
+        {
+            // Sirkuit sudah ditutup, tidak ada yang perlu dilakukan
+        }
+    }
+
+    public void Dispose() => _timer?.Dispose();
+}
