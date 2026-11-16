@@ -6,7 +6,7 @@ A catering business management system rebuilt from a legacy desktop application 
 
 Originally developed as my Information Systems thesis project, this is an advanced iteration that separates business logic from the UI, so the same API can serve web, mobile, or desktop clients.
 
-> **Status:** the core flow is complete end to end, from buying raw materials to selling menu items, in the web app. Remaining work: deployment and further polish. See the [Roadmap](#roadmap).
+> **Status:** the core flow is complete end to end, from buying raw materials to selling menu items, and the app is deployed online. See the [Live Demo](#live-demo) and the [Roadmap](#roadmap).
 
 ## Live Demo
 
@@ -24,7 +24,7 @@ The demo runs on a free hosting plan (ASP.NET Core + SQL Server on MonsterASP.NE
 
 | Receipt of Raw Materials | Sales Roles Page |
 |---|---|
-| ![Receipt_of_Raw_Materials](docs/screenshots/raw-materials-receiving-page.png) | ![Sales_Roles_Page](docs/screenshots/page-sales-role.png)
+| ![Receipt_of_Raw_Materials](docs/screenshots/raw-materials-receiving-page.png) | ![Sales_Roles_Page](docs/screenshots/page-sales-role.png) |
 
 | Sales order | Sales |
 |---|---|
@@ -36,19 +36,19 @@ The demo runs on a free hosting plan (ASP.NET Core + SQL Server on MonsterASP.NE
 
 | Sales Report | Stock Report |
 |---|---|
-| ![Sales_Repor](docs/screenshots/sales-report-page.png) | ![Stock_Report](docs/screenshots/raw-materials-inventory-report-page.png) |
+| ![Sales_Report](docs/screenshots/sales-report-page.png) | ![Stock_Report](docs/screenshots/raw-materials-inventory-report-page.png) |
 
 ## Features
 
 ### Backend (ASP.NET Core Web API)
 - RESTful CRUD endpoints for master data and transactions
 - JWT authentication with BCrypt password hashing; users log in with a username
-- Role-based authorization with 4 roles: `Admin`, `Penjualan` (Sales), `Pembelian` (Purchasing), `Persediaan` (Inventory)
+- Role-based authorization with 5 roles: `Admin`, `Penjualan` (Sales), `Pembelian` (Purchasing), `Persediaan` (Inventory), and `Tamu` (read-only guest for the public demo)
 - Business flow: purchase → goods receipt → stock usage / adjustment → recipe → order → sale
 - Batch-based inventory using **FEFO** (First Expired, First Out), with automatic stock deduction when a sale consumes recipe ingredients
 - Recipes modeled as a bill of materials (BOM), with unit conversion between raw material units
 - Report endpoints for sales, purchasing, inventory (stock cards), menu items, raw materials, customers, and suppliers
-- Header-detail transaction design across 21 tables, organized by schema (`BahanBaku`, `Pembelian`, `Resep`, `Penjualan`)
+- Header-detail transaction design across 23 tables, organized by schema (`BahanBaku`, `Pelanggan`, `Pemasok`, `Pembelian`, `Penjualan`, `Resep`, `Satuan`, `User`)
 - OpenAPI document (served in Development)
 
 ### Frontend (Blazor)
@@ -58,6 +58,8 @@ The demo runs on a free hosting plan (ASP.NET Core + SQL Server on MonsterASP.NE
 - 13 master data and transaction pages: Customers, Suppliers, Raw Materials, Raw Material Units, Unit Conversions, Recipes, Menu Items, Sales Orders, Sales, Purchases, Goods Receipts, Stock Usage, Stock Adjustments
 - 7 reports: Sales, Purchasing, Inventory (stock, expiry, usage, adjustments), Menu Items, Raw Materials, Customers, Suppliers
 - Settings page (Admin only) for user accounts
+- Read-only guest account (`tamu`): opens every page except Settings and can print reports, but cannot save changes
+- Login sessions expire after 15 minutes and the user is redirected to the login page
 - Search, status filters (All / Active / Inactive), and auto-generated IDs (e.g. `PLG0000001`)
 - Master data is never hard-deleted; records are set to Inactive to preserve transaction history
 
@@ -164,7 +166,7 @@ To use a different SQL Server, set the `TEST_DB_SERVER_CONNECTION` environment v
 - [x] Blazor: Sales, Purchasing, and Inventory transaction pages
 - [x] Operational reports
 - [x] Automated tests (xUnit) and continuous integration
-- [] Online deployment
+- [x] Online deployment
 
 ## Author
 **Daffa Shiddiq Hidayat**, Information Systems graduate.
