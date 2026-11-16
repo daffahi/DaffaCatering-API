@@ -20,6 +20,7 @@ namespace DaffaCatering.API.Controllers.User
     {
         private readonly DaffaCateringContext _context;
         private readonly IConfiguration _config;
+        private const string IdRoleTamu = "R005";
 
         public UserController(DaffaCateringContext context, IConfiguration config)
         {
@@ -147,12 +148,18 @@ namespace DaffaCatering.API.Controllers.User
             if (!user.Status)
                 return Unauthorized("Akun ini tidak aktif");
 
-            var claims = new[]
+            var isTamu = user.IdRole == IdRoleTamu;
+
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.IdUser),
                 new Claim(ClaimTypes.Name, user.NamaUser),
-                new Claim(ClaimTypes.Role, user.IdRole)
+                // Tamu diberi hak lihat setara admin. Penyimpanan data diblokir.
+                new Claim(ClaimTypes.Role, isTamu ? AppRoles.Admin : user.IdRole)
             };
+
+            if (isTamu)
+                claims.Add(new Claim("akses", "baca-saja"));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

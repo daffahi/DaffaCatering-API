@@ -75,10 +75,14 @@ namespace DaffaCatering.Blazor.Services
             }
 
             var claims = new List<Claim>();
+            var bacaSaja = jwt.Claims.Any(c => c.Type == "akses" && c.Value == "baca-saja");
+
             foreach (var c in jwt.Claims)
             {
                 if (c.Type == "role" || c.Type == ClaimTypes.Role)
                 {
+                    // Peran akun tamu diganti di bawah, jadi peran admin dari token dilewati
+                    if (bacaSaja) continue;
                     claims.Add(new Claim(ClaimTypes.Role, c.Value));
                 }
                 else if (c.Type == "unique_name" || c.Type == ClaimTypes.Name)
@@ -93,6 +97,14 @@ namespace DaffaCatering.Blazor.Services
                 {
                     claims.Add(new Claim(c.Type, c.Value));
                 }
+            }
+
+            if (bacaSaja)
+            {
+                // Tamu bisa membuka semua halaman operasional, kecuali halaman khusus admin
+                claims.Add(new Claim(ClaimTypes.Role, "R002"));
+                claims.Add(new Claim(ClaimTypes.Role, "R003")); 
+                claims.Add(new Claim(ClaimTypes.Role, "R004"));
             }
 
             return new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt"));

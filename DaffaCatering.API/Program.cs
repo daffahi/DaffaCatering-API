@@ -79,6 +79,33 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+
+// Akun tamu hanya boleh membaca data
+app.Use(async (context, next) =>
+{
+    if (context.User.HasClaim("akses", "baca-saja"))
+    {
+        var method = context.Request.Method;
+        var hanyaBaca = HttpMethods.IsGet(method) || HttpMethods.IsHead(method) || HttpMethods.IsOptions(method);
+
+        var path = context.Request.Path;
+        var areaPengaturan = path.StartsWithSegments("/api/User", StringComparison.OrdinalIgnoreCase)
+                          || path.StartsWithSegments("/api/Role", StringComparison.OrdinalIgnoreCase);
+
+        if (areaPengaturan || !hanyaBaca)
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsync(areaPengaturan
+                ? "Halaman ini tidak tersedia untuk akun tamu."
+                : "Akun tamu hanya bisa melihat data, tidak bisa menyimpan perubahan.");
+            return;
+        }
+    }
+
+    await next();
+});
+
+
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
