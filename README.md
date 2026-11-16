@@ -8,6 +8,14 @@ Originally developed as my Information Systems thesis project, this is an advanc
 
 > **Status:** the core flow is complete end to end, from buying raw materials to selling menu items, in the web app. Remaining work: deployment and further polish. See the [Roadmap](#roadmap).
 
+## Live Demo
+
+- App: https://daffakatering.runasp.net
+- Guest account (read-only): username `tamu`, password `123456`
+
+The guest account can open every page and print reports, but saving or changing data is disabled.
+The demo runs on a free hosting plan (ASP.NET Core + SQL Server on MonsterASP.NET), so occasional slowness or downtime is possible.
+
 ## Screenshots
 
 | Dashboard | Customers |
